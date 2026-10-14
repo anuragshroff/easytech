@@ -1,6 +1,4 @@
-import React, { useEffect, useState } from 'react'
-import { api } from './api.js'
-import Pager, { SearchBox, State, fmtDate } from './Shared.jsx'
+import { Link } from 'react-router-dom'
 
 export default function Organizations() {
   const [page, setPage] = useState(1)
@@ -49,7 +47,11 @@ export default function Organizations() {
                   {data.organizations.map((o) => (
                     <tr key={o.id} className="border-b border-gray-100">
                       <td className="px-4 py-2 text-gray-600">{o.id}</td>
-                      <td className="px-4 py-2 font-medium text-gray-900">{o.provider_id}</td>
+                      <td className="px-4 py-2 text-gray-600">
+                        <Link to={`/organizations/${o.id}`} className="text-indigo-600 hover:underline">
+                          {o.provider_id}
+                        </Link>
+                      </td>
                       <td className="px-4 py-2 text-gray-600">{o.user_count}</td>
                       <td className="px-4 py-2 text-gray-600">{o.run_count}</td>
                       <td className="px-4 py-2 text-gray-600">{fmtDate(o.created_at)}</td>

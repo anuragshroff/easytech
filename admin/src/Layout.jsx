@@ -7,6 +7,8 @@ const links = [
   { to: '/users', label: 'Users' },
   { to: '/organizations', label: 'Organizations' },
   { to: '/runs', label: 'Runs' },
+  { to: '/usage', label: 'Usage' },
+  { to: '/settings', label: 'Settings' },
 ]
 
 export default function Layout() {

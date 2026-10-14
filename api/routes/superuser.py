@@ -5,6 +5,25 @@ from typing import List, Optional
 from fastapi import APIRouter, Depends, HTTPException, Query, status
 from pydantic import BaseModel
 
+from api.constants import (
+    APP_VERSION,
+    AUTH_PROVIDER,
+    BACKEND_API_ENDPOINT,
+    DEPLOYMENT_MODE,
+    ENABLE_ARI_STASIS,
+    ENABLE_CALL_RECORDING_UPLOAD,
+    ENABLE_PROMETHEUS_METRICS,
+    ENABLE_SIGNUP,
+    ENABLE_TELEMETRY,
+    ENVIRONMENT,
+    FORCE_TURN_RELAY,
+    LOG_LEVEL,
+    MINIO_BUCKET,
+    MINIO_ENDPOINT,
+    MINIO_SECURE,
+    TELEPHONY_WS_TOKEN_ENFORCE,
+    UI_APP_URL,
+)
 from api.db import db_client
 from api.db.models import UserModel
 from api.services.auth.depends import get_superuser
@@ -76,6 +95,7 @@ class SuperuserUserResponse(BaseModel):
     email: Optional[str]
     provider_id: str
     is_superuser: bool
+    is_active: bool = True
     organization_id: Optional[int]
     created_at: Optional[datetime]
 
@@ -102,6 +122,105 @@ class SuperuserOrganizationsListResponse(BaseModel):
     page: int
     limit: int
     total_pages: int
+
+
+class ToggleSuperuserRequest(BaseModel):
+    is_superuser: bool
+
+
+class ToggleActiveRequest(BaseModel):
+    is_active: bool
+
+
+class SuperuserWorkflowSummary(BaseModel):
+    id: int
+    name: Optional[str]
+    status: Optional[str] = None
+    created_at: Optional[datetime] = None
+    run_count: int = 0
+
+
+class SuperuserRunSummary(BaseModel):
+    id: int
+    name: str
+    workflow_id: int
+    workflow_name: Optional[str] = None
+    mode: str
+    is_completed: bool
+    recording_url: Optional[str] = None
+    transcript_url: Optional[str] = None
+    created_at: datetime
+
+
+class SuperuserOrganizationDetail(BaseModel):
+    id: int
+    provider_id: str
+    created_at: Optional[datetime] = None
+    price_per_second_usd: Optional[float] = None
+    user_count: int
+    run_count: int
+    workflow_count: int
+
+
+class SuperuserOrganizationMembersResponse(BaseModel):
+    users: List[SuperuserUserResponse]
+
+
+class SuperuserOrganizationWorkflowsResponse(BaseModel):
+    workflows: List[SuperuserWorkflowSummary]
+
+
+class SuperuserOrganizationRunsListResponse(BaseModel):
+    runs: List[SuperuserRunSummary]
+    total_count: int
+    page: int
+    limit: int
+    total_pages: int
+
+
+class PlatformUsageOrg(BaseModel):
+    organization_id: int
+    provider_id: str
+    price_per_second_usd: Optional[float]
+    call_count: int
+    total_seconds: float
+    total_minutes: float
+    cost_usd: float
+
+
+class PlatformUsageTotals(BaseModel):
+    call_count: int
+    total_seconds: float
+    total_minutes: float
+    cost_usd: float
+
+
+class PlatformUsageOverviewResponse(BaseModel):
+    period_start: str
+    period_end: str
+    organizations: List[PlatformUsageOrg]
+    totals: PlatformUsageTotals
+
+
+class PlatformSettingsResponse(BaseModel):
+    version: str
+    deployment_mode: str
+    auth_provider: str
+    signup_enabled: bool
+    turn_enabled: bool
+    force_turn_relay: bool
+    backend_api_endpoint: str
+    ui_app_url: str
+    enable_telemetry: bool
+    enable_prometheus_metrics: bool
+    enable_ari_stasis: bool
+    log_level: str
+    minio_endpoint: str
+    minio_bucket: str
+    minio_secure: bool
+    call_recording_upload: bool
+    telephony_ws_enforce: bool
+    environment: str
 
 
 @router.post("/impersonate")
@@ -302,4 +421,138 @@ async def get_organizations(
         page=page,
         limit=limit,
         total_pages=total_pages,
+    )
+
+
+@router.post("/users/{user_id}/superuser")
+async def set_user_superuser(
+    user_id: int,
+    body: ToggleSuperuserRequest,
+    user: UserModel = Depends(get_superuser),
+) -> dict:
+    if user_id == user.id:
+        raise HTTPException(
+            status_code=400, detail="Cannot change superuser status of yourself"
+        )
+    result = await db_client.set_superuser(user_id, body.is_superuser)
+    if result is None:
+        raise HTTPException(status_code=404, detail="User not found")
+    return {"user_id": user_id, "is_superuser": result}
+
+
+@router.post("/users/{user_id}/active")
+async def set_user_active(
+    user_id: int,
+    body: ToggleActiveRequest,
+    user: UserModel = Depends(get_superuser),
+) -> dict:
+    if user_id == user.id:
+        raise HTTPException(status_code=400, detail="Cannot disable yourself")
+    result = await db_client.set_user_active(user_id, body.is_active)
+    if result is None:
+        raise HTTPException(status_code=404, detail="User not found")
+    return {"user_id": user_id, "is_active": result}
+
+
+@router.get("/organizations/{org_id}", response_model=SuperuserOrganizationDetail)
+async def get_organization_detail(
+    org_id: int, user: UserModel = Depends(get_superuser)
+) -> SuperuserOrganizationDetail:
+    detail = await db_client.get_organization_detail_superadmin(org_id)
+    if detail is None:
+        raise HTTPException(status_code=404, detail="Organization not found")
+    return SuperuserOrganizationDetail(**detail)
+
+
+@router.get(
+    "/organizations/{org_id}/members",
+    response_model=SuperuserOrganizationMembersResponse,
+)
+async def get_organization_members(
+    org_id: int, user: UserModel = Depends(get_superuser)
+) -> SuperuserOrganizationMembersResponse:
+    members = await db_client.get_organization_users(org_id)
+    users = [
+        SuperuserUserResponse(
+            id=m.id,
+            email=m.email,
+            provider_id=m.provider_id,
+            is_superuser=m.is_superuser,
+            is_active=getattr(m, "is_active", True),
+            organization_id=m.selected_organization_id,
+            created_at=m.created_at,
+        )
+        for m in members
+    ]
+    return SuperuserOrganizationMembersResponse(users=users)
+
+
+@router.get(
+    "/organizations/{org_id}/workflows",
+    response_model=SuperuserOrganizationWorkflowsResponse,
+)
+async def get_organization_workflows(
+    org_id: int, user: UserModel = Depends(get_superuser)
+) -> SuperuserOrganizationWorkflowsResponse:
+    workflows = await db_client.get_organization_workflows_superadmin(org_id)
+    return SuperuserOrganizationWorkflowsResponse(
+        workflows=[SuperuserWorkflowSummary(**w) for w in workflows]
+    )
+
+
+@router.get(
+    "/organizations/{org_id}/runs",
+    response_model=SuperuserOrganizationRunsListResponse,
+)
+async def get_organization_runs(
+    org_id: int,
+    page: int = Query(1, ge=1),
+    limit: int = Query(50, ge=1, le=100),
+    user: UserModel = Depends(get_superuser),
+) -> SuperuserOrganizationRunsListResponse:
+    offset = (page - 1) * limit
+    runs, total_count = await db_client.get_organization_runs_superadmin(
+        org_id, limit=limit, offset=offset
+    )
+    total_pages = (total_count + limit - 1) // limit
+    return SuperuserOrganizationRunsListResponse(
+        runs=[SuperuserRunSummary(**r) for r in runs],
+        total_count=total_count,
+        page=page,
+        limit=limit,
+        total_pages=total_pages,
+    )
+
+
+@router.get("/usage", response_model=PlatformUsageOverviewResponse)
+async def get_platform_usage(
+    user: UserModel = Depends(get_superuser),
+) -> PlatformUsageOverviewResponse:
+    overview = await db_client.get_usage_overview()
+    return PlatformUsageOverviewResponse(**overview)
+
+
+@router.get("/settings", response_model=PlatformSettingsResponse)
+async def get_platform_settings(
+    user: UserModel = Depends(get_superuser),
+) -> PlatformSettingsResponse:
+    return PlatformSettingsResponse(
+        version=APP_VERSION,
+        deployment_mode=DEPLOYMENT_MODE,
+        auth_provider=AUTH_PROVIDER,
+        signup_enabled=ENABLE_SIGNUP,
+        turn_enabled=ENABLE_ARI_STASIS is not True,  # just keep consistent with health
+        force_turn_relay=FORCE_TURN_RELAY,
+        backend_api_endpoint=BACKEND_API_ENDPOINT,
+        ui_app_url=UI_APP_URL,
+        enable_telemetry=ENABLE_TELEMETRY,
+        enable_prometheus_metrics=ENABLE_PROMETHEUS_METRICS,
+        enable_ari_stasis=ENABLE_ARI_STASIS,
+        log_level=LOG_LEVEL,
+        minio_endpoint=MINIO_ENDPOINT,
+        minio_bucket=MINIO_BUCKET,
+        minio_secure=MINIO_SECURE,
+        call_recording_upload=ENABLE_CALL_RECORDING_UPLOAD,
+        telephony_ws_enforce=TELEPHONY_WS_TOKEN_ENFORCE,
+        environment=ENVIRONMENT,
     )

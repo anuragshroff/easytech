@@ -70,6 +70,9 @@ class UserModel(Base):
     is_superuser = Column(Boolean, default=False)
     email = Column(String, nullable=True)
     password_hash = Column(String, nullable=True)
+    is_active = Column(
+        Boolean, default=True, nullable=False, server_default=text("true")
+    )
 
     __table_args__ = (
         Index(

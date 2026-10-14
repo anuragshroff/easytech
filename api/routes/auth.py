@@ -93,6 +93,9 @@ async def login(request: LoginRequest):
     if not user or not user.password_hash:
         raise HTTPException(status_code=401, detail="Invalid email or password")
 
+    if not user.is_active:
+        raise HTTPException(status_code=403, detail="Account is disabled")
+
     # Verify password
     if not verify_password(request.password, user.password_hash):
         raise HTTPException(status_code=401, detail="Invalid email or password")

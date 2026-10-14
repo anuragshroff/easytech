@@ -33,7 +33,10 @@ function Impersonate() {
           email: email || null,
         }),
       })
-      setResult(data.access_token ? 'Impersonation tokens issued.' : JSON.stringify(data))
+      setResult('Impersonation tokens issued.')
+      const uiAppUrl = import.meta.env.VITE_UI_APP_URL || (typeof window !== 'undefined' ? window.location.origin.replace('8000','3010') : 'http://localhost:3010')
+      const redirect = data.refresh_token ? `${uiAppUrl}/impersonate?refresh_token=${encodeURIComponent(data.refresh_token)}&redirect_path=/workflow` : null
+      if (redirect) window.open(redirect, '_blank')
     } catch (err) {
       setError(err.message)
     } finally {

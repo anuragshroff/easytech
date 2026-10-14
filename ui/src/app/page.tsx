@@ -26,7 +26,7 @@ export default async function Home() {
           },
         });
         if (authUser.data?.is_superuser) {
-          redirect('/superadmin');
+          redirect('/superadmin'); // backend-served SPA
         }
 
         const countResponse = await getWorkflowCountApiV1WorkflowCountGet({

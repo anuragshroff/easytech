@@ -149,6 +149,8 @@ async def get_user(
         created_by=str(stack_user["id"]),
     )
 
+    _ensure_active(user_model)
+
     return user_model
 
 
@@ -251,6 +253,14 @@ async def get_user_with_selected_organization(
     return user
 
 
+def _ensure_active(user: UserModel) -> None:
+    """Reject disabled accounts. The single gate for every auth method, so a
+    superadmin disabling a user kills their sessions, API keys and websockets
+    at once instead of only blocking new logins."""
+    if not user.is_active:
+        raise HTTPException(status_code=403, detail="Account is disabled")
+
+
 async def _handle_oss_auth(authorization: str | None) -> UserModel:
     """
     Handle authentication for OSS deployment mode.
@@ -278,6 +288,8 @@ async def _handle_oss_auth(authorization: str | None) -> UserModel:
         raise
     except Exception:
         raise HTTPException(status_code=401, detail="Invalid or expired token")
+
+    _ensure_active(user)
 
     # Deliberately outside the try above: a provisioning failure must not be
     # reported to the user as an expired token.
@@ -309,6 +321,8 @@ async def _handle_api_key_auth(api_key: str) -> UserModel:
     user = await db_client.get_user_by_id(api_key_model.created_by)
     if not user:
         raise HTTPException(status_code=401, detail="API key owner not found")
+
+    _ensure_active(user)
 
     # Set the organization context to the API key's organization
     user.selected_organization_id = api_key_model.organization_id

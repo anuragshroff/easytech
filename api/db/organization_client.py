@@ -212,3 +212,130 @@ class OrganizationClient(BaseDBClient):
                 for row in result.all()
             ]
             return organizations, total_count
+
+    async def get_organization_detail_superadmin(self, organization_id: int) -> dict | None:
+        """Organization header + counts for the admin drill-down page."""
+        async with self.async_session() as session:
+            member_count = (
+                select(func.count())
+                .select_from(organization_users_association)
+                .where(
+                    organization_users_association.c.organization_id
+                    == OrganizationModel.id
+                )
+                .correlate(OrganizationModel)
+                .scalar_subquery()
+                .label("user_count")
+            )
+            run_count = (
+                select(func.count(WorkflowRunModel.id))
+                .select_from(WorkflowRunModel)
+                .join(WorkflowModel, WorkflowRunModel.workflow_id == WorkflowModel.id)
+                .where(WorkflowModel.organization_id == OrganizationModel.id)
+                .correlate(OrganizationModel)
+                .scalar_subquery()
+                .label("run_count")
+            )
+            workflow_count = (
+                select(func.count(WorkflowModel.id))
+                .where(WorkflowModel.organization_id == OrganizationModel.id)
+                .correlate(OrganizationModel)
+                .scalar_subquery()
+                .label("workflow_count")
+            )
+            result = await session.execute(
+                select(
+                    OrganizationModel.id,
+                    OrganizationModel.provider_id,
+                    OrganizationModel.created_at,
+                    OrganizationModel.price_per_second_usd,
+                    member_count,
+                    run_count,
+                    workflow_count,
+                ).where(OrganizationModel.id == organization_id)
+            )
+            row = result.first()
+            if row is None:
+                return None
+            return {
+                "id": row.id,
+                "provider_id": row.provider_id,
+                "created_at": row.created_at,
+                "price_per_second_usd": row.price_per_second_usd,
+                "user_count": row.user_count,
+                "run_count": row.run_count,
+                "workflow_count": row.workflow_count,
+            }
+
+    async def get_organization_workflows_superadmin(
+        self, organization_id: int
+    ) -> list[dict]:
+        """Workflows owned by an organization, with run counts."""
+        async with self.async_session() as session:
+            run_count = (
+                select(func.count(WorkflowRunModel.id))
+                .where(WorkflowRunModel.workflow_id == WorkflowModel.id)
+                .correlate(WorkflowModel)
+                .scalar_subquery()
+                .label("run_count")
+            )
+            result = await session.execute(
+                select(
+                    WorkflowModel.id,
+                    WorkflowModel.name,
+                    WorkflowModel.status,
+                    WorkflowModel.created_at,
+                    run_count,
+                )
+                .where(WorkflowModel.organization_id == organization_id)
+                .order_by(WorkflowModel.created_at.desc())
+            )
+            return [
+                {
+                    "id": row.id,
+                    "name": row.name,
+                    "status": str(row.status),
+                    "created_at": row.created_at,
+                    "run_count": row.run_count,
+                }
+                for row in result.all()
+            ]
+
+    async def get_organization_runs_superadmin(
+        self, organization_id: int, limit: int = 50, offset: int = 0
+    ) -> tuple[list[dict], int]:
+        """Recent workflow runs for every workflow owned by an organization."""
+        async with self.async_session() as session:
+            base_query = (
+                select(WorkflowRunModel)
+                .join(WorkflowModel, WorkflowRunModel.workflow_id == WorkflowModel.id)
+                .where(WorkflowModel.organization_id == organization_id)
+            )
+            count_result = await session.execute(
+                base_query.with_only_columns(func.count(WorkflowRunModel.id))
+            )
+            total_count = count_result.scalar() or 0
+
+            result = await session.execute(
+                base_query.add_columns(WorkflowModel.name.label("workflow_name"))
+                .order_by(WorkflowRunModel.created_at.desc())
+                .limit(limit)
+                .offset(offset)
+            )
+            return (
+                [
+                    {
+                        "id": run.id,
+                        "name": run.name,
+                        "workflow_id": run.workflow_id,
+                        "workflow_name": workflow_name,
+                        "mode": run.mode,
+                        "is_completed": run.is_completed,
+                        "recording_url": run.recording_url,
+                        "transcript_url": run.transcript_url,
+                        "created_at": run.created_at,
+                    }
+                    for run, workflow_name in result.all()
+                ],
+                total_count,
+            )

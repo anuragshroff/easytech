@@ -7,6 +7,9 @@ import Dashboard from './Dashboard.jsx'
 import Users from './Users.jsx'
 import Organizations from './Organizations.jsx'
 import Runs from './Runs.jsx'
+import OrganizationDetail from './OrganizationDetail.jsx'
+import Usage from './Usage.jsx'
+import Settings from './Settings.jsx'
 
 function Protected() {
   if (!getToken()) return <Navigate to="/login" replace />
@@ -22,7 +25,10 @@ export default function App() {
         <Route path="/" element={<Dashboard user={user} />} />
         <Route path="/users" element={<Users />} />
         <Route path="/organizations" element={<Organizations />} />
+        <Route path="/organizations/:orgId" element={<OrganizationDetail />} />
         <Route path="/runs" element={<Runs />} />
+        <Route path="/usage" element={<Usage />} />
+        <Route path="/settings" element={<Settings />} />
       </Route>
       <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>

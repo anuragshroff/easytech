@@ -135,6 +135,40 @@ class UserClient(BaseDBClient):
             await session.execute(stmt)
             await session.commit()
 
+    async def set_superuser(self, user_id: int, is_superuser: bool) -> bool | None:
+        """Set a user's superuser flag. Returns the new value, or None if the
+        user does not exist."""
+        from sqlalchemy import update
+
+        async with self.async_session() as session:
+            stmt = (
+                update(UserModel)
+                .where(UserModel.id == user_id)
+                .values(is_superuser=is_superuser)
+            )
+            result = await session.execute(stmt)
+            await session.commit()
+            if result.rowcount == 0:
+                return None
+            return is_superuser
+
+    async def set_user_active(self, user_id: int, is_active: bool) -> bool | None:
+        """Enable or disable a user account. Returns the new value, or None if
+        the user does not exist."""
+        from sqlalchemy import update
+
+        async with self.async_session() as session:
+            stmt = (
+                update(UserModel)
+                .where(UserModel.id == user_id)
+                .values(is_active=is_active)
+            )
+            result = await session.execute(stmt)
+            await session.commit()
+            if result.rowcount == 0:
+                return None
+            return is_active
+
     async def get_user_by_email(self, email: str) -> UserModel | None:
         """Fetch a user by their email address (case-insensitive).
 
@@ -197,6 +231,7 @@ class UserClient(BaseDBClient):
                     "email": user.email,
                     "provider_id": user.provider_id,
                     "is_superuser": user.is_superuser,
+                    "is_active": user.is_active,
                     "organization_id": user.selected_organization_id,
                     "created_at": user.created_at,
                 }

@@ -416,6 +416,79 @@ class OrganizationUsageClient(BaseDBClient):
                 "currency": "USD",
             }
 
+    async def get_usage_overview(self) -> dict:
+        """Cross-organization usage for the current reporting period.
+
+        Aggregates completed runs per organization and prices each org with its
+        own ``price_per_second_usd``. Unlike per-org usage cycles this never
+        writes; it is a read-only admin summary.
+        """
+        period_start, period_end = self._calculate_current_period()
+        async with self.async_session() as session:
+            seconds_expr = func.sum(
+                WorkflowRunModel.usage_info["call_duration_seconds"].as_float()
+            )
+            result = await session.execute(
+                select(
+                    OrganizationModel.id,
+                    OrganizationModel.provider_id,
+                    OrganizationModel.price_per_second_usd,
+                    func.count(WorkflowRunModel.id).label("call_count"),
+                    seconds_expr.label("total_seconds"),
+                )
+                .join(WorkflowModel, WorkflowModel.id == WorkflowRunModel.workflow_id)
+                .join(
+                    OrganizationModel,
+                    OrganizationModel.id == WorkflowModel.organization_id,
+                )
+                .where(
+                    WorkflowRunModel.created_at >= period_start,
+                    WorkflowRunModel.created_at <= period_end,
+                    WorkflowRunModel.is_completed.is_(True),
+                )
+                .group_by(
+                    OrganizationModel.id,
+                    OrganizationModel.provider_id,
+                    OrganizationModel.price_per_second_usd,
+                )
+                .order_by(seconds_expr.desc())
+            )
+
+            organizations = []
+            total_seconds = 0.0
+            total_cost_usd = 0.0
+            total_calls = 0
+            for row in result.all():
+                seconds = row.total_seconds or 0
+                price = row.price_per_second_usd or 0
+                cost_usd = seconds * price
+                total_seconds += seconds
+                total_cost_usd += cost_usd
+                total_calls += row.call_count
+                organizations.append(
+                    {
+                        "organization_id": row.id,
+                        "provider_id": row.provider_id,
+                        "price_per_second_usd": row.price_per_second_usd,
+                        "call_count": row.call_count,
+                        "total_seconds": round(seconds, 1),
+                        "total_minutes": round(seconds / 60, 1),
+                        "cost_usd": round(cost_usd, 4),
+                    }
+                )
+
+            return {
+                "period_start": period_start.isoformat(),
+                "period_end": period_end.isoformat(),
+                "organizations": organizations,
+                "totals": {
+                    "call_count": total_calls,
+                    "total_seconds": round(total_seconds, 1),
+                    "total_minutes": round(total_seconds / 60, 1),
+                    "cost_usd": round(total_cost_usd, 4),
+                },
+            }
+
     def _calculate_current_period(self) -> tuple[datetime, datetime]:
         """Calculate the current calendar-month reporting period."""
         now = datetime.now(timezone.utc)
