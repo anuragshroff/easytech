@@ -1,6 +1,6 @@
 """add is_active to users
 
-Revision ID: a1b2c3d4e5f6
+Revision ID: b1c2d3e4f5a6
 Revises: c82d4f6a9b10
 Create Date: 2026-10-14 12:00:00.000000
 
@@ -12,7 +12,7 @@ import sqlalchemy as sa
 from alembic import op
 
 # revision identifiers, used by Alembic.
-revision: str = "a1b2c3d4e5f6"
+revision: str = "b1c2d3e4f5a6"
 down_revision: Union[str, None] = "c82d4f6a9b10"
 branch_labels: Union[str, Sequence[str], None] = None
 depends_on: Union[str, Sequence[str], None] = None

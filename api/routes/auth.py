@@ -38,15 +38,30 @@ async def signup(request: SignupRequest):
         name=request.name,
     )
 
-    # Create organization for the user
-    org_provider_id = f"org_{user.provider_id}"
-    organization, _ = await db_client.get_or_create_organization_by_provider_id(
-        org_provider_id=org_provider_id, user_id=user.id
+    # A pending invitation for this email takes precedence over the default
+    # one-org-per-user provisioning: the invitee joins the inviting organization
+    # instead of getting a fresh one.
+    pending_invitations = await db_client.get_pending_invitations_for_email(
+        request.email
     )
+    if pending_invitations:
+        invitation = pending_invitations[0]
+        organization = await db_client.get_organization_by_id(
+            invitation.organization_id
+        )
+        await db_client.add_user_to_organization(user.id, organization.id)
+        await db_client.update_user_selected_organization(user.id, organization.id)
+        await db_client.accept_invitation(invitation.id, user.id)
+    else:
+        # Create organization for the user
+        org_provider_id = f"org_{user.provider_id}"
+        organization, _ = await db_client.get_or_create_organization_by_provider_id(
+            org_provider_id=org_provider_id, user_id=user.id
+        )
 
-    # Link user to organization
-    await db_client.add_user_to_organization(user.id, organization.id)
-    await db_client.update_user_selected_organization(user.id, organization.id)
+        # Link user to organization
+        await db_client.add_user_to_organization(user.id, organization.id)
+        await db_client.update_user_selected_organization(user.id, organization.id)
 
     # Create default service configuration. This never raises, so signup still
     # succeeds if MPS is down; `_handle_oss_auth` re-enters bootstrap on the

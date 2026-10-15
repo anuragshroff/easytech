@@ -67,6 +67,13 @@ CORS_ALLOWED_ORIGINS = [
 ]
 AUTH_PROVIDER = os.getenv("AUTH_PROVIDER", "local")
 ENABLE_SIGNUP = os.getenv("ENABLE_SIGNUP", "true").lower() == "true"
+
+# Stripe Payment Links top-up webhook signing secret. When unset, the webhook
+# endpoint refuses requests (nothing to verify against).
+STRIPE_WEBHOOK_SECRET = os.getenv("STRIPE_WEBHOOK_SECRET")
+STRIPE_WEBHOOK_TOLERANCE_SECONDS = int(
+    os.getenv("STRIPE_WEBHOOK_TOLERANCE_SECONDS", "300")
+)
 # Stack Auth public client config. These are safe to expose to the browser (the
 # publishable client key is public by design, and the project id is non-sensitive),
 # and are served to the UI at runtime via /api/v1/health so the frontend no longer

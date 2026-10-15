@@ -37,9 +37,11 @@ from api.schemas.telephony_config import (
     TrunkUpdateRequest,
 )
 from api.schemas.telephony_phone_number import (
+    AvailablePhoneNumberResponse,
     PhoneNumberCreateRequest,
     PhoneNumberListResponse,
     PhoneNumberResponse,
+    PhoneNumberSearchResponse,
     PhoneNumberUpdateRequest,
     ProviderSyncStatus,
 )
@@ -1223,6 +1225,50 @@ async def create_phone_number(
             attach=row.is_active,
         )
     return response
+
+
+@router.get(
+    "/telephony-configs/{config_id}/phone-numbers/search",
+    response_model=PhoneNumberSearchResponse,
+)
+async def search_available_phone_numbers(
+    config_id: int,
+    country_code: str = "US",
+    area_code: str | None = None,
+    contains: str | None = None,
+    limit: int = 20,
+    user: UserModel = Depends(get_user),
+):
+    """Search the org's carrier for purchasable DIDs (read-only).
+
+    Declared before ``/phone-numbers/{phone_number_id}`` so the literal
+    ``search`` segment isn't parsed as a number id. Buying a result is a
+    normal ``POST /phone-numbers`` with the chosen address.
+    """
+    if not user.selected_organization_id:
+        raise HTTPException(status_code=400, detail="No organization selected")
+    await _ensure_config_belongs_to_org(config_id, user.selected_organization_id)
+
+    provider = await get_telephony_provider_by_id(
+        config_id, user.selected_organization_id
+    )
+    try:
+        numbers = await provider.search_available_numbers(
+            country_code=country_code,
+            area_code=area_code,
+            contains=contains,
+            limit=limit,
+        )
+    except NotImplementedError as e:
+        raise HTTPException(status_code=400, detail=str(e))
+    except ProviderPhoneNumberLookupError as e:
+        raise HTTPException(status_code=502, detail=str(e))
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e))
+
+    return PhoneNumberSearchResponse(
+        numbers=[AvailablePhoneNumberResponse(**vars(n)) for n in numbers]
+    )
 
 
 @router.get(

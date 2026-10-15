@@ -10,6 +10,7 @@ import {
   CircleDollarSign,
   Database,
   FileText,
+  Hash,
   Home,
   Key,
   LogOut,
@@ -110,6 +111,11 @@ const NAV_SECTIONS: SidebarNavSection[] = [
         url: "/telephony-configurations",
         icon: Phone,
         showsTelephonyWarning: true,
+      },
+      {
+        title: "Numbers",
+        url: "/numbers",
+        icon: Hash,
       },
       {
         title: "Tools",
@@ -352,18 +358,13 @@ export function AppSidebar() {
             {isBehind && latestRelease && (
               <Tooltip>
                 <TooltipTrigger asChild>
-                  <a
-                    href="https://docs.dograh.com/deployment/update"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="inline-flex items-center gap-1 rounded-md border bg-amber-50 px-1.5 py-0.5 text-[10px] font-medium leading-none text-amber-900 transition-opacity hover:opacity-80 dark:bg-amber-950 dark:text-amber-200"
-                  >
+                  <span className="inline-flex items-center gap-1 rounded-md border bg-amber-50 px-1.5 py-0.5 text-[10px] font-medium leading-none text-amber-900 dark:bg-amber-950 dark:text-amber-200">
                     <ArrowUpCircle className="h-3 w-3" />
                     Update
-                  </a>
+                  </span>
                 </TooltipTrigger>
                 <TooltipContent side="bottom">
-                  <p>Latest: {latestRelease} - click to see the update guide</p>
+                  <p>Latest: {latestRelease}</p>
                 </TooltipContent>
               </Tooltip>
             )}

@@ -168,6 +168,11 @@ class OrganizationModel(Base):
         "OrganizationConfigurationModel", back_populates="organization"
     )
     api_keys = relationship("APIKeyModel", back_populates="organization")
+    invitations = relationship(
+        "OrganizationInvitationModel",
+        back_populates="organization",
+        cascade="all, delete-orphan",
+    )
 
 
 class APIKeyModel(Base):
@@ -195,6 +200,51 @@ class APIKeyModel(Base):
         Index("ix_api_keys_organization_id", "organization_id"),
         Index("ix_api_keys_key_hash", "key_hash"),
         Index("ix_api_keys_active", "is_active"),
+    )
+
+
+class OrganizationInvitationModel(Base):
+    """A pending (or accepted) request for an email to join an organization.
+
+    Only one *pending* invitation may exist per (organization, email); accepted
+    rows are kept as an audit trail, so the uniqueness rule is a partial index
+    scoped to ``accepted_at IS NULL``. The raw token is emailed to the invitee
+    and never stored — only its SHA256 hash is, mirroring ``api_keys``.
+    """
+
+    __tablename__ = "organization_invitations"
+
+    id = Column(Integer, primary_key=True, index=True)
+    organization_id = Column(
+        Integer, ForeignKey("organizations.id", ondelete="CASCADE"), nullable=False
+    )
+    email = Column(String, nullable=False)
+    role = Column(
+        String(32), nullable=False, default="member", server_default=text("'member'")
+    )
+    token_hash = Column(String, nullable=False, unique=True, index=True)
+    invited_by = Column(
+        Integer, ForeignKey("users.id", ondelete="SET NULL"), nullable=True
+    )
+    accepted_at = Column(DateTime(timezone=True), nullable=True)
+    accepted_by = Column(
+        Integer, ForeignKey("users.id", ondelete="SET NULL"), nullable=True
+    )
+    expires_at = Column(DateTime(timezone=True), nullable=True)
+    created_at = Column(DateTime(timezone=True), default=lambda: datetime.now(UTC))
+
+    organization = relationship("OrganizationModel", back_populates="invitations")
+
+    __table_args__ = (
+        Index(
+            "uq_organization_invitations_pending",
+            "organization_id",
+            func.lower(email),
+            unique=True,
+            postgresql_where=text("accepted_at IS NULL"),
+        ),
+        Index("ix_organization_invitations_email_lower", func.lower(email)),
+        Index("ix_organization_invitations_org", "organization_id"),
     )
 
 
@@ -817,6 +867,124 @@ class OrganizationUsageCycleModel(Base):
             "organization_id", "period_start", "period_end", name="unique_org_period"
         ),
         Index("idx_usage_cycles_org_period", "organization_id", "period_end"),
+    )
+
+
+class BillingSettingsModel(Base):
+    """Pricing and guard configuration for the local wallet.
+
+    A row with ``organization_id`` NULL is the platform default (edited from the
+    admin SPA). A row keyed by ``organization_id`` overrides it for one org and
+    carries org-specific auto-recharge settings.
+    """
+
+    __tablename__ = "billing_settings"
+
+    id = Column(Integer, primary_key=True, index=True)
+    organization_id = Column(
+        Integer, ForeignKey("organizations.id", ondelete="CASCADE"), nullable=True
+    )
+    # All config columns are nullable so a per-org row only stores what it
+    # overrides; NULL means "inherit from the platform row", which in turn falls
+    # back to the built-in defaults in api/services/wallet_billing.py.
+    rate_cents_per_minute = Column(Integer, nullable=True)
+    minimum_balance_cents = Column(Integer, nullable=True)
+    # Reporting-only by default: the guard is recorded but does not block calls
+    # unless a platform admin opts in.
+    enforce_pre_call_balance = Column(Boolean, nullable=True)
+    auto_recharge_enabled = Column(Boolean, nullable=True)
+    auto_recharge_threshold_cents = Column(Integer, nullable=True)
+    auto_recharge_amount_cents = Column(Integer, nullable=True)
+    # Platform-level Stripe Payment Links: [{"amount_cents", "url", "label"}].
+    payment_links = Column(JSON, nullable=True)
+    created_at = Column(DateTime(timezone=True), default=lambda: datetime.now(UTC))
+    updated_at = Column(
+        DateTime(timezone=True),
+        default=lambda: datetime.now(UTC),
+        onupdate=lambda: datetime.now(UTC),
+    )
+
+    __table_args__ = (
+        Index(
+            "uq_billing_settings_platform",
+            "organization_id",
+            unique=True,
+            postgresql_where=text("organization_id IS NULL"),
+        ),
+        Index(
+            "uq_billing_settings_org",
+            "organization_id",
+            unique=True,
+            postgresql_where=text("organization_id IS NOT NULL"),
+        ),
+    )
+
+
+class WalletTransactionModel(Base):
+    """Append-only wallet ledger. Balance is SUM(amount_cents) over an org.
+
+    ``amount_cents`` is signed: top-ups are positive, usage debits negative.
+    """
+
+    __tablename__ = "wallet_transactions"
+
+    id = Column(Integer, primary_key=True, index=True)
+    organization_id = Column(
+        Integer, ForeignKey("organizations.id", ondelete="CASCADE"), nullable=False
+    )
+    amount_cents = Column(Integer, nullable=False)
+    currency = Column(String(length=8), nullable=False, server_default=text("'usd'"))
+    kind = Column(String(length=32), nullable=False)
+    source = Column(String(length=32), nullable=False)
+    description = Column(String, nullable=True)
+    # Idempotency keys: one Stripe event and one usage debit per run at most.
+    external_ref = Column(String, nullable=True)
+    workflow_run_id = Column(
+        Integer, ForeignKey("workflow_runs.id", ondelete="SET NULL"), nullable=True
+    )
+    created_by = Column(
+        Integer, ForeignKey("users.id", ondelete="SET NULL"), nullable=True
+    )
+    created_at = Column(DateTime(timezone=True), default=lambda: datetime.now(UTC))
+
+    __table_args__ = (
+        Index("ix_wallet_transactions_org_created", "organization_id", "created_at"),
+        Index(
+            "uq_wallet_transactions_external_ref",
+            "source",
+            "external_ref",
+            unique=True,
+            postgresql_where=text("external_ref IS NOT NULL"),
+        ),
+        Index(
+            "uq_wallet_transactions_usage_run",
+            "workflow_run_id",
+            unique=True,
+            postgresql_where=text("workflow_run_id IS NOT NULL"),
+        ),
+    )
+
+
+class UsageRecordModel(Base):
+    """One billable record per completed workflow run (call duration + charge)."""
+
+    __tablename__ = "usage_records"
+
+    id = Column(Integer, primary_key=True, index=True)
+    organization_id = Column(
+        Integer, ForeignKey("organizations.id", ondelete="CASCADE"), nullable=False
+    )
+    workflow_run_id = Column(
+        Integer, ForeignKey("workflow_runs.id", ondelete="CASCADE"), nullable=False
+    )
+    duration_seconds = Column(Integer, nullable=False, default=0)
+    rate_cents_per_minute = Column(Integer, nullable=False)
+    amount_cents = Column(Integer, nullable=False)
+    created_at = Column(DateTime(timezone=True), default=lambda: datetime.now(UTC))
+
+    __table_args__ = (
+        UniqueConstraint("workflow_run_id", name="uq_usage_records_workflow_run"),
+        Index("ix_usage_records_org_created", "organization_id", "created_at"),
     )
 
 

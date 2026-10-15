@@ -14,6 +14,8 @@ from api.routes.knowledge_base import router as knowledge_base_router
 from api.routes.model_connections import router as model_connections_router
 from api.routes.node_types import router as node_types_router
 from api.routes.organization import router as organization_router
+from api.routes.organization_billing import router as organization_billing_router
+from api.routes.organization_invitations import router as organization_invitations_router
 from api.routes.organization_usage import router as organization_usage_router
 from api.routes.public_agent import router as public_agent_router
 from api.routes.public_download import router as public_download_router
@@ -49,6 +51,8 @@ router.include_router(campaign_router)
 router.include_router(credentials_router)
 router.include_router(tool_router)
 router.include_router(organization_router)
+router.include_router(organization_billing_router)
+router.include_router(organization_invitations_router)
 router.include_router(model_connections_router)
 router.include_router(s3_router)
 router.include_router(service_keys_router)

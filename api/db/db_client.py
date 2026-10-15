@@ -8,6 +8,7 @@ from api.db.knowledge_base_client import KnowledgeBaseClient
 from api.db.model_connection_client import ModelConnectionClient
 from api.db.organization_client import OrganizationClient
 from api.db.organization_configuration_client import OrganizationConfigurationClient
+from api.db.organization_invitation_client import OrganizationInvitationClient
 from api.db.organization_usage_client import OrganizationUsageClient
 from api.db.reports_client import ReportsClient
 from api.db.telephony_configuration_client import TelephonyConfigurationClient
@@ -15,6 +16,7 @@ from api.db.telephony_phone_number_client import TelephonyPhoneNumberClient
 from api.db.telephony_trunk_client import TelephonyTrunkClient
 from api.db.tool_client import ToolClient
 from api.db.user_client import UserClient
+from api.db.wallet_client import WalletClient
 from api.db.webhook_credential_client import WebhookCredentialClient
 from api.db.webhook_delivery_client import WebhookDeliveryClient
 from api.db.workflow_client import WorkflowClient
@@ -32,7 +34,9 @@ class DBClient(
     UserClient,
     OrganizationClient,
     OrganizationConfigurationClient,
+    OrganizationInvitationClient,
     OrganizationUsageClient,
+    WalletClient,
     IntegrationClient,
     WorkflowTemplateClient,
     CampaignClient,

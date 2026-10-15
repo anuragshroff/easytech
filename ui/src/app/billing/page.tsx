@@ -40,6 +40,7 @@ import { formatDateTime } from "@/lib/dateTime";
 import { trackMetaInitiateCheckout } from "@/lib/metaPixel";
 
 import { BillingLedgerFilters } from "./BillingLedgerFilters";
+import { WalletPanel } from "./WalletPanel";
 
 const LEDGER_PAGE_SIZE = 50;
 
@@ -291,6 +292,8 @@ export default function BillingPage() {
                     </div>
                 </div>
             )}
+
+            <WalletPanel />
 
             <div className="grid gap-4 md:grid-cols-2">
                 <Card>

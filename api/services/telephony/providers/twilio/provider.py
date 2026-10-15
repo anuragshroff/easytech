@@ -13,6 +13,7 @@ from twilio.request_validator import RequestValidator
 from api.enums import TelephonyCallStatus, WorkflowRunMode
 from api.services.telephony import ws_auth
 from api.services.telephony.base import (
+    AvailablePhoneNumber,
     CallInitiationResult,
     NormalizedInboundData,
     ProviderPhoneNumberLookupError,
@@ -519,6 +520,92 @@ class TwilioProvider(TelephonyProvider):
                 "console first."
             ),
         )
+
+    async def search_available_numbers(
+        self,
+        *,
+        country_code: str = "US",
+        area_code: Optional[str] = None,
+        contains: Optional[str] = None,
+        limit: int = 20,
+    ) -> List[AvailablePhoneNumber]:
+        """Search Twilio's purchasable inventory for this account's country.
+
+        Read-only: does not reserve or buy anything. The caller buys a returned
+        number by storing it, which triggers ``provision_phone_number``.
+        """
+        if not (self.account_sid and self.auth_token):
+            raise ProviderPhoneNumberLookupError(
+                "Twilio account SID and auth token are required to search numbers"
+            )
+
+        endpoint = (
+            f"{self.base_url}/AvailablePhoneNumbers/{country_code.upper()}/Local.json"
+        )
+        params: Dict[str, Any] = {"PageSize": min(max(limit, 1), 50)}
+        if area_code:
+            params["AreaCode"] = area_code
+        if contains:
+            params["Contains"] = contains
+
+        async with aiohttp.ClientSession() as session:
+            auth = aiohttp.BasicAuth(self.account_sid, self.auth_token)
+            async with session.get(endpoint, params=params, auth=auth) as response:
+                if response.status != 200:
+                    body = await response.text()
+                    raise ProviderPhoneNumberLookupError(
+                        f"Twilio API {response.status}: {body}",
+                        status_code=response.status,
+                    )
+                data = await response.json()
+
+        return [
+            AvailablePhoneNumber(
+                phone_number=item.get("phone_number", ""),
+                friendly_name=item.get("friendly_name"),
+                locality=item.get("locality"),
+                region=item.get("region"),
+                country_code=item.get("iso_country") or country_code.upper(),
+                capabilities=item.get("capabilities") or {},
+            )
+            for item in (data.get("available_phone_numbers") or [])
+        ]
+
+    async def provision_phone_number(self, address: str) -> ProviderSyncResult | None:
+        """Buy ``address`` into this Twilio account (IncomingPhoneNumbers).
+
+        Idempotent: if the account already owns the number, this returns ok
+        without buying a second copy — Twilio rejects re-purchasing an owned
+        number, and a retried request must succeed instead.
+        """
+        normalized = normalize_telephony_address(address)
+        if normalized.address_type != "pstn":
+            # Twilio's IncomingPhoneNumbers resource covers PSTN numbers only.
+            return None
+        if not (self.account_sid and self.auth_token):
+            return ProviderSyncResult(
+                ok=False, message="Twilio provider not properly configured"
+            )
+
+        e164 = normalized.canonical
+        existing = await self._lookup_incoming_number_sid(e164)
+        if existing:
+            return ProviderSyncResult(ok=True)
+
+        endpoint = f"{self.base_url}/IncomingPhoneNumbers.json"
+        async with aiohttp.ClientSession() as session:
+            auth = aiohttp.BasicAuth(self.account_sid, self.auth_token)
+            async with session.post(
+                endpoint, data={"PhoneNumber": e164}, auth=auth
+            ) as response:
+                if response.status not in (200, 201):
+                    body = await response.text()
+                    return ProviderSyncResult(
+                        ok=False,
+                        message=f"Twilio purchase failed ({response.status}): {body}",
+                    )
+        logger.info(f"Twilio number {e164} purchased into {self.account_sid}")
+        return ProviderSyncResult(ok=True)
 
     async def _lookup_incoming_number_sid(self, e164: str) -> Optional[str]:
         """Return the Twilio SID of the IncomingPhoneNumber matching ``e164``."""

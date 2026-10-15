@@ -33,8 +33,19 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Dograh",
-  description: "Open Source Voice Assistant Workflow Builder",
+  title: "EasyTech",
+  description: "Voice AI platform for building and deploying conversational agents.",
+  openGraph: {
+    title: "EasyTech",
+    description: "Voice AI platform for building and deploying conversational agents.",
+    images: ["/og-image.svg"],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "EasyTech",
+    description: "Voice AI platform for building and deploying conversational agents.",
+    images: ["/og-image.svg"],
+  },
 };
 
 export default function RootLayout({

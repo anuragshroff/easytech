@@ -10,6 +10,7 @@ import Runs from './Runs.jsx'
 import OrganizationDetail from './OrganizationDetail.jsx'
 import Usage from './Usage.jsx'
 import Settings from './Settings.jsx'
+import Billing from './Billing.jsx'
 
 function Protected() {
   if (!getToken()) return <Navigate to="/login" replace />
@@ -28,6 +29,7 @@ export default function App() {
         <Route path="/organizations/:orgId" element={<OrganizationDetail />} />
         <Route path="/runs" element={<Runs />} />
         <Route path="/usage" element={<Usage />} />
+        <Route path="/billing" element={<Billing />} />
         <Route path="/settings" element={<Settings />} />
       </Route>
       <Route path="*" element={<Navigate to="/" replace />} />

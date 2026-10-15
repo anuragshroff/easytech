@@ -1,7 +1,8 @@
-from typing import Annotated
+from typing import Annotated, Any
 
 from fastapi import Depends, Header, HTTPException, Query, WebSocket
 from loguru import logger
+from pydantic import BaseModel, ConfigDict
 
 from api.constants import AUTH_PROVIDER
 from api.db import db_client
@@ -251,6 +252,37 @@ async def get_user_with_selected_organization(
     if not user.selected_organization_id:
         raise HTTPException(status_code=400, detail="No organization selected")
     return user
+
+
+class TenantContext(BaseModel):
+    """The organization a request acts within, plus the acting user.
+
+    Returned by ``get_current_tenant_context`` so handlers depend on one
+    explicit tenant object instead of reaching into the request body or the
+    user model for an organization id.
+    """
+
+    user: Any
+    user_id: int
+    organization_id: int
+
+    model_config = ConfigDict(arbitrary_types_allowed=True)
+
+
+async def get_current_tenant_context(
+    user: Annotated[UserModel, Depends(get_user_with_selected_organization)],
+) -> TenantContext:
+    """Resolve the current tenant (organization) for a request.
+
+    Reuses ``get_user_with_selected_organization`` so the "no organization
+    selected" rejection stays in one place. Prefer this over reading
+    ``user.selected_organization_id`` ad hoc.
+    """
+    return TenantContext(
+        user=user,
+        user_id=user.id,
+        organization_id=user.selected_organization_id,
+    )
 
 
 def _ensure_active(user: UserModel) -> None:

@@ -118,3 +118,19 @@ class PhoneNumberResponse(BaseModel):
 
 class PhoneNumberListResponse(BaseModel):
     phone_numbers: list[PhoneNumberResponse]
+
+
+class AvailablePhoneNumberResponse(BaseModel):
+    """One purchasable DID from a carrier inventory search."""
+
+    phone_number: str
+    friendly_name: Optional[str] = None
+    locality: Optional[str] = None
+    region: Optional[str] = None
+    country_code: Optional[str] = None
+    capabilities: Dict[str, Any] = Field(default_factory=dict)
+    price: Optional[str] = None
+
+
+class PhoneNumberSearchResponse(BaseModel):
+    numbers: list[AvailablePhoneNumberResponse]

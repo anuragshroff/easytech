@@ -43,6 +43,21 @@ async def process_workflow_completion(
             f"Error reporting platform usage for workflow {workflow_run_id}: {e}"
         )
 
+    # Settle the local wallet ledger (usage_records + debit) for this run.
+    try:
+        from api.tasks.arq import enqueue_job
+        from api.tasks.function_names import FunctionNames
+
+        await enqueue_job(
+            FunctionNames.SETTLE_WALLET_FOR_WORKFLOW_RUN,
+            workflow_run_id,
+            _job_id=f"wallet-settle-{workflow_run_id}",
+        )
+    except Exception as e:
+        logger.error(
+            f"Error enqueuing wallet settlement for workflow {workflow_run_id}: {e}"
+        )
+
     # Deliberately last. The write-back reads the run's gathered context to
     # resolve the workflow's mapped lead fields, and on an abrupt hangup the
     # final variable extraction can still be in flight when this job starts --

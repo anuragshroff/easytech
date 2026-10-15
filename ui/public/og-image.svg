@@ -1,0 +1,19 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 630" role="img" aria-label="EasyTech">
+  <defs>
+    <linearGradient id="etBg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#0B1220"/>
+      <stop offset="1" stop-color="#131C31"/>
+    </linearGradient>
+    <linearGradient id="etMark" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#3B82F6"/>
+      <stop offset="1" stop-color="#6366F1"/>
+    </linearGradient>
+  </defs>
+  <rect width="1200" height="630" fill="url(#etBg)"/>
+  <g transform="translate(440 235)">
+    <rect width="96" height="96" rx="24" fill="url(#etMark)"/>
+    <path d="M33 30h30v8H42v9h17v8H42v12h22v8H33z" fill="#fff"/>
+  </g>
+  <text x="600" y="430" text-anchor="middle" font-family="Inter, 'Segoe UI', Arial, sans-serif" font-size="72" font-weight="700" fill="#F8FAFC">EasyTech</text>
+  <text x="600" y="490" text-anchor="middle" font-family="Inter, 'Segoe UI', Arial, sans-serif" font-size="28" fill="#94A3B8">Voice AI platform</text>
+</svg>

@@ -68,6 +68,7 @@ from api.tasks.text_chat_inactivity import (
     complete_inactive_text_chat_session,
     sweep_inactive_text_chat_sessions,
 )
+from api.tasks.wallet_settlement import settle_wallet_for_workflow_run
 from api.tasks.webhook_delivery import deliver_webhook, sweep_webhook_deliveries
 from api.tasks.workflow_completion import process_workflow_completion
 
@@ -82,6 +83,7 @@ class WorkerSettings:
         deliver_webhook,
         complete_inactive_text_chat_session,
         finalize_completed_text_chat,
+        settle_wallet_for_workflow_run,
     ]
     cron_jobs = [
         # Safety net for webhook deliveries whose ARQ job was lost (worker

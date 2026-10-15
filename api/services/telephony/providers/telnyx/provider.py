@@ -27,6 +27,7 @@ TELNYX_SIGNATURE_BYTES = 64
 from api.enums import TelephonyCallStatus, WorkflowRunMode
 from api.services.telephony import ws_auth
 from api.services.telephony.base import (
+    AvailablePhoneNumber,
     CallInitiationResult,
     NormalizedInboundData,
     ProviderPhoneNumberLookupError,
@@ -709,6 +710,98 @@ class TelnyxProvider(TelephonyProvider):
                 "Portal first."
             ),
         )
+
+    async def search_available_numbers(
+        self,
+        *,
+        country_code: str = "US",
+        area_code: Optional[str] = None,
+        contains: Optional[str] = None,
+        limit: int = 20,
+    ) -> List[AvailablePhoneNumber]:
+        """Search Telnyx's purchasable inventory. Read-only (no reservation)."""
+        if not self.api_key:
+            raise ProviderPhoneNumberLookupError(
+                "Telnyx API key is required to search numbers"
+            )
+
+        endpoint = f"{self.TELNYX_API_BASE}/available_phone_numbers"
+        params: Dict[str, Any] = {
+            "filter[country_code]": country_code.upper(),
+            "filter[limit]": min(max(limit, 1), 100),
+        }
+        if area_code:
+            params["filter[national_destination_code]"] = area_code
+        if contains:
+            params["filter[phone_number][contains]"] = contains
+
+        async with aiohttp.ClientSession() as session:
+            async with session.get(
+                endpoint, params=params, headers=self._headers()
+            ) as response:
+                if response.status != 200:
+                    body = await response.text()
+                    raise ProviderPhoneNumberLookupError(
+                        f"Telnyx API {response.status}: {body}",
+                        status_code=response.status,
+                    )
+                data = await response.json()
+
+        results = []
+        for item in data.get("data") or []:
+            cost = item.get("cost_information") or {}
+            results.append(
+                AvailablePhoneNumber(
+                    phone_number=item.get("phone_number", ""),
+                    friendly_name=item.get("phone_number"),
+                    region=item.get("region_information", {}).get("region_name")
+                    if isinstance(item.get("region_information"), dict)
+                    else None,
+                    country_code=item.get("region_information", {}).get("country_code")
+                    if isinstance(item.get("region_information"), dict)
+                    else country_code.upper(),
+                    capabilities=item.get("features") or {},
+                    price=cost.get("monthly_cost"),
+                )
+            )
+        return results
+
+    async def provision_phone_number(self, address: str) -> ProviderSyncResult | None:
+        """Buy ``address`` from Telnyx via a number order.
+
+        Idempotent: if the account already owns the number, returns ok without
+        ordering again. ponytail: number orders provision asynchronously —
+        ordering is accepted here and the number is owned shortly after; we
+        don't poll the order to completion. Poll ``/number_orders/{id}`` if a
+        caller ever needs the guaranteed-live state before storing.
+        """
+        normalized = normalize_telephony_address(address)
+        if normalized.address_type != "pstn":
+            return None
+        if not self.api_key:
+            return ProviderSyncResult(
+                ok=False, message="Telnyx provider not properly configured"
+            )
+
+        e164 = normalized.canonical
+        owned = await self.validate_phone_number(e164)
+        if owned.ok:
+            return ProviderSyncResult(ok=True)
+
+        endpoint = f"{self.TELNYX_API_BASE}/number_orders"
+        payload = {"phone_numbers": [{"phone_number": e164}]}
+        async with aiohttp.ClientSession() as session:
+            async with session.post(
+                endpoint, json=payload, headers=self._headers()
+            ) as response:
+                if response.status not in (200, 201):
+                    body = await response.text()
+                    return ProviderSyncResult(
+                        ok=False,
+                        message=f"Telnyx number order failed ({response.status}): {body}",
+                    )
+        logger.info(f"Telnyx number order placed for {e164}")
+        return ProviderSyncResult(ok=True)
 
     async def start_inbound_stream(
         self,

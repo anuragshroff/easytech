@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 64" role="img" aria-label="EasyTech">
+  <defs>
+    <linearGradient id="etL" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#3B82F6"/>
+      <stop offset="1" stop-color="#6366F1"/>
+    </linearGradient>
+  </defs>
+  <rect width="64" height="64" rx="16" fill="url(#etL)"/>
+  <path d="M22 20h20v5H27.5v6H39v5H27.5v8H42v5H22z" fill="#fff"/>
+  <text x="80" y="42" font-family="Inter, 'Segoe UI', Arial, sans-serif" font-size="30" font-weight="700" fill="#0B1220">EasyTech</text>
+</svg>

@@ -2,7 +2,7 @@ from types import SimpleNamespace
 from unittest.mock import AsyncMock
 
 import pytest
-from fastapi import HTTPException
+from fastapi import Depends, HTTPException
 
 from api.services.auth import depends as auth_depends
 
@@ -20,6 +20,10 @@ def _patch_get_user_dependencies(
     person_calls,
 ):
     monkeypatch.setattr(auth_depends, "AUTH_PROVIDER", "stack")
+    # Real UserModel rows always carry is_active; default the fake to enabled so
+    # the account gate is exercised rather than tripped by a missing attribute.
+    if user is not None and not hasattr(user, "is_active"):
+        user.is_active = True
     monkeypatch.setattr(
         auth_depends.stackauth,
         "get_user",
@@ -238,6 +242,10 @@ async def test_get_user_succeeds_when_bootstrap_cannot_complete(monkeypatch):
 
 def _patch_oss_auth_dependencies(monkeypatch, *, user, bootstrap):
     monkeypatch.setattr(auth_depends, "AUTH_PROVIDER", "local")
+    # Real UserModel rows always carry is_active; default the fake to enabled so
+    # the account gate is exercised rather than tripped by a missing attribute.
+    if user is not None and not hasattr(user, "is_active"):
+        user.is_active = True
     monkeypatch.setattr(auth_depends, "decode_jwt_token", lambda token: {"sub": "7"})
     monkeypatch.setattr(
         auth_depends.db_client,
@@ -308,6 +316,53 @@ async def test_oss_auth_rejects_unknown_user(monkeypatch):
     assert exc_info.value.status_code == 401
     assert exc_info.value.detail == "User not found"
     bootstrap.assert_not_awaited()
+
+
+@pytest.mark.asyncio
+async def test_tenant_context_returns_selected_organization():
+    user = SimpleNamespace(
+        id=7, provider_id="oss-user-1", selected_organization_id=42, is_active=True
+    )
+    context = await auth_depends.get_current_tenant_context(user=user)
+    assert context.organization_id == 42
+    assert context.user_id == 7
+    assert context.user is user
+
+
+def _tenant_app(user):
+    from fastapi import FastAPI
+    from fastapi.testclient import TestClient
+
+    app = FastAPI()
+
+    @app.get("/tenant")
+    async def _read(
+        context: auth_depends.TenantContext = Depends(
+            auth_depends.get_current_tenant_context
+        ),
+    ):
+        return {"organization_id": context.organization_id}
+
+    app.dependency_overrides[auth_depends.get_user] = lambda: user
+    return TestClient(app)
+
+
+def test_tenant_context_requires_selected_organization():
+    client = _tenant_app(
+        SimpleNamespace(id=7, selected_organization_id=None, is_active=True)
+    )
+    response = client.get("/tenant")
+    assert response.status_code == 400
+    assert response.json() == {"detail": "No organization selected"}
+
+
+def test_tenant_context_resolves_organization_through_dependency():
+    client = _tenant_app(
+        SimpleNamespace(id=7, selected_organization_id=42, is_active=True)
+    )
+    response = client.get("/tenant")
+    assert response.status_code == 200
+    assert response.json() == {"organization_id": 42}
 
 
 def test_associate_user_with_posthog_org_supports_backfill_arguments(monkeypatch):

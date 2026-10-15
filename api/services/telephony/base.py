@@ -41,6 +41,24 @@ class ProviderSyncResult:
     message: Optional[str] = None  # human-readable detail when ok=False
 
 
+@dataclass
+class AvailablePhoneNumber:
+    """One purchasable number from a carrier's inventory search.
+
+    Returned by ``TelephonyProvider.search_available_numbers``. Fields mirror
+    what both Twilio and Telnyx expose; anything a provider doesn't supply
+    stays None/empty rather than forcing a lowest-common-denominator shape.
+    """
+
+    phone_number: str  # E.164
+    friendly_name: Optional[str] = None
+    locality: Optional[str] = None
+    region: Optional[str] = None
+    country_code: Optional[str] = None
+    capabilities: Dict[str, Any] = field(default_factory=dict)
+    price: Optional[str] = None
+
+
 @dataclass(frozen=True)
 class SIPTransportDetails:
     """Connection details for one supported inbound SIP transport."""
@@ -487,6 +505,25 @@ class TelephonyProvider(ABC):
         below. Providers that opt in must make this operation idempotent.
         """
         return None
+
+    async def search_available_numbers(
+        self,
+        *,
+        country_code: str = "US",
+        area_code: Optional[str] = None,
+        contains: Optional[str] = None,
+        limit: int = 20,
+    ) -> List["AvailablePhoneNumber"]:
+        """Search the carrier's *purchasable* inventory (DID numbers to buy).
+
+        Distinct from ``get_available_phone_numbers``, which lists numbers the
+        account already owns and can dial from. The default raises because most
+        PBX-style providers have no carrier inventory; opt-in providers
+        implement a read-only search on their own API.
+        """
+        raise NotImplementedError(
+            f"Number search not supported by provider {self.PROVIDER_NAME}"
+        )
 
     @abstractmethod
     async def validate_phone_number(self, address: str) -> ProviderSyncResult:

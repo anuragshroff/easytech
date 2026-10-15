@@ -34,6 +34,7 @@ from api.services.managed_model_services import (
     uses_managed_model_services_v2,
 )
 from api.services.mps_service_key_client import mps_service_key_client
+from api.services.wallet_billing import check_pre_call_balance
 
 MINIMUM_DOGRAH_CREDITS_FOR_CALL = 0.10
 
@@ -646,6 +647,27 @@ async def authorize_workflow_run_start(
             has_quota=False,
             error_code="workflow_not_found",
             error_message="Workflow not found",
+        )
+
+    # Local wallet guard. Reporting-only unless a platform admin enables
+    # enforcement, in which case an org below its minimum balance is denied.
+    allowed, wallet_settings, balance_cents = await check_pre_call_balance(
+        organization_id
+    )
+    if not allowed:
+        logger.warning(
+            "Workflow start denied: wallet balance {} below minimum {} for org {}",
+            balance_cents,
+            wallet_settings.minimum_balance_cents,
+            organization_id,
+        )
+        return QuotaCheckResult(
+            has_quota=False,
+            error_code="insufficient_balance",
+            error_message=(
+                "Insufficient wallet balance. Add funds from the billing page to continue."
+            ),
+            status_code=402,
         )
 
     try:

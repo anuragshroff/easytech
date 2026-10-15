@@ -26,12 +26,14 @@ from api.constants import (
 )
 from api.db import db_client
 from api.db.models import UserModel
+from api.schemas.wallet_billing import PaymentLinkResponse
 from api.services.auth.depends import get_superuser
 from api.services.auth.stack_auth import (
     StackAuthSessionError,
     StackAuthUserSearchError,
     stackauth,
 )
+from api.services.wallet_billing import get_effective_settings
 
 router = APIRouter(prefix="/superuser", tags=["superuser"])
 
@@ -221,6 +223,41 @@ class PlatformSettingsResponse(BaseModel):
     call_recording_upload: bool
     telephony_ws_enforce: bool
     environment: str
+
+
+class PlatformBillingSettingsResponse(BaseModel):
+    rate_cents_per_minute: int
+    minimum_balance_cents: int
+    enforce_pre_call_balance: bool
+    auto_recharge_threshold_cents: int
+    auto_recharge_amount_cents: int
+    payment_links: List[PaymentLinkResponse]
+
+
+class UpdatePlatformBillingSettingsRequest(BaseModel):
+    rate_cents_per_minute: Optional[int] = None
+    minimum_balance_cents: Optional[int] = None
+    enforce_pre_call_balance: Optional[bool] = None
+    auto_recharge_threshold_cents: Optional[int] = None
+    auto_recharge_amount_cents: Optional[int] = None
+    payment_links: Optional[List[PaymentLinkResponse]] = None
+
+
+def _platform_billing_response(
+    effective, payment_links: List[dict]
+) -> PlatformBillingSettingsResponse:
+    return PlatformBillingSettingsResponse(
+        rate_cents_per_minute=effective.rate_cents_per_minute,
+        minimum_balance_cents=effective.minimum_balance_cents,
+        enforce_pre_call_balance=effective.enforce_pre_call_balance,
+        auto_recharge_threshold_cents=effective.auto_recharge_threshold_cents,
+        auto_recharge_amount_cents=effective.auto_recharge_amount_cents,
+        payment_links=[
+            PaymentLinkResponse(**link)
+            for link in payment_links
+            if isinstance(link, dict) and link.get("url")
+        ],
+    )
 
 
 @router.post("/impersonate")
@@ -556,3 +593,24 @@ async def get_platform_settings(
         telephony_ws_enforce=TELEPHONY_WS_TOKEN_ENFORCE,
         environment=ENVIRONMENT,
     )
+
+
+@router.get("/billing/settings", response_model=PlatformBillingSettingsResponse)
+async def get_platform_billing_settings(
+    user: UserModel = Depends(get_superuser),
+) -> PlatformBillingSettingsResponse:
+    effective = await get_effective_settings(None)
+    return _platform_billing_response(effective, effective.payment_links)
+
+
+@router.put("/billing/settings", response_model=PlatformBillingSettingsResponse)
+async def update_platform_billing_settings(
+    request: UpdatePlatformBillingSettingsRequest,
+    user: UserModel = Depends(get_superuser),
+) -> PlatformBillingSettingsResponse:
+    """Update the platform billing defaults and Stripe Payment Links."""
+    fields = request.model_dump(exclude_none=True)
+    if fields:
+        await db_client.upsert_platform_settings(**fields)
+    effective = await get_effective_settings(None)
+    return _platform_billing_response(effective, effective.payment_links)

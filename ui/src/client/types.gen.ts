@@ -233,6 +233,44 @@ export type AutoscaleMetricResponse = {
 };
 
 /**
+ * AvailablePhoneNumberResponse
+ *
+ * One purchasable DID from a carrier inventory search.
+ */
+export type AvailablePhoneNumberResponse = {
+    /**
+     * Phone Number
+     */
+    phone_number: string;
+    /**
+     * Friendly Name
+     */
+    friendly_name?: string | null;
+    /**
+     * Locality
+     */
+    locality?: string | null;
+    /**
+     * Region
+     */
+    region?: string | null;
+    /**
+     * Country Code
+     */
+    country_code?: string | null;
+    /**
+     * Capabilities
+     */
+    capabilities?: {
+        [key: string]: unknown;
+    };
+    /**
+     * Price
+     */
+    price?: string | null;
+};
+
+/**
  * BatchRecordingCreateRequestSchema
  *
  * Request schema for creating one or more recording records after upload.
@@ -2460,6 +2498,82 @@ export type InitiateCallRequest = {
 };
 
 /**
+ * InvitationAcceptRequest
+ */
+export type InvitationAcceptRequest = {
+    /**
+     * Token
+     */
+    token: string;
+};
+
+/**
+ * InvitationCreateRequest
+ */
+export type InvitationCreateRequest = {
+    /**
+     * Email
+     */
+    email: string;
+    /**
+     * Role
+     */
+    role?: string;
+};
+
+/**
+ * InvitationListResponse
+ */
+export type InvitationListResponse = {
+    /**
+     * Invitations
+     */
+    invitations: Array<InvitationResponse>;
+};
+
+/**
+ * InvitationResponse
+ */
+export type InvitationResponse = {
+    /**
+     * Id
+     */
+    id: number;
+    /**
+     * Organization Id
+     */
+    organization_id: number;
+    /**
+     * Email
+     */
+    email: string;
+    /**
+     * Role
+     */
+    role: string;
+    /**
+     * Invited By
+     */
+    invited_by?: number | null;
+    /**
+     * Accepted At
+     */
+    accepted_at?: string | null;
+    /**
+     * Expires At
+     */
+    expires_at?: string | null;
+    /**
+     * Created At
+     */
+    created_at: string;
+    /**
+     * Token
+     */
+    token?: string | null;
+};
+
+/**
  * ItemKind
  */
 export type ItemKind = 'node' | 'edge' | 'workflow';
@@ -3220,6 +3334,24 @@ export type OrganizationPreferencesResponse = {
 };
 
 /**
+ * PaymentLinkResponse
+ */
+export type PaymentLinkResponse = {
+    /**
+     * Label
+     */
+    label: string;
+    /**
+     * Amount Cents
+     */
+    amount_cents: number;
+    /**
+     * Url
+     */
+    url: string;
+};
+
+/**
  * PhoneNumberCreateRequest
  *
  * Create a new phone number under a telephony configuration.
@@ -3345,6 +3477,16 @@ export type PhoneNumberResponse = {
 };
 
 /**
+ * PhoneNumberSearchResponse
+ */
+export type PhoneNumberSearchResponse = {
+    /**
+     * Numbers
+     */
+    numbers: Array<AvailablePhoneNumberResponse>;
+};
+
+/**
  * PhoneNumberUpdateRequest
  *
  * Partial update. ``address`` is intentionally immutable — to change a
@@ -3385,6 +3527,189 @@ export type PhoneNumberUpdateRequest = {
     extra_metadata?: {
         [key: string]: unknown;
     } | null;
+};
+
+/**
+ * PlatformBillingSettingsResponse
+ */
+export type PlatformBillingSettingsResponse = {
+    /**
+     * Rate Cents Per Minute
+     */
+    rate_cents_per_minute: number;
+    /**
+     * Minimum Balance Cents
+     */
+    minimum_balance_cents: number;
+    /**
+     * Enforce Pre Call Balance
+     */
+    enforce_pre_call_balance: boolean;
+    /**
+     * Auto Recharge Threshold Cents
+     */
+    auto_recharge_threshold_cents: number;
+    /**
+     * Auto Recharge Amount Cents
+     */
+    auto_recharge_amount_cents: number;
+    /**
+     * Payment Links
+     */
+    payment_links: Array<PaymentLinkResponse>;
+};
+
+/**
+ * PlatformSettingsResponse
+ */
+export type PlatformSettingsResponse = {
+    /**
+     * Version
+     */
+    version: string;
+    /**
+     * Deployment Mode
+     */
+    deployment_mode: string;
+    /**
+     * Auth Provider
+     */
+    auth_provider: string;
+    /**
+     * Signup Enabled
+     */
+    signup_enabled: boolean;
+    /**
+     * Turn Enabled
+     */
+    turn_enabled: boolean;
+    /**
+     * Force Turn Relay
+     */
+    force_turn_relay: boolean;
+    /**
+     * Backend Api Endpoint
+     */
+    backend_api_endpoint: string;
+    /**
+     * Ui App Url
+     */
+    ui_app_url: string;
+    /**
+     * Enable Telemetry
+     */
+    enable_telemetry: boolean;
+    /**
+     * Enable Prometheus Metrics
+     */
+    enable_prometheus_metrics: boolean;
+    /**
+     * Enable Ari Stasis
+     */
+    enable_ari_stasis: boolean;
+    /**
+     * Log Level
+     */
+    log_level: string;
+    /**
+     * Minio Endpoint
+     */
+    minio_endpoint: string;
+    /**
+     * Minio Bucket
+     */
+    minio_bucket: string;
+    /**
+     * Minio Secure
+     */
+    minio_secure: boolean;
+    /**
+     * Call Recording Upload
+     */
+    call_recording_upload: boolean;
+    /**
+     * Telephony Ws Enforce
+     */
+    telephony_ws_enforce: boolean;
+    /**
+     * Environment
+     */
+    environment: string;
+};
+
+/**
+ * PlatformUsageOrg
+ */
+export type PlatformUsageOrg = {
+    /**
+     * Organization Id
+     */
+    organization_id: number;
+    /**
+     * Provider Id
+     */
+    provider_id: string;
+    /**
+     * Price Per Second Usd
+     */
+    price_per_second_usd: number | null;
+    /**
+     * Call Count
+     */
+    call_count: number;
+    /**
+     * Total Seconds
+     */
+    total_seconds: number;
+    /**
+     * Total Minutes
+     */
+    total_minutes: number;
+    /**
+     * Cost Usd
+     */
+    cost_usd: number;
+};
+
+/**
+ * PlatformUsageOverviewResponse
+ */
+export type PlatformUsageOverviewResponse = {
+    /**
+     * Period Start
+     */
+    period_start: string;
+    /**
+     * Period End
+     */
+    period_end: string;
+    /**
+     * Organizations
+     */
+    organizations: Array<PlatformUsageOrg>;
+    totals: PlatformUsageTotals;
+};
+
+/**
+ * PlatformUsageTotals
+ */
+export type PlatformUsageTotals = {
+    /**
+     * Call Count
+     */
+    call_count: number;
+    /**
+     * Total Seconds
+     */
+    total_seconds: number;
+    /**
+     * Total Minutes
+     */
+    total_minutes: number;
+    /**
+     * Cost Usd
+     */
+    cost_usd: number;
 };
 
 /**
@@ -4446,6 +4771,270 @@ export type SignupRequest = {
 };
 
 /**
+ * SuperuserOrganizationDetail
+ */
+export type SuperuserOrganizationDetail = {
+    /**
+     * Id
+     */
+    id: number;
+    /**
+     * Provider Id
+     */
+    provider_id: string;
+    /**
+     * Created At
+     */
+    created_at?: string | null;
+    /**
+     * Price Per Second Usd
+     */
+    price_per_second_usd?: number | null;
+    /**
+     * User Count
+     */
+    user_count: number;
+    /**
+     * Run Count
+     */
+    run_count: number;
+    /**
+     * Workflow Count
+     */
+    workflow_count: number;
+};
+
+/**
+ * SuperuserOrganizationMembersResponse
+ */
+export type SuperuserOrganizationMembersResponse = {
+    /**
+     * Users
+     */
+    users: Array<SuperuserUserResponse>;
+};
+
+/**
+ * SuperuserOrganizationResponse
+ */
+export type SuperuserOrganizationResponse = {
+    /**
+     * Id
+     */
+    id: number;
+    /**
+     * Provider Id
+     */
+    provider_id: string;
+    /**
+     * Created At
+     */
+    created_at: string | null;
+    /**
+     * User Count
+     */
+    user_count: number;
+    /**
+     * Run Count
+     */
+    run_count: number;
+};
+
+/**
+ * SuperuserOrganizationRunsListResponse
+ */
+export type SuperuserOrganizationRunsListResponse = {
+    /**
+     * Runs
+     */
+    runs: Array<SuperuserRunSummary>;
+    /**
+     * Total Count
+     */
+    total_count: number;
+    /**
+     * Page
+     */
+    page: number;
+    /**
+     * Limit
+     */
+    limit: number;
+    /**
+     * Total Pages
+     */
+    total_pages: number;
+};
+
+/**
+ * SuperuserOrganizationWorkflowsResponse
+ */
+export type SuperuserOrganizationWorkflowsResponse = {
+    /**
+     * Workflows
+     */
+    workflows: Array<SuperuserWorkflowSummary>;
+};
+
+/**
+ * SuperuserOrganizationsListResponse
+ */
+export type SuperuserOrganizationsListResponse = {
+    /**
+     * Organizations
+     */
+    organizations: Array<SuperuserOrganizationResponse>;
+    /**
+     * Total Count
+     */
+    total_count: number;
+    /**
+     * Page
+     */
+    page: number;
+    /**
+     * Limit
+     */
+    limit: number;
+    /**
+     * Total Pages
+     */
+    total_pages: number;
+};
+
+/**
+ * SuperuserRunSummary
+ */
+export type SuperuserRunSummary = {
+    /**
+     * Id
+     */
+    id: number;
+    /**
+     * Name
+     */
+    name: string;
+    /**
+     * Workflow Id
+     */
+    workflow_id: number;
+    /**
+     * Workflow Name
+     */
+    workflow_name?: string | null;
+    /**
+     * Mode
+     */
+    mode: string;
+    /**
+     * Is Completed
+     */
+    is_completed: boolean;
+    /**
+     * Recording Url
+     */
+    recording_url?: string | null;
+    /**
+     * Transcript Url
+     */
+    transcript_url?: string | null;
+    /**
+     * Created At
+     */
+    created_at: string;
+};
+
+/**
+ * SuperuserStatsResponse
+ */
+export type SuperuserStatsResponse = {
+    /**
+     * Total Users
+     */
+    total_users: number;
+    /**
+     * Total Organizations
+     */
+    total_organizations: number;
+    /**
+     * Total Runs
+     */
+    total_runs: number;
+    /**
+     * Completed Runs
+     */
+    completed_runs: number;
+    /**
+     * Active Runs
+     */
+    active_runs: number;
+    /**
+     * Runs Today
+     */
+    runs_today: number;
+};
+
+/**
+ * SuperuserUserResponse
+ */
+export type SuperuserUserResponse = {
+    /**
+     * Id
+     */
+    id: number;
+    /**
+     * Email
+     */
+    email: string | null;
+    /**
+     * Provider Id
+     */
+    provider_id: string;
+    /**
+     * Is Superuser
+     */
+    is_superuser: boolean;
+    /**
+     * Is Active
+     */
+    is_active?: boolean;
+    /**
+     * Organization Id
+     */
+    organization_id: number | null;
+    /**
+     * Created At
+     */
+    created_at: string | null;
+};
+
+/**
+ * SuperuserUsersListResponse
+ */
+export type SuperuserUsersListResponse = {
+    /**
+     * Users
+     */
+    users: Array<SuperuserUserResponse>;
+    /**
+     * Total Count
+     */
+    total_count: number;
+    /**
+     * Page
+     */
+    page: number;
+    /**
+     * Limit
+     */
+    limit: number;
+    /**
+     * Total Pages
+     */
+    total_pages: number;
+};
+
+/**
  * SuperuserWorkflowRunResponse
  */
 export type SuperuserWorkflowRunResponse = {
@@ -4547,6 +5136,32 @@ export type SuperuserWorkflowRunsListResponse = {
      * Total Pages
      */
     total_pages: number;
+};
+
+/**
+ * SuperuserWorkflowSummary
+ */
+export type SuperuserWorkflowSummary = {
+    /**
+     * Id
+     */
+    id: number;
+    /**
+     * Name
+     */
+    name: string | null;
+    /**
+     * Status
+     */
+    status?: string | null;
+    /**
+     * Created At
+     */
+    created_at?: string | null;
+    /**
+     * Run Count
+     */
+    run_count?: number;
 };
 
 /**
@@ -5101,6 +5716,26 @@ export type TimeSlotResponse = {
      * End Time
      */
     end_time: string;
+};
+
+/**
+ * ToggleActiveRequest
+ */
+export type ToggleActiveRequest = {
+    /**
+     * Is Active
+     */
+    is_active: boolean;
+};
+
+/**
+ * ToggleSuperuserRequest
+ */
+export type ToggleSuperuserRequest = {
+    /**
+     * Is Superuser
+     */
+    is_superuser: boolean;
 };
 
 /**
@@ -5895,6 +6530,36 @@ export type UpdateFolderRequest = {
 };
 
 /**
+ * UpdatePlatformBillingSettingsRequest
+ */
+export type UpdatePlatformBillingSettingsRequest = {
+    /**
+     * Rate Cents Per Minute
+     */
+    rate_cents_per_minute?: number | null;
+    /**
+     * Minimum Balance Cents
+     */
+    minimum_balance_cents?: number | null;
+    /**
+     * Enforce Pre Call Balance
+     */
+    enforce_pre_call_balance?: boolean | null;
+    /**
+     * Auto Recharge Threshold Cents
+     */
+    auto_recharge_threshold_cents?: number | null;
+    /**
+     * Auto Recharge Amount Cents
+     */
+    auto_recharge_amount_cents?: number | null;
+    /**
+     * Payment Links
+     */
+    payment_links?: Array<PaymentLinkResponse> | null;
+};
+
+/**
  * UpdateToolRequest
  *
  * Request schema for updating a reusable tool.
@@ -5936,6 +6601,26 @@ export type UpdateToolRequest = {
      * Status
      */
     status?: string | null;
+};
+
+/**
+ * UpdateWalletSettingsRequest
+ *
+ * Org-scoped self-service settings (auto-recharge). Pricing is admin-only.
+ */
+export type UpdateWalletSettingsRequest = {
+    /**
+     * Auto Recharge Enabled
+     */
+    auto_recharge_enabled?: boolean | null;
+    /**
+     * Auto Recharge Threshold Cents
+     */
+    auto_recharge_threshold_cents?: number | null;
+    /**
+     * Auto Recharge Amount Cents
+     */
+    auto_recharge_amount_cents?: number | null;
 };
 
 /**
@@ -6019,6 +6704,46 @@ export type UsageHistoryResponse = {
      * Total Pages
      */
     total_pages: number;
+};
+
+/**
+ * UsageRecordResponse
+ */
+export type UsageRecordResponse = {
+    /**
+     * Id
+     */
+    id: number;
+    /**
+     * Workflow Run Id
+     */
+    workflow_run_id: number;
+    /**
+     * Duration Seconds
+     */
+    duration_seconds: number;
+    /**
+     * Rate Cents Per Minute
+     */
+    rate_cents_per_minute: number;
+    /**
+     * Amount Cents
+     */
+    amount_cents: number;
+    /**
+     * Created At
+     */
+    created_at: string;
+};
+
+/**
+ * UsageRecordsResponse
+ */
+export type UsageRecordsResponse = {
+    /**
+     * Usage Records
+     */
+    usage_records: Array<UsageRecordResponse>;
 };
 
 /**
@@ -6364,6 +7089,122 @@ export type VonageConfigurationRequest = {
      * Vonage signature secret used to verify signed webhooks
      */
     signature_secret?: string | null;
+};
+
+/**
+ * WalletOverviewResponse
+ */
+export type WalletOverviewResponse = {
+    /**
+     * Balance Cents
+     */
+    balance_cents: number;
+    /**
+     * Currency
+     */
+    currency?: string;
+    settings: WalletSettingsResponse;
+    /**
+     * Payment Links
+     */
+    payment_links?: Array<PaymentLinkResponse>;
+    totals: WalletTotalsResponse;
+};
+
+/**
+ * WalletSettingsResponse
+ */
+export type WalletSettingsResponse = {
+    /**
+     * Rate Cents Per Minute
+     */
+    rate_cents_per_minute: number;
+    /**
+     * Minimum Balance Cents
+     */
+    minimum_balance_cents: number;
+    /**
+     * Enforce Pre Call Balance
+     */
+    enforce_pre_call_balance: boolean;
+    /**
+     * Auto Recharge Enabled
+     */
+    auto_recharge_enabled: boolean;
+    /**
+     * Auto Recharge Threshold Cents
+     */
+    auto_recharge_threshold_cents: number;
+    /**
+     * Auto Recharge Amount Cents
+     */
+    auto_recharge_amount_cents: number;
+};
+
+/**
+ * WalletTotalsResponse
+ */
+export type WalletTotalsResponse = {
+    /**
+     * Call Count
+     */
+    call_count: number;
+    /**
+     * Total Duration Seconds
+     */
+    total_duration_seconds: number;
+    /**
+     * Total Amount Cents
+     */
+    total_amount_cents: number;
+};
+
+/**
+ * WalletTransactionResponse
+ */
+export type WalletTransactionResponse = {
+    /**
+     * Id
+     */
+    id: number;
+    /**
+     * Amount Cents
+     */
+    amount_cents: number;
+    /**
+     * Currency
+     */
+    currency: string;
+    /**
+     * Kind
+     */
+    kind: string;
+    /**
+     * Source
+     */
+    source: string;
+    /**
+     * Description
+     */
+    description?: string | null;
+    /**
+     * Workflow Run Id
+     */
+    workflow_run_id?: number | null;
+    /**
+     * Created At
+     */
+    created_at: string;
+};
+
+/**
+ * WalletTransactionsResponse
+ */
+export type WalletTransactionsResponse = {
+    /**
+     * Transactions
+     */
+    transactions: Array<WalletTransactionResponse>;
 };
 
 /**
@@ -7887,6 +8728,590 @@ export type GetWorkflowRunsApiV1SuperuserWorkflowRunsGetResponses = {
 };
 
 export type GetWorkflowRunsApiV1SuperuserWorkflowRunsGetResponse = GetWorkflowRunsApiV1SuperuserWorkflowRunsGetResponses[keyof GetWorkflowRunsApiV1SuperuserWorkflowRunsGetResponses];
+
+export type GetStatsApiV1SuperuserStatsGetData = {
+    body?: never;
+    headers?: {
+        /**
+         * Authorization
+         */
+        authorization?: string | null;
+        /**
+         * X-Api-Key
+         */
+        'X-API-Key'?: string | null;
+    };
+    path?: never;
+    query?: never;
+    url: '/api/v1/superuser/stats';
+};
+
+export type GetStatsApiV1SuperuserStatsGetErrors = {
+    /**
+     * Not found
+     */
+    404: unknown;
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type GetStatsApiV1SuperuserStatsGetError = GetStatsApiV1SuperuserStatsGetErrors[keyof GetStatsApiV1SuperuserStatsGetErrors];
+
+export type GetStatsApiV1SuperuserStatsGetResponses = {
+    /**
+     * Successful Response
+     */
+    200: SuperuserStatsResponse;
+};
+
+export type GetStatsApiV1SuperuserStatsGetResponse = GetStatsApiV1SuperuserStatsGetResponses[keyof GetStatsApiV1SuperuserStatsGetResponses];
+
+export type GetUsersApiV1SuperuserUsersGetData = {
+    body?: never;
+    headers?: {
+        /**
+         * Authorization
+         */
+        authorization?: string | null;
+        /**
+         * X-Api-Key
+         */
+        'X-API-Key'?: string | null;
+    };
+    path?: never;
+    query?: {
+        /**
+         * Page
+         */
+        page?: number;
+        /**
+         * Limit
+         */
+        limit?: number;
+        /**
+         * Search
+         *
+         * Partial email match
+         */
+        search?: string | null;
+    };
+    url: '/api/v1/superuser/users';
+};
+
+export type GetUsersApiV1SuperuserUsersGetErrors = {
+    /**
+     * Not found
+     */
+    404: unknown;
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type GetUsersApiV1SuperuserUsersGetError = GetUsersApiV1SuperuserUsersGetErrors[keyof GetUsersApiV1SuperuserUsersGetErrors];
+
+export type GetUsersApiV1SuperuserUsersGetResponses = {
+    /**
+     * Successful Response
+     */
+    200: SuperuserUsersListResponse;
+};
+
+export type GetUsersApiV1SuperuserUsersGetResponse = GetUsersApiV1SuperuserUsersGetResponses[keyof GetUsersApiV1SuperuserUsersGetResponses];
+
+export type GetOrganizationsApiV1SuperuserOrganizationsGetData = {
+    body?: never;
+    headers?: {
+        /**
+         * Authorization
+         */
+        authorization?: string | null;
+        /**
+         * X-Api-Key
+         */
+        'X-API-Key'?: string | null;
+    };
+    path?: never;
+    query?: {
+        /**
+         * Page
+         */
+        page?: number;
+        /**
+         * Limit
+         */
+        limit?: number;
+        /**
+         * Search
+         *
+         * Partial provider_id match
+         */
+        search?: string | null;
+    };
+    url: '/api/v1/superuser/organizations';
+};
+
+export type GetOrganizationsApiV1SuperuserOrganizationsGetErrors = {
+    /**
+     * Not found
+     */
+    404: unknown;
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type GetOrganizationsApiV1SuperuserOrganizationsGetError = GetOrganizationsApiV1SuperuserOrganizationsGetErrors[keyof GetOrganizationsApiV1SuperuserOrganizationsGetErrors];
+
+export type GetOrganizationsApiV1SuperuserOrganizationsGetResponses = {
+    /**
+     * Successful Response
+     */
+    200: SuperuserOrganizationsListResponse;
+};
+
+export type GetOrganizationsApiV1SuperuserOrganizationsGetResponse = GetOrganizationsApiV1SuperuserOrganizationsGetResponses[keyof GetOrganizationsApiV1SuperuserOrganizationsGetResponses];
+
+export type SetUserSuperuserApiV1SuperuserUsersUserIdSuperuserPostData = {
+    body: ToggleSuperuserRequest;
+    headers?: {
+        /**
+         * Authorization
+         */
+        authorization?: string | null;
+        /**
+         * X-Api-Key
+         */
+        'X-API-Key'?: string | null;
+    };
+    path: {
+        /**
+         * User Id
+         */
+        user_id: number;
+    };
+    query?: never;
+    url: '/api/v1/superuser/users/{user_id}/superuser';
+};
+
+export type SetUserSuperuserApiV1SuperuserUsersUserIdSuperuserPostErrors = {
+    /**
+     * Not found
+     */
+    404: unknown;
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type SetUserSuperuserApiV1SuperuserUsersUserIdSuperuserPostError = SetUserSuperuserApiV1SuperuserUsersUserIdSuperuserPostErrors[keyof SetUserSuperuserApiV1SuperuserUsersUserIdSuperuserPostErrors];
+
+export type SetUserSuperuserApiV1SuperuserUsersUserIdSuperuserPostResponses = {
+    /**
+     * Response Set User Superuser Api V1 Superuser Users  User Id  Superuser Post
+     *
+     * Successful Response
+     */
+    200: {
+        [key: string]: unknown;
+    };
+};
+
+export type SetUserSuperuserApiV1SuperuserUsersUserIdSuperuserPostResponse = SetUserSuperuserApiV1SuperuserUsersUserIdSuperuserPostResponses[keyof SetUserSuperuserApiV1SuperuserUsersUserIdSuperuserPostResponses];
+
+export type SetUserActiveApiV1SuperuserUsersUserIdActivePostData = {
+    body: ToggleActiveRequest;
+    headers?: {
+        /**
+         * Authorization
+         */
+        authorization?: string | null;
+        /**
+         * X-Api-Key
+         */
+        'X-API-Key'?: string | null;
+    };
+    path: {
+        /**
+         * User Id
+         */
+        user_id: number;
+    };
+    query?: never;
+    url: '/api/v1/superuser/users/{user_id}/active';
+};
+
+export type SetUserActiveApiV1SuperuserUsersUserIdActivePostErrors = {
+    /**
+     * Not found
+     */
+    404: unknown;
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type SetUserActiveApiV1SuperuserUsersUserIdActivePostError = SetUserActiveApiV1SuperuserUsersUserIdActivePostErrors[keyof SetUserActiveApiV1SuperuserUsersUserIdActivePostErrors];
+
+export type SetUserActiveApiV1SuperuserUsersUserIdActivePostResponses = {
+    /**
+     * Response Set User Active Api V1 Superuser Users  User Id  Active Post
+     *
+     * Successful Response
+     */
+    200: {
+        [key: string]: unknown;
+    };
+};
+
+export type SetUserActiveApiV1SuperuserUsersUserIdActivePostResponse = SetUserActiveApiV1SuperuserUsersUserIdActivePostResponses[keyof SetUserActiveApiV1SuperuserUsersUserIdActivePostResponses];
+
+export type GetOrganizationDetailApiV1SuperuserOrganizationsOrgIdGetData = {
+    body?: never;
+    headers?: {
+        /**
+         * Authorization
+         */
+        authorization?: string | null;
+        /**
+         * X-Api-Key
+         */
+        'X-API-Key'?: string | null;
+    };
+    path: {
+        /**
+         * Org Id
+         */
+        org_id: number;
+    };
+    query?: never;
+    url: '/api/v1/superuser/organizations/{org_id}';
+};
+
+export type GetOrganizationDetailApiV1SuperuserOrganizationsOrgIdGetErrors = {
+    /**
+     * Not found
+     */
+    404: unknown;
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type GetOrganizationDetailApiV1SuperuserOrganizationsOrgIdGetError = GetOrganizationDetailApiV1SuperuserOrganizationsOrgIdGetErrors[keyof GetOrganizationDetailApiV1SuperuserOrganizationsOrgIdGetErrors];
+
+export type GetOrganizationDetailApiV1SuperuserOrganizationsOrgIdGetResponses = {
+    /**
+     * Successful Response
+     */
+    200: SuperuserOrganizationDetail;
+};
+
+export type GetOrganizationDetailApiV1SuperuserOrganizationsOrgIdGetResponse = GetOrganizationDetailApiV1SuperuserOrganizationsOrgIdGetResponses[keyof GetOrganizationDetailApiV1SuperuserOrganizationsOrgIdGetResponses];
+
+export type GetOrganizationMembersApiV1SuperuserOrganizationsOrgIdMembersGetData = {
+    body?: never;
+    headers?: {
+        /**
+         * Authorization
+         */
+        authorization?: string | null;
+        /**
+         * X-Api-Key
+         */
+        'X-API-Key'?: string | null;
+    };
+    path: {
+        /**
+         * Org Id
+         */
+        org_id: number;
+    };
+    query?: never;
+    url: '/api/v1/superuser/organizations/{org_id}/members';
+};
+
+export type GetOrganizationMembersApiV1SuperuserOrganizationsOrgIdMembersGetErrors = {
+    /**
+     * Not found
+     */
+    404: unknown;
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type GetOrganizationMembersApiV1SuperuserOrganizationsOrgIdMembersGetError = GetOrganizationMembersApiV1SuperuserOrganizationsOrgIdMembersGetErrors[keyof GetOrganizationMembersApiV1SuperuserOrganizationsOrgIdMembersGetErrors];
+
+export type GetOrganizationMembersApiV1SuperuserOrganizationsOrgIdMembersGetResponses = {
+    /**
+     * Successful Response
+     */
+    200: SuperuserOrganizationMembersResponse;
+};
+
+export type GetOrganizationMembersApiV1SuperuserOrganizationsOrgIdMembersGetResponse = GetOrganizationMembersApiV1SuperuserOrganizationsOrgIdMembersGetResponses[keyof GetOrganizationMembersApiV1SuperuserOrganizationsOrgIdMembersGetResponses];
+
+export type GetOrganizationWorkflowsApiV1SuperuserOrganizationsOrgIdWorkflowsGetData = {
+    body?: never;
+    headers?: {
+        /**
+         * Authorization
+         */
+        authorization?: string | null;
+        /**
+         * X-Api-Key
+         */
+        'X-API-Key'?: string | null;
+    };
+    path: {
+        /**
+         * Org Id
+         */
+        org_id: number;
+    };
+    query?: never;
+    url: '/api/v1/superuser/organizations/{org_id}/workflows';
+};
+
+export type GetOrganizationWorkflowsApiV1SuperuserOrganizationsOrgIdWorkflowsGetErrors = {
+    /**
+     * Not found
+     */
+    404: unknown;
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type GetOrganizationWorkflowsApiV1SuperuserOrganizationsOrgIdWorkflowsGetError = GetOrganizationWorkflowsApiV1SuperuserOrganizationsOrgIdWorkflowsGetErrors[keyof GetOrganizationWorkflowsApiV1SuperuserOrganizationsOrgIdWorkflowsGetErrors];
+
+export type GetOrganizationWorkflowsApiV1SuperuserOrganizationsOrgIdWorkflowsGetResponses = {
+    /**
+     * Successful Response
+     */
+    200: SuperuserOrganizationWorkflowsResponse;
+};
+
+export type GetOrganizationWorkflowsApiV1SuperuserOrganizationsOrgIdWorkflowsGetResponse = GetOrganizationWorkflowsApiV1SuperuserOrganizationsOrgIdWorkflowsGetResponses[keyof GetOrganizationWorkflowsApiV1SuperuserOrganizationsOrgIdWorkflowsGetResponses];
+
+export type GetOrganizationRunsApiV1SuperuserOrganizationsOrgIdRunsGetData = {
+    body?: never;
+    headers?: {
+        /**
+         * Authorization
+         */
+        authorization?: string | null;
+        /**
+         * X-Api-Key
+         */
+        'X-API-Key'?: string | null;
+    };
+    path: {
+        /**
+         * Org Id
+         */
+        org_id: number;
+    };
+    query?: {
+        /**
+         * Page
+         */
+        page?: number;
+        /**
+         * Limit
+         */
+        limit?: number;
+    };
+    url: '/api/v1/superuser/organizations/{org_id}/runs';
+};
+
+export type GetOrganizationRunsApiV1SuperuserOrganizationsOrgIdRunsGetErrors = {
+    /**
+     * Not found
+     */
+    404: unknown;
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type GetOrganizationRunsApiV1SuperuserOrganizationsOrgIdRunsGetError = GetOrganizationRunsApiV1SuperuserOrganizationsOrgIdRunsGetErrors[keyof GetOrganizationRunsApiV1SuperuserOrganizationsOrgIdRunsGetErrors];
+
+export type GetOrganizationRunsApiV1SuperuserOrganizationsOrgIdRunsGetResponses = {
+    /**
+     * Successful Response
+     */
+    200: SuperuserOrganizationRunsListResponse;
+};
+
+export type GetOrganizationRunsApiV1SuperuserOrganizationsOrgIdRunsGetResponse = GetOrganizationRunsApiV1SuperuserOrganizationsOrgIdRunsGetResponses[keyof GetOrganizationRunsApiV1SuperuserOrganizationsOrgIdRunsGetResponses];
+
+export type GetPlatformUsageApiV1SuperuserUsageGetData = {
+    body?: never;
+    headers?: {
+        /**
+         * Authorization
+         */
+        authorization?: string | null;
+        /**
+         * X-Api-Key
+         */
+        'X-API-Key'?: string | null;
+    };
+    path?: never;
+    query?: never;
+    url: '/api/v1/superuser/usage';
+};
+
+export type GetPlatformUsageApiV1SuperuserUsageGetErrors = {
+    /**
+     * Not found
+     */
+    404: unknown;
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type GetPlatformUsageApiV1SuperuserUsageGetError = GetPlatformUsageApiV1SuperuserUsageGetErrors[keyof GetPlatformUsageApiV1SuperuserUsageGetErrors];
+
+export type GetPlatformUsageApiV1SuperuserUsageGetResponses = {
+    /**
+     * Successful Response
+     */
+    200: PlatformUsageOverviewResponse;
+};
+
+export type GetPlatformUsageApiV1SuperuserUsageGetResponse = GetPlatformUsageApiV1SuperuserUsageGetResponses[keyof GetPlatformUsageApiV1SuperuserUsageGetResponses];
+
+export type GetPlatformSettingsApiV1SuperuserSettingsGetData = {
+    body?: never;
+    headers?: {
+        /**
+         * Authorization
+         */
+        authorization?: string | null;
+        /**
+         * X-Api-Key
+         */
+        'X-API-Key'?: string | null;
+    };
+    path?: never;
+    query?: never;
+    url: '/api/v1/superuser/settings';
+};
+
+export type GetPlatformSettingsApiV1SuperuserSettingsGetErrors = {
+    /**
+     * Not found
+     */
+    404: unknown;
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type GetPlatformSettingsApiV1SuperuserSettingsGetError = GetPlatformSettingsApiV1SuperuserSettingsGetErrors[keyof GetPlatformSettingsApiV1SuperuserSettingsGetErrors];
+
+export type GetPlatformSettingsApiV1SuperuserSettingsGetResponses = {
+    /**
+     * Successful Response
+     */
+    200: PlatformSettingsResponse;
+};
+
+export type GetPlatformSettingsApiV1SuperuserSettingsGetResponse = GetPlatformSettingsApiV1SuperuserSettingsGetResponses[keyof GetPlatformSettingsApiV1SuperuserSettingsGetResponses];
+
+export type GetPlatformBillingSettingsApiV1SuperuserBillingSettingsGetData = {
+    body?: never;
+    headers?: {
+        /**
+         * Authorization
+         */
+        authorization?: string | null;
+        /**
+         * X-Api-Key
+         */
+        'X-API-Key'?: string | null;
+    };
+    path?: never;
+    query?: never;
+    url: '/api/v1/superuser/billing/settings';
+};
+
+export type GetPlatformBillingSettingsApiV1SuperuserBillingSettingsGetErrors = {
+    /**
+     * Not found
+     */
+    404: unknown;
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type GetPlatformBillingSettingsApiV1SuperuserBillingSettingsGetError = GetPlatformBillingSettingsApiV1SuperuserBillingSettingsGetErrors[keyof GetPlatformBillingSettingsApiV1SuperuserBillingSettingsGetErrors];
+
+export type GetPlatformBillingSettingsApiV1SuperuserBillingSettingsGetResponses = {
+    /**
+     * Successful Response
+     */
+    200: PlatformBillingSettingsResponse;
+};
+
+export type GetPlatformBillingSettingsApiV1SuperuserBillingSettingsGetResponse = GetPlatformBillingSettingsApiV1SuperuserBillingSettingsGetResponses[keyof GetPlatformBillingSettingsApiV1SuperuserBillingSettingsGetResponses];
+
+export type UpdatePlatformBillingSettingsApiV1SuperuserBillingSettingsPutData = {
+    body: UpdatePlatformBillingSettingsRequest;
+    headers?: {
+        /**
+         * Authorization
+         */
+        authorization?: string | null;
+        /**
+         * X-Api-Key
+         */
+        'X-API-Key'?: string | null;
+    };
+    path?: never;
+    query?: never;
+    url: '/api/v1/superuser/billing/settings';
+};
+
+export type UpdatePlatformBillingSettingsApiV1SuperuserBillingSettingsPutErrors = {
+    /**
+     * Not found
+     */
+    404: unknown;
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type UpdatePlatformBillingSettingsApiV1SuperuserBillingSettingsPutError = UpdatePlatformBillingSettingsApiV1SuperuserBillingSettingsPutErrors[keyof UpdatePlatformBillingSettingsApiV1SuperuserBillingSettingsPutErrors];
+
+export type UpdatePlatformBillingSettingsApiV1SuperuserBillingSettingsPutResponses = {
+    /**
+     * Successful Response
+     */
+    200: PlatformBillingSettingsResponse;
+};
+
+export type UpdatePlatformBillingSettingsApiV1SuperuserBillingSettingsPutResponse = UpdatePlatformBillingSettingsApiV1SuperuserBillingSettingsPutResponses[keyof UpdatePlatformBillingSettingsApiV1SuperuserBillingSettingsPutResponses];
 
 export type ValidateWorkflowApiV1WorkflowWorkflowIdValidatePostData = {
     body?: never;
@@ -11853,6 +13278,67 @@ export type CreatePhoneNumberApiV1OrganizationsTelephonyConfigsConfigIdPhoneNumb
 
 export type CreatePhoneNumberApiV1OrganizationsTelephonyConfigsConfigIdPhoneNumbersPostResponse = CreatePhoneNumberApiV1OrganizationsTelephonyConfigsConfigIdPhoneNumbersPostResponses[keyof CreatePhoneNumberApiV1OrganizationsTelephonyConfigsConfigIdPhoneNumbersPostResponses];
 
+export type SearchAvailablePhoneNumbersApiV1OrganizationsTelephonyConfigsConfigIdPhoneNumbersSearchGetData = {
+    body?: never;
+    headers?: {
+        /**
+         * Authorization
+         */
+        authorization?: string | null;
+        /**
+         * X-Api-Key
+         */
+        'X-API-Key'?: string | null;
+    };
+    path: {
+        /**
+         * Config Id
+         */
+        config_id: number;
+    };
+    query?: {
+        /**
+         * Country Code
+         */
+        country_code?: string;
+        /**
+         * Area Code
+         */
+        area_code?: string | null;
+        /**
+         * Contains
+         */
+        contains?: string | null;
+        /**
+         * Limit
+         */
+        limit?: number;
+    };
+    url: '/api/v1/organizations/telephony-configs/{config_id}/phone-numbers/search';
+};
+
+export type SearchAvailablePhoneNumbersApiV1OrganizationsTelephonyConfigsConfigIdPhoneNumbersSearchGetErrors = {
+    /**
+     * Not found
+     */
+    404: unknown;
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type SearchAvailablePhoneNumbersApiV1OrganizationsTelephonyConfigsConfigIdPhoneNumbersSearchGetError = SearchAvailablePhoneNumbersApiV1OrganizationsTelephonyConfigsConfigIdPhoneNumbersSearchGetErrors[keyof SearchAvailablePhoneNumbersApiV1OrganizationsTelephonyConfigsConfigIdPhoneNumbersSearchGetErrors];
+
+export type SearchAvailablePhoneNumbersApiV1OrganizationsTelephonyConfigsConfigIdPhoneNumbersSearchGetResponses = {
+    /**
+     * Successful Response
+     */
+    200: PhoneNumberSearchResponse;
+};
+
+export type SearchAvailablePhoneNumbersApiV1OrganizationsTelephonyConfigsConfigIdPhoneNumbersSearchGetResponse = SearchAvailablePhoneNumbersApiV1OrganizationsTelephonyConfigsConfigIdPhoneNumbersSearchGetResponses[keyof SearchAvailablePhoneNumbersApiV1OrganizationsTelephonyConfigsConfigIdPhoneNumbersSearchGetResponses];
+
 export type DeletePhoneNumberApiV1OrganizationsTelephonyConfigsConfigIdPhoneNumbersPhoneNumberIdDeleteData = {
     body?: never;
     headers?: {
@@ -12194,6 +13680,358 @@ export type GetCampaignDefaultsApiV1OrganizationsCampaignDefaultsGetResponses = 
 };
 
 export type GetCampaignDefaultsApiV1OrganizationsCampaignDefaultsGetResponse = GetCampaignDefaultsApiV1OrganizationsCampaignDefaultsGetResponses[keyof GetCampaignDefaultsApiV1OrganizationsCampaignDefaultsGetResponses];
+
+export type GetWalletOverviewApiV1OrganizationsBillingWalletGetData = {
+    body?: never;
+    headers?: {
+        /**
+         * Authorization
+         */
+        authorization?: string | null;
+        /**
+         * X-Api-Key
+         */
+        'X-API-Key'?: string | null;
+    };
+    path?: never;
+    query?: never;
+    url: '/api/v1/organizations/billing/wallet';
+};
+
+export type GetWalletOverviewApiV1OrganizationsBillingWalletGetErrors = {
+    /**
+     * Not found
+     */
+    404: unknown;
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type GetWalletOverviewApiV1OrganizationsBillingWalletGetError = GetWalletOverviewApiV1OrganizationsBillingWalletGetErrors[keyof GetWalletOverviewApiV1OrganizationsBillingWalletGetErrors];
+
+export type GetWalletOverviewApiV1OrganizationsBillingWalletGetResponses = {
+    /**
+     * Successful Response
+     */
+    200: WalletOverviewResponse;
+};
+
+export type GetWalletOverviewApiV1OrganizationsBillingWalletGetResponse = GetWalletOverviewApiV1OrganizationsBillingWalletGetResponses[keyof GetWalletOverviewApiV1OrganizationsBillingWalletGetResponses];
+
+export type ListWalletTransactionsApiV1OrganizationsBillingWalletTransactionsGetData = {
+    body?: never;
+    headers?: {
+        /**
+         * Authorization
+         */
+        authorization?: string | null;
+        /**
+         * X-Api-Key
+         */
+        'X-API-Key'?: string | null;
+    };
+    path?: never;
+    query?: {
+        /**
+         * Limit
+         */
+        limit?: number;
+        /**
+         * Offset
+         */
+        offset?: number;
+    };
+    url: '/api/v1/organizations/billing/wallet/transactions';
+};
+
+export type ListWalletTransactionsApiV1OrganizationsBillingWalletTransactionsGetErrors = {
+    /**
+     * Not found
+     */
+    404: unknown;
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type ListWalletTransactionsApiV1OrganizationsBillingWalletTransactionsGetError = ListWalletTransactionsApiV1OrganizationsBillingWalletTransactionsGetErrors[keyof ListWalletTransactionsApiV1OrganizationsBillingWalletTransactionsGetErrors];
+
+export type ListWalletTransactionsApiV1OrganizationsBillingWalletTransactionsGetResponses = {
+    /**
+     * Successful Response
+     */
+    200: WalletTransactionsResponse;
+};
+
+export type ListWalletTransactionsApiV1OrganizationsBillingWalletTransactionsGetResponse = ListWalletTransactionsApiV1OrganizationsBillingWalletTransactionsGetResponses[keyof ListWalletTransactionsApiV1OrganizationsBillingWalletTransactionsGetResponses];
+
+export type ListWalletUsageApiV1OrganizationsBillingWalletUsageGetData = {
+    body?: never;
+    headers?: {
+        /**
+         * Authorization
+         */
+        authorization?: string | null;
+        /**
+         * X-Api-Key
+         */
+        'X-API-Key'?: string | null;
+    };
+    path?: never;
+    query?: {
+        /**
+         * Limit
+         */
+        limit?: number;
+        /**
+         * Offset
+         */
+        offset?: number;
+    };
+    url: '/api/v1/organizations/billing/wallet/usage';
+};
+
+export type ListWalletUsageApiV1OrganizationsBillingWalletUsageGetErrors = {
+    /**
+     * Not found
+     */
+    404: unknown;
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type ListWalletUsageApiV1OrganizationsBillingWalletUsageGetError = ListWalletUsageApiV1OrganizationsBillingWalletUsageGetErrors[keyof ListWalletUsageApiV1OrganizationsBillingWalletUsageGetErrors];
+
+export type ListWalletUsageApiV1OrganizationsBillingWalletUsageGetResponses = {
+    /**
+     * Successful Response
+     */
+    200: UsageRecordsResponse;
+};
+
+export type ListWalletUsageApiV1OrganizationsBillingWalletUsageGetResponse = ListWalletUsageApiV1OrganizationsBillingWalletUsageGetResponses[keyof ListWalletUsageApiV1OrganizationsBillingWalletUsageGetResponses];
+
+export type UpdateWalletSettingsApiV1OrganizationsBillingSettingsPutData = {
+    body: UpdateWalletSettingsRequest;
+    headers?: {
+        /**
+         * Authorization
+         */
+        authorization?: string | null;
+        /**
+         * X-Api-Key
+         */
+        'X-API-Key'?: string | null;
+    };
+    path?: never;
+    query?: never;
+    url: '/api/v1/organizations/billing/settings';
+};
+
+export type UpdateWalletSettingsApiV1OrganizationsBillingSettingsPutErrors = {
+    /**
+     * Not found
+     */
+    404: unknown;
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type UpdateWalletSettingsApiV1OrganizationsBillingSettingsPutError = UpdateWalletSettingsApiV1OrganizationsBillingSettingsPutErrors[keyof UpdateWalletSettingsApiV1OrganizationsBillingSettingsPutErrors];
+
+export type UpdateWalletSettingsApiV1OrganizationsBillingSettingsPutResponses = {
+    /**
+     * Successful Response
+     */
+    200: WalletSettingsResponse;
+};
+
+export type UpdateWalletSettingsApiV1OrganizationsBillingSettingsPutResponse = UpdateWalletSettingsApiV1OrganizationsBillingSettingsPutResponses[keyof UpdateWalletSettingsApiV1OrganizationsBillingSettingsPutResponses];
+
+export type StripeWebhookApiV1OrganizationsBillingStripeWebhookPostData = {
+    body?: never;
+    path?: never;
+    query?: never;
+    url: '/api/v1/organizations/billing/stripe/webhook';
+};
+
+export type StripeWebhookApiV1OrganizationsBillingStripeWebhookPostErrors = {
+    /**
+     * Not found
+     */
+    404: unknown;
+};
+
+export type StripeWebhookApiV1OrganizationsBillingStripeWebhookPostResponses = {
+    /**
+     * Successful Response
+     */
+    200: unknown;
+};
+
+export type ListInvitationsApiV1OrganizationsInvitationsGetData = {
+    body?: never;
+    headers?: {
+        /**
+         * Authorization
+         */
+        authorization?: string | null;
+        /**
+         * X-Api-Key
+         */
+        'X-API-Key'?: string | null;
+    };
+    path?: never;
+    query?: never;
+    url: '/api/v1/organizations/invitations';
+};
+
+export type ListInvitationsApiV1OrganizationsInvitationsGetErrors = {
+    /**
+     * Not found
+     */
+    404: unknown;
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type ListInvitationsApiV1OrganizationsInvitationsGetError = ListInvitationsApiV1OrganizationsInvitationsGetErrors[keyof ListInvitationsApiV1OrganizationsInvitationsGetErrors];
+
+export type ListInvitationsApiV1OrganizationsInvitationsGetResponses = {
+    /**
+     * Successful Response
+     */
+    200: InvitationListResponse;
+};
+
+export type ListInvitationsApiV1OrganizationsInvitationsGetResponse = ListInvitationsApiV1OrganizationsInvitationsGetResponses[keyof ListInvitationsApiV1OrganizationsInvitationsGetResponses];
+
+export type CreateInvitationApiV1OrganizationsInvitationsPostData = {
+    body: InvitationCreateRequest;
+    headers?: {
+        /**
+         * Authorization
+         */
+        authorization?: string | null;
+        /**
+         * X-Api-Key
+         */
+        'X-API-Key'?: string | null;
+    };
+    path?: never;
+    query?: never;
+    url: '/api/v1/organizations/invitations';
+};
+
+export type CreateInvitationApiV1OrganizationsInvitationsPostErrors = {
+    /**
+     * Not found
+     */
+    404: unknown;
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type CreateInvitationApiV1OrganizationsInvitationsPostError = CreateInvitationApiV1OrganizationsInvitationsPostErrors[keyof CreateInvitationApiV1OrganizationsInvitationsPostErrors];
+
+export type CreateInvitationApiV1OrganizationsInvitationsPostResponses = {
+    /**
+     * Successful Response
+     */
+    200: InvitationResponse;
+};
+
+export type CreateInvitationApiV1OrganizationsInvitationsPostResponse = CreateInvitationApiV1OrganizationsInvitationsPostResponses[keyof CreateInvitationApiV1OrganizationsInvitationsPostResponses];
+
+export type RevokeInvitationApiV1OrganizationsInvitationsInvitationIdDeleteData = {
+    body?: never;
+    headers?: {
+        /**
+         * Authorization
+         */
+        authorization?: string | null;
+        /**
+         * X-Api-Key
+         */
+        'X-API-Key'?: string | null;
+    };
+    path: {
+        /**
+         * Invitation Id
+         */
+        invitation_id: number;
+    };
+    query?: never;
+    url: '/api/v1/organizations/invitations/{invitation_id}';
+};
+
+export type RevokeInvitationApiV1OrganizationsInvitationsInvitationIdDeleteErrors = {
+    /**
+     * Not found
+     */
+    404: unknown;
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type RevokeInvitationApiV1OrganizationsInvitationsInvitationIdDeleteError = RevokeInvitationApiV1OrganizationsInvitationsInvitationIdDeleteErrors[keyof RevokeInvitationApiV1OrganizationsInvitationsInvitationIdDeleteErrors];
+
+export type RevokeInvitationApiV1OrganizationsInvitationsInvitationIdDeleteResponses = {
+    /**
+     * Successful Response
+     */
+    200: unknown;
+};
+
+export type AcceptInvitationApiV1OrganizationsInvitationsAcceptPostData = {
+    body: InvitationAcceptRequest;
+    headers?: {
+        /**
+         * Authorization
+         */
+        authorization?: string | null;
+        /**
+         * X-Api-Key
+         */
+        'X-API-Key'?: string | null;
+    };
+    path?: never;
+    query?: never;
+    url: '/api/v1/organizations/invitations/accept';
+};
+
+export type AcceptInvitationApiV1OrganizationsInvitationsAcceptPostErrors = {
+    /**
+     * Not found
+     */
+    404: unknown;
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type AcceptInvitationApiV1OrganizationsInvitationsAcceptPostError = AcceptInvitationApiV1OrganizationsInvitationsAcceptPostErrors[keyof AcceptInvitationApiV1OrganizationsInvitationsAcceptPostErrors];
+
+export type AcceptInvitationApiV1OrganizationsInvitationsAcceptPostResponses = {
+    /**
+     * Successful Response
+     */
+    200: unknown;
+};
 
 export type GetModelConnectionCatalogData = {
     body?: never;
