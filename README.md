@@ -8,32 +8,17 @@
 
 **A project-based, self-hostable alternative to Vapi & Retell** — build production voice agents with a visual workflow builder, test them in minutes, and let AI coding assistants help design and edit them through MCP.
 
-<p align="center">
-  <a href="https://app.easytech.com">
-    <img src="https://img.shields.io/badge/▶_Try_the_Cloud-app.easytech.com-2563eb?style=for-the-badge" alt="Try the Cloud">
-  </a>
-  &nbsp;
-  <a href="#-get-started">
-    <img src="https://img.shields.io/badge/⚡_Self--host_in_60s-One_command-111827?style=for-the-badge" alt="Self-host in 60s">
-  </a>
-  &nbsp;
-  <a href="https://join.slack.com/t/easytech-community/shared_invite/zt-4anp45mlu-ukR3jTqwdDFMEpqeBhKn6g">
-    <img src="https://img.shields.io/badge/💬_Join_Slack-Community-4A154B?style=for-the-badge&logo=slack" alt="Join Slack">
-  </a>
-</p>
+
 
 <p align="center">
-  <a href="https://docs.easytech.com">📖 Docs</a> &nbsp;·&nbsp;
-  <a href="LICENSE">📜 BSD 2-Clause</a> &nbsp;·&nbsp;
-  <a href="README.zh-CN.md">🌐 中文</a> &nbsp;·&nbsp;
-  <a href="README.ja-JP.md">🌐 日本語</a>
+  
 </p>
 
 <p align="center">
   <img src="docs/images/hero.gif" alt="EasyTech in action — build a workflow, launch a voice agent, talk to it" width="80%">
 </p>
 
-- **100% open source**, self-hostable — no vendor lock-in, unlike Vapi or Retell
+- **Self-hostable** — no vendor lock-in, unlike Vapi or Retell
 - **Full control & transparency** — every line of code is open, with flexible LLM / TTS / STT integration
 - **Maintained by YC alumni and exit founders**, committed to keeping voice AI open
 
@@ -76,7 +61,7 @@ An honest comparison on the axes that matter most to teams evaluating voice AI p
 
 |  | **EasyTech** | **Vapi** | **Retell** |
 |---|---|---|---|
-| **License** | BSD 2-Clause (open source) | Proprietary | Proprietary |
+| **License** | Proprietary | Proprietary | Proprietary |
 | **Self-hostable** | ✅ Yes — one Docker command | ❌ SaaS only | ❌ SaaS only |
 | **Pricing** | Free (self-host) · usage-based (cloud) | Per-minute SaaS | Per-minute SaaS |
 | **Bring your own LLM / STT / TTS** | ✅ Any provider, or use EasyTech's stack | Configurable within their integrations | Configurable within their integrations |
@@ -196,7 +181,7 @@ You can go to [https://docs.easytech.com](https://docs.easytech.com/) for our do
 
 ## 🙌 Contributing
 
-We love contributions! EasyTech AI is 100% open source and we intend to keep it that way.
+We love contributions! EasyTech AI is built for project-based use and welcomes contributions.
 
 ### Getting Started
 
