@@ -6,7 +6,7 @@
   </a>
 </p>
 
-**The open-source, self-hostable alternative to Vapi & Retell** — build production voice agents with a visual workflow builder, test them in minutes, and let AI coding assistants help design and edit them through MCP.
+**A project-based, self-hostable alternative to Vapi & Retell** — build production voice agents with a visual workflow builder, test them in minutes, and let AI coding assistants help design and edit them through MCP.
 
 <p align="center">
   <a href="https://app.easytech.com">
