@@ -41,10 +41,10 @@ _spec = importlib.util.spec_from_file_location(
 migration = importlib.util.module_from_spec(_spec)
 _spec.loader.exec_module(migration)
 
-DOGRAH_V2 = {
+EASYTECH_V2 = {
     "version": 2,
-    "mode": "dograh",
-    "dograh": {
+    "mode": "easytech",
+    "easytech": {
         "api_key": "svc-key",
         "voice": "default",
         "speed": 1.0,
@@ -125,17 +125,17 @@ def _assert_valid_for_registry(spec, connections):
         assert set(selection["settings"]) <= allowed, (role, provider, selection)
 
 
-def test_dograh_organization_becomes_one_connection_and_a_default():
+def test_easytech_organization_becomes_one_connection_and_a_default():
     catalog = migration.OrganizationCatalog(1)
-    mode, sections = migration.sections_from_v2(DOGRAH_V2)
+    mode, sections = migration.sections_from_v2(EASYTECH_V2)
     default = catalog.configuration(mode, sections, "Organization default")
     connections, configurations = _rows(catalog)
 
-    assert [row["provider"] for row in connections.values()] == ["dograh"]
+    assert [row["provider"] for row in connections.values()] == ["easytech"]
     (connection,) = connections.values()
     assert json.loads(connection["credentials"]) == {"api_key": "svc-key"}
     assert json.loads(connection["connection_settings"]) == {}
-    assert connection["name"] == "Dograh"
+    assert connection["name"] == "EasyTech"
     [(name, spec)] = configurations
     assert (name, catalog.configurations[0]["uuid"]) == (
         "Organization default",
@@ -196,16 +196,16 @@ def test_byok_realtime_drops_the_retired_temperature_setting():
 def test_identical_setups_share_rows_and_names_stay_unique():
     catalog = migration.OrganizationCatalog(1)
     default = catalog.configuration(
-        *migration.sections_from_v2(DOGRAH_V2), "Organization default"
+        *migration.sections_from_v2(EASYTECH_V2), "Organization default"
     )
-    same = catalog.configuration(*migration.sections_from_v2(DOGRAH_V2), "Support")
+    same = catalog.configuration(*migration.sections_from_v2(EASYTECH_V2), "Support")
     assert same == default
 
-    louder = json.loads(json.dumps(DOGRAH_V2))
-    louder["dograh"]["voice"] = "rachel"
+    louder = json.loads(json.dumps(EASYTECH_V2))
+    louder["easytech"]["voice"] = "rachel"
     first = catalog.configuration(*migration.sections_from_v2(louder), "Support")
     assert first != default
-    louder["dograh"]["speed"] = 1.2
+    louder["easytech"]["speed"] = 1.2
     second = catalog.configuration(*migration.sections_from_v2(louder), "Support")
     assert len({default, first, second}) == 3
     assert [row["name"] for row in catalog.configurations] == [
@@ -213,12 +213,12 @@ def test_identical_setups_share_rows_and_names_stay_unique():
         "Support",
         "Support 2",
     ]
-    # One shared key means one Dograh connection for all three.
+    # One shared key means one EasyTech connection for all three.
     assert len(catalog.connections) == 1
 
 
 def test_partial_overrides_merge_same_provider_and_replace_a_switched_one():
-    base_mode, base = migration.sections_from_v2(DOGRAH_V2)
+    base_mode, base = migration.sections_from_v2(EASYTECH_V2)
     mode, sections = migration.apply_partial_overrides(
         base_mode,
         base,
@@ -234,7 +234,7 @@ def test_partial_overrides_merge_same_provider_and_replace_a_switched_one():
         "model": "gpt-4.1",
     }
     assert sections["tts"] == {
-        "provider": "dograh",
+        "provider": "easytech",
         "api_key": "svc-key",
         "voice": "rachel",
         "speed": 1.0,
@@ -255,7 +255,7 @@ def test_partial_overrides_merge_same_provider_and_replace_a_switched_one():
     ],
 )
 def test_partial_overrides_the_catalog_cannot_represent_are_rejected(overrides):
-    base_mode, base = migration.sections_from_v2(DOGRAH_V2)
+    base_mode, base = migration.sections_from_v2(EASYTECH_V2)
     with pytest.raises(migration.Unconvertible):
         migration.apply_partial_overrides(base_mode, base, overrides)
 
@@ -265,7 +265,7 @@ def test_partial_overrides_the_catalog_cannot_represent_are_rejected(overrides):
     [
         None,
         "not json",
-        {"mode": "dograh", "dograh": {}},
+        {"mode": "easytech", "easytech": {}},
         {
             "mode": "byok",
             "byok": {"mode": "pipeline", "pipeline": {"llm": {"provider": "openai"}}},
@@ -291,7 +291,7 @@ async def seeded(test_engine):
             OrganizationConfigurationModel(
                 organization_id=organization_id,
                 key="MODEL_CONFIGURATION_V2",
-                value=DOGRAH_V2,
+                value=EASYTECH_V2,
             )
         )
 
@@ -454,7 +454,7 @@ async def test_backfill_binds_current_rows_once_and_leaves_history_alone(
 
     assert default in configurations
     assert configurations[default].name == "Organization default"
-    # Dograh default, the Sales BYOK setup, and the draft's voice variant.
+    # EasyTech default, the Sales BYOK setup, and the draft's voice variant.
     assert sorted(row.name for row in configurations.values()) == [
         "Organization default",
         "Sales",
@@ -462,7 +462,7 @@ async def test_backfill_binds_current_rows_once_and_leaves_history_alone(
     ]
     assert sorted(row["provider"] for row in connections.values()) == [
         "deepgram",
-        "dograh",
+        "easytech",
         "google_vertex",
     ]
     for row in configurations.values():

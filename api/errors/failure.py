@@ -16,6 +16,8 @@ import httpx
 from loguru import logger
 from pipecat.utils.run_context import get_current_org_id
 
+from api.constants import APP_NAME
+
 
 class ErrorSource(str, Enum):
     LLM = "llm"
@@ -66,8 +68,8 @@ _HTTP_STATUS_IN_MESSAGE_RE = re.compile(
     r"(?i)\b(?:http(?:\s+status)?|status(?:_code)?)\s*[:=]?\s*(\d{3})\b"
 )
 _MAX_MESSAGE_LENGTH = 4000
-_FAILURE_METADATA_ATTR = "_dograh_failure_metadata"
-_FAILURE_REPORTED_ATTR = "_dograh_failure_reported"
+_FAILURE_METADATA_ATTR = "_easytech_failure_metadata"
+_FAILURE_REPORTED_ATTR = "_easytech_failure_reported"
 
 
 def _redact_quoted_secret_assignment(match: re.Match[str]) -> str:
@@ -121,10 +123,10 @@ def _resolve_error_owner(
     owner the seam declared: the seam knows whose credentials were in play,
     which the shape of the exception cannot tell us. ``system_error`` used to
     force operator here, which silently overrode seams that had correctly said
-    "user" and made every unclassifiable provider error look like a Dograh bug.
+    "user" and made every unclassifiable provider error look like a EasyTech bug.
 
     An unstated owner still falls back to operator — an unattributed failure is
-    Dograh's to investigate until a seam claims otherwise.
+    EasyTech's to investigate until a seam claims otherwise.
     """
 
     if error_type in (ErrorType.CONFIG_ERROR, ErrorType.QUOTA_ERROR):
@@ -137,7 +139,7 @@ def _resolve_error_owner(
 
 
 @dataclass
-class DograhFailure:
+class EasyTechFailure:
     source: ErrorSource
     type: ErrorType
     code: str
@@ -179,7 +181,7 @@ def _external_message(source: ErrorSource, error_type: ErrorType) -> str:
         return f"The {label} account has insufficient quota or credits."
     if error_type == ErrorType.PROVIDER_ERROR:
         return f"The external {label} service is temporarily unavailable."
-    return f"Dograh encountered an internal error while processing {label}."
+    return f"{APP_NAME} encountered an internal error while processing {label}."
 
 
 def _valid_http_status(value: object) -> int | None:
@@ -267,13 +269,13 @@ def classify_http_response(
     provider_error_code: object | None = None,
     error_owner: ErrorOwner | str | None = None,
     context: dict[str, Any] | None = None,
-) -> DograhFailure:
+) -> EasyTechFailure:
     """Classify an HTTP response at a known external boundary."""
 
     normalized_provider = _normalize_provider(provider)
     internal_message = redact_failure_message(message)
 
-    if normalized_provider == "dograh":
+    if normalized_provider == "easytech":
         if status_code == 402:
             error_type, detail, retryable = (
                 ErrorType.QUOTA_ERROR,
@@ -296,7 +298,7 @@ def classify_http_response(
         detail = str(status_code)
 
     code_provider = normalized_provider or source.value.replace("_", "-")
-    return DograhFailure(
+    return EasyTechFailure(
         source=source,
         type=error_type,
         code=f"{code_provider}-{detail}",
@@ -317,12 +319,12 @@ def classify_message(
     provider: object | None = None,
     error_owner: ErrorOwner | str | None = None,
     context: dict[str, Any] | None = None,
-) -> DograhFailure:
+) -> EasyTechFailure:
     """Classify string-only errors using protocol signals or the safe default."""
 
     internal_message = redact_failure_message(message)
     normalized_provider = _normalize_provider(provider)
-    if normalized_provider == "dograh":
+    if normalized_provider == "easytech":
         error_type, detail, retryable = (
             ErrorType.SYSTEM_ERROR,
             "unknown",
@@ -343,7 +345,7 @@ def classify_message(
         error_type, detail, retryable = ErrorType.SYSTEM_ERROR, "unknown", None
 
     code_provider = normalized_provider or source.value.replace("_", "-")
-    return DograhFailure(
+    return EasyTechFailure(
         source=source,
         type=error_type,
         code=f"{code_provider}-{detail}",
@@ -363,7 +365,7 @@ def classify_exception(
     provider: object | None = None,
     error_owner: ErrorOwner | str | None = None,
     context: dict[str, Any] | None = None,
-) -> DograhFailure:
+) -> EasyTechFailure:
     """Pure exception classifier used by all execution seams."""
 
     failure_context = dict(context or {})
@@ -402,7 +404,7 @@ def classify_exception(
         )
 
     normalized_provider = _normalize_provider(provider)
-    if normalized_provider == "dograh":
+    if normalized_provider == "easytech":
         exception_identity = f"{type(exc).__module__}.{type(exc).__name__}".lower()
         transient = isinstance(
             exc,
@@ -418,13 +420,13 @@ def classify_exception(
             if isinstance(exc, httpx.TimeoutException | TimeoutError)
             else ("connection" if transient else "unknown")
         )
-        return DograhFailure(
+        return EasyTechFailure(
             source=source,
             type=ErrorType.SYSTEM_ERROR,
-            code=f"dograh-{detail_code}",
+            code=f"easytech-{detail_code}",
             internal_message=internal_message,
             external_message=_external_message(source, ErrorType.SYSTEM_ERROR),
-            provider="dograh",
+            provider="easytech",
             provider_error_code=provider_error_code,
             error_owner=ErrorOwner.OPERATOR,
             retryable=True if transient else None,
@@ -462,7 +464,7 @@ def classify_exception(
     detail_code = "connection" if transient_exception else "unknown"
     if isinstance(exc, httpx.TimeoutException | TimeoutError):
         detail_code = "timeout"
-    return DograhFailure(
+    return EasyTechFailure(
         source=source,
         type=error_type,
         code=f"{code_provider}-{detail_code}",
@@ -582,7 +584,7 @@ def failure_metadata_for_processor(processor: object | None) -> ServiceFailureMe
         # path if the configuration registry is unavailable during startup.
         pass
 
-    # A Dograh-prefixed wrapper is not sufficient evidence that the dependency is
+    # A EasyTech-prefixed wrapper is not sufficient evidence that the dependency is
     # operator-owned; several BYOK adapters use that prefix. Only factory metadata
     # is authoritative for ownership.
     return ServiceFailureMetadata(source, provider, ErrorOwner.OPERATOR)
@@ -605,7 +607,7 @@ def _safe_log_context(context: dict[str, Any]) -> dict[str, Any]:
 
 
 def log_failure(
-    failure: DograhFailure,
+    failure: EasyTechFailure,
     *,
     level: str = "ERROR",
     **extra_context: Any,
@@ -634,7 +636,7 @@ def log_failure(
         )
         bound.opt(depth=1).log(
             level.upper(),
-            "DOGRAH_FAILURE [src={} type={} code={}] [owner={}] {}",
+            "EASYTECH_FAILURE [src={} type={} code={}] [owner={}] {}",
             failure.source.value,
             failure.type.value,
             failure.code,

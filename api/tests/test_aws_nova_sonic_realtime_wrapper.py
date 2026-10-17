@@ -30,14 +30,14 @@ from api.services.configuration.registry import (
 )
 from api.services.integrations.paygent.collector import _is_sts_processor_name
 from api.services.pipecat.realtime.aws_nova_sonic import (
-    DograhAWSNovaSonicLLMService,
+    EasyTechAWSNovaSonicLLMService,
 )
 from api.services.pipecat.service_factory import create_realtime_llm_service
 from api.services.workflow.pipecat_engine import PipecatEngine
 
 
-def _make_service() -> DograhAWSNovaSonicLLMService:
-    return DograhAWSNovaSonicLLMService(
+def _make_service() -> EasyTechAWSNovaSonicLLMService:
+    return EasyTechAWSNovaSonicLLMService(
         secret_access_key="test-secret",
         access_key_id="test-access",
         session_token="test-session",
@@ -116,7 +116,7 @@ def test_factory_creates_nova_service_with_credentials_and_audio_config():
         ),
     )
 
-    assert isinstance(service, DograhAWSNovaSonicLLMService)
+    assert isinstance(service, EasyTechAWSNovaSonicLLMService)
     assert service._access_key_id == "access"
     assert service._secret_access_key == "secret"
     assert service._session_token == "session"
@@ -357,7 +357,7 @@ async def test_initial_greeting_waits_for_audio_input_to_start():
     service._send_text_event = AsyncMock()
 
     await service.process_frame(
-        TTSSpeakFrame("Welcome to Dograh", append_to_context=True),
+        TTSSpeakFrame("Welcome to EasyTech", append_to_context=True),
         FrameDirection.DOWNSTREAM,
     )
 

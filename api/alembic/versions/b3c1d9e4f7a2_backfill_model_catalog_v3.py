@@ -71,6 +71,8 @@ _ROLES = {
     "pipeline": ("llm", "stt", "tts", "embeddings"),
     "realtime": ("llm", "realtime", "embeddings"),
 }
+# Managed provider display name; its slug title-cases to the wrong brand case.
+_BRAND_NAMES = {"easytech": "EasyTech"}
 _REQUIRED = {"pipeline": ("llm", "stt", "tts"), "realtime": ("llm", "realtime")}
 
 _LEGACY_ROWS_SQL = """
@@ -151,18 +153,18 @@ def _complete(mode, sections):
 def sections_from_v2(value):
     """Return (mode, {role: service}) for a V2 payload.
 
-    Mirrors compile_ai_model_configuration_v2: Dograh mode expands the single
+    Mirrors compile_ai_model_configuration_v2: EasyTech mode expands the single
     managed key into one service per role; BYOK mode already stores a service
     per role.
     """
     value = _as_object(value)
     if value is None:
         raise Unconvertible("not_an_object")
-    if value.get("mode") == "dograh":
-        managed = _as_object(value.get("dograh")) or {}
+    if value.get("mode") == "easytech":
+        managed = _as_object(value.get("easytech")) or {}
         if not managed.get("api_key"):
-            raise Unconvertible("missing_dograh_service_key")
-        shared = {"provider": "dograh", "api_key": managed["api_key"]}
+            raise Unconvertible("missing_easytech_service_key")
+        shared = {"provider": "easytech", "api_key": managed["api_key"]}
         llm = dict(shared)
         if managed.get("temperature") is not None:
             llm["temperature"] = managed["temperature"]
@@ -273,7 +275,8 @@ class OrganizationCatalog:
                     "uuid": row_uuid,
                     "organization_id": self.organization_id,
                     "name": self._name(
-                        "connection", provider.replace("_", " ").title()
+                        "connection",
+                        _BRAND_NAMES.get(provider, provider.replace("_", " ").title()),
                     ),
                     "provider": provider,
                     "credentials": json.dumps(credentials),

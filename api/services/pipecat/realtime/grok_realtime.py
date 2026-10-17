@@ -1,6 +1,6 @@
-"""Dograh subclass of pipecat's Grok Realtime LLM service.
+"""EasyTech subclass of pipecat's Grok Realtime LLM service.
 
-Layers Dograh engine integration quirks onto upstream-pristine
+Layers EasyTech engine integration quirks onto upstream-pristine
 :class:`GrokRealtimeLLMService`. Grok already supports runtime session updates,
 so this wrapper stays close to the OpenAI realtime shim.
 
@@ -10,11 +10,11 @@ Adds:
 - **TTSSpeakFrame as initial-response trigger** so the engine's greeting
   flow kicks off the bot's first response.
 - **One-off LLMMessagesAppendFrame handling** for ephemeral realtime prompts
-  like user-idle checks, without mutating Dograh's local ``LLMContext``.
+  like user-idle checks, without mutating EasyTech's local ``LLMContext``.
 - **Workflow-control deferral** so node transitions, call termination, and
   transfers wait for any current bot audio to finish while ordinary tools run
   immediately.
-- **finalized=True on TranscriptionFrame** for parity with Dograh's other
+- **finalized=True on TranscriptionFrame** for parity with EasyTech's other
   realtime providers.
 """
 
@@ -39,8 +39,8 @@ from pipecat.services.xai.realtime.llm import GrokRealtimeLLMService
 from pipecat.utils.time import time_now_iso8601
 
 
-class DograhGrokRealtimeLLMService(RealtimeConversationMixin, GrokRealtimeLLMService):
-    """Grok Realtime with Dograh engine integration quirks."""
+class EasyTechGrokRealtimeLLMService(RealtimeConversationMixin, GrokRealtimeLLMService):
+    """Grok Realtime with EasyTech engine integration quirks."""
 
     _workflow_tools_follow_voice_response = False
 

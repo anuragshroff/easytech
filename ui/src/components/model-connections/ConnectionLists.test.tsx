@@ -17,8 +17,8 @@ vi.mock("@/context/OrgConfigContext", () => ({ useOrgConfig: vi.fn() }));
 vi.mock("sonner", () => ({ toast: { success: vi.fn(), error: vi.fn() } }));
 
 const provider = { credential_fields: {}, connection_fields: {}, settings_schema: { properties: {} } };
-const catalog: ModelConnectionCatalog = { services: { llm: { dograh: provider }, stt: { dograh: provider }, tts: { dograh: provider }, embeddings: { dograh: provider } } };
-const connections: ProviderConnection[] = ["Primary", "Secondary"].map(name => ({ uuid: name, name, provider: "dograh", is_active: true, revision: 1, connection_settings: {}, configured_credentials: ["api_key"] }));
+const catalog: ModelConnectionCatalog = { services: { llm: { easytech: provider }, stt: { easytech: provider }, tts: { easytech: provider }, embeddings: { easytech: provider } } };
+const connections: ProviderConnection[] = ["Primary", "Secondary"].map(name => ({ uuid: name, name, provider: "easytech", is_active: true, revision: 1, connection_settings: {}, configured_credentials: ["api_key"] }));
 const service = { provider_connection_uuid: "Primary", settings: {} };
 const configurations: NamedModelConfiguration[] = ["Sales", "Support"].map(name => ({ uuid: name, name, is_active: true, revision: 1, configuration: { version: 3, mode: "pipeline", llm: service, stt: service, tts: service, embeddings: service } }));
 const reload = vi.fn();
@@ -138,7 +138,7 @@ describe("provider connection and model configuration lists", () => {
         fireEvent.click(screen.getByRole("button", { name: "Toggle Archived" }));
         expect((screen.getByRole("button", { name: "Restore" }) as HTMLButtonElement).disabled).toBe(true);
         expect(screen.getByText(/Restore this configuration/).textContent).toContain("provider connections");
-        expect(screen.getByText("Dograh · Primary")).toBeDefined();
+        expect(screen.getByText("EasyTech · Primary")).toBeDefined();
     });
 
     it.each(["models", "providers"] as const)("shows newly archived %s in the archive section", async view => {

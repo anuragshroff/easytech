@@ -2,13 +2,13 @@
 
 Two shapes share this provider and they fail differently:
 
-* **Dograh-managed** (``managed_by == "dograh-mps"``) — Dograh owns the
+* **EasyTech-managed** (``managed_by == "easytech-mps"``) — EasyTech owns the
   Cloudonix domain and hands it to the customer empty. Nothing routes until
   the customer points their own SIP carrier or PBX at it, so a missing
   outbound trunk means there is no path off the platform at all.
 * **Customer-owned** — the customer brought their own Cloudonix account and
-  may already have trunks configured in the Cockpit that Dograh cannot see.
-  A missing Dograh-managed trunk is then only a missing pin, not a dead end.
+  may already have trunks configured in the Cockpit that EasyTech cannot see.
+  A missing EasyTech-managed trunk is then only a missing pin, not a dead end.
 
 Either way Cloudonix rejects an outbound call with no ``caller-id``, so at
 least one active phone number is required in both.
@@ -24,8 +24,8 @@ from api.services.telephony.registry import (
 
 from .config import MANAGED_BY
 
-MANAGED_DOCS_URL = "https://docs.dograh.com/integrations/telephony/dograh-sip"
-SELF_SERVE_DOCS_URL = "https://docs.dograh.com/integrations/telephony/cloudonix"
+MANAGED_DOCS_URL = "https://docs.easytech.com/integrations/telephony/easytech-sip"
+SELF_SERVE_DOCS_URL = "https://docs.easytech.com/integrations/telephony/cloudonix"
 
 
 def resolve_setup_checklist(
@@ -42,7 +42,7 @@ def resolve_setup_checklist(
                 "SIP domain provisioned" if managed else "Cloudonix credentials saved"
             ),
             description=(
-                "Dograh provisioned a Cloudonix SIP domain for this "
+                "EasyTech provisioned a Cloudonix SIP domain for this "
                 "organization. Its inbound hostname and outbound origin IP "
                 "are listed under SIP connectivity below — you will need "
                 "them when configuring your carrier."
@@ -59,10 +59,10 @@ def resolve_setup_checklist(
             description=(
                 "Under Outbound trunks, add a trunk pointing at your SIP "
                 "carrier or PBX and allow its origin IP on your side. "
-                "Without one Dograh has nowhere to send outbound calls."
+                "Without one EasyTech has nowhere to send outbound calls."
                 if managed
                 else "Optional: add a trunk under Outbound trunks to pin "
-                "Dograh's calls to one route. Without it Cloudonix picks "
+                "EasyTech's calls to one route. Without it Cloudonix picks "
                 "among the active trunks on your domain."
             ),
             complete=state.enabled_trunk_count > 0,
@@ -91,11 +91,11 @@ def resolve_setup_checklist(
         steps.append(
             SetupStep(
                 key="trunk_assignment",
-                title="Tell Dograh which trunk each number dials out on",
+                title="Tell EasyTech which trunk each number dials out on",
                 description=(
                     "This configuration has more than one trunk, so a number's "
                     "carrier is no longer obvious. Assign each phone number to "
-                    "the trunk whose carrier authorised it — otherwise Dograh "
+                    "the trunk whose carrier authorised it — otherwise EasyTech "
                     "cannot pin the call and Cloudonix picks among your active "
                     "trunks."
                 ),

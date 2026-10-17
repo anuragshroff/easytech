@@ -79,10 +79,10 @@ async def submit(service, names, *, complete=True):
     name = type(service).__name__
     batch = calls(service, names)
     if name in {
-        "DograhOpenAIRealtimeLLMService",
-        "DograhAzureRealtimeLLMService",
-        "DograhGrokRealtimeLLMService",
-        "DograhOpenAILiveLLMService",
+        "EasyTechOpenAIRealtimeLLMService",
+        "EasyTechAzureRealtimeLLMService",
+        "EasyTechGrokRealtimeLLMService",
+        "EasyTechOpenAILiveLLMService",
     }:
         if not getattr(service, "_test_response_open", False):
             service._test_response_number = (
@@ -264,7 +264,7 @@ async def test_new_response_can_defer_its_own_single_transition(tools_service):
     service, dispatch = tools_service
     await submit(service, ["save_booking"])
     dispatch.reset_mock()
-    if type(service).__name__ == "DograhOpenAILiveLLMService":
+    if type(service).__name__ == "EasyTechOpenAILiveLLMService":
         await service._handle_evt_response(
             SimpleNamespace(
                 inner_type="response.created",
@@ -335,7 +335,7 @@ async def test_fresh_response_after_interruption_forgets_previous_tool_count(
     await service.process_frame(InterruptionFrame(), FrameDirection.DOWNSTREAM)
     dispatch.reset_mock()
     # An interrupted response may never deliver its end frame.
-    if type(service).__name__ == "DograhOpenAILiveLLMService":
+    if type(service).__name__ == "EasyTechOpenAILiveLLMService":
         await service._handle_evt_response(
             SimpleNamespace(
                 inner_type="response.created",
@@ -361,7 +361,7 @@ async def test_delayed_interrupted_stop_preserves_fresh_realtime_transition(
     upstream.broadcast_sibling_id = downstream.id
     downstream.broadcast_sibling_id = upstream.id
     await service.process_frame(upstream, FrameDirection.UPSTREAM)
-    if type(service).__name__ == "DograhOpenAILiveLLMService":
+    if type(service).__name__ == "EasyTechOpenAILiveLLMService":
         await service._handle_evt_response(
             SimpleNamespace(
                 inner_type="response.created",

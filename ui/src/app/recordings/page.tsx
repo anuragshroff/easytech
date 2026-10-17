@@ -7,6 +7,7 @@ import { PageLayout, PageSection } from "@/components/layout/PageLayout";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { DOCS_BASE } from "@/constants/documentation";
 import { useAuth } from "@/lib/auth";
 
 import RecordingsList from "./RecordingsList";
@@ -39,7 +40,7 @@ export default function RecordingsPage() {
         <PageLayout title="Recordings" description={<>Manage audio recordings for your organization. Use{" "}
             <code className="rounded bg-muted px-1 text-xs">@</code> in prompt fields to insert them,
             or as transition messages in tool calls.{" "}
-            <a href="https://docs.dograh.com/voice-agent/pre-recorded-audio" target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-0.5 underline">
+            <a href={`${DOCS_BASE}/voice-agent/pre-recorded-audio`} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-0.5 underline">
                 Learn more <ExternalLink className="h-3 w-3" />
             </a></>}>
 

@@ -56,7 +56,7 @@ def test_update_workflow_drops_retired_inline_model_keys_before_db_write():
                 "workflow_configurations": {
                     "max_call_duration": 60,
                     "model_overrides": {"llm": {"model": "anthropic/claude-sonnet-4"}},
-                    "model_configuration_v2_override": {"mode": "dograh"},
+                    "model_configuration_v2_override": {"mode": "easytech"},
                 },
             },
         )

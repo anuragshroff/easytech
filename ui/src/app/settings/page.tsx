@@ -14,6 +14,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import { DOCS_BASE } from "@/constants/documentation";
 
 export default function SettingsPage() {
   return (
@@ -36,10 +37,10 @@ export default function SettingsPage() {
         <CardHeader>
           <CardTitle>MCP Server</CardTitle>
           <CardDescription>
-            Let AI agents access your Dograh workspace and documentation via
+            Let AI agents access your EasyTech workspace and documentation via
             the Model Context Protocol.{" "}
             <a
-              href="https://docs.dograh.com/integrations/mcp"
+              href={`${DOCS_BASE}/integrations/mcp`}
               target="_blank"
               rel="noopener noreferrer"
               className="inline-flex items-center gap-0.5 underline"
@@ -59,7 +60,7 @@ export default function SettingsPage() {
           <CardDescription>
             Configure Langfuse tracing for your voice agent calls.{" "}
             <a
-              href="https://docs.dograh.com/configurations/tracing"
+              href={`${DOCS_BASE}/configurations/tracing`}
               target="_blank"
               rel="noopener noreferrer"
               className="inline-flex items-center gap-0.5 underline"

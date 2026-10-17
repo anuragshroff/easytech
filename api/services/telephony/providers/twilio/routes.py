@@ -138,7 +138,7 @@ async def handle_twilio_status_callback(
 
 @router.get("/twilio/transfer-audio/{token}", include_in_schema=False)
 async def transfer_audio(token: str):
-    # Play requests have no Dograh login. A random 256-bit capability identifies
+    # Play requests have no EasyTech login. A random 256-bit capability identifies
     # one bounded clip, expires in Redis, and never grants access to other files.
     audio = await get_transfer_audio(token)
     if audio is None:

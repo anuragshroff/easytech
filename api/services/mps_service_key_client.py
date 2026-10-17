@@ -11,7 +11,7 @@ from typing import List, Optional
 import httpx
 from loguru import logger
 
-from api.constants import DEPLOYMENT_MODE, DOGRAH_MPS_SECRET_KEY, MPS_API_URL
+from api.constants import DEPLOYMENT_MODE, EASYTECH_MPS_SECRET_KEY, MPS_API_URL
 from api.errors.failure import ErrorSource, classify_exception, log_failure
 from api.errors.mps import MPSUnavailableError
 
@@ -31,7 +31,7 @@ def _log_mps_dependency_failure(
         classify_exception(
             error,
             source=ErrorSource.PLATFORM,
-            provider="dograh",
+            provider="easytech",
             error_owner="operator",
         ),
         organization_id=organization_id,
@@ -66,8 +66,8 @@ class MPSServiceKeyClient:
 
         # Add authentication for non-OSS mode
         if DEPLOYMENT_MODE != "oss":
-            if DOGRAH_MPS_SECRET_KEY:
-                headers["X-Secret-Key"] = DOGRAH_MPS_SECRET_KEY
+            if EASYTECH_MPS_SECRET_KEY:
+                headers["X-Secret-Key"] = EASYTECH_MPS_SECRET_KEY
             if organization_id:
                 headers["X-Organization-Id"] = str(organization_id)
         else:
@@ -143,7 +143,7 @@ class MPSServiceKeyClient:
         """Create or return the Cloudonix domain for the deployment owner.
 
         OSS allocations are scoped by ``created_by``. Hosted allocations are
-        scoped by ``organization_id`` and authenticated with the Dograh/MPS
+        scoped by ``organization_id`` and authenticated with the EasyTech/MPS
         control-plane secret. No model-service key participates in ownership.
         """
         async with httpx.AsyncClient(timeout=self.timeout) as client:
@@ -455,7 +455,7 @@ class MPSServiceKeyClient:
             )
 
     async def get_billing_pricing(self, organization_id: int) -> dict:
-        """Return MPS-owned effective platform and Dograh model prices for an org."""
+        """Return MPS-owned effective platform and EasyTech model prices for an org."""
         if DEPLOYMENT_MODE == "oss":
             raise ValueError("OSS deployments do not fetch hosted billing prices")
 
@@ -646,7 +646,7 @@ class MPSServiceKeyClient:
         metadata: Optional[dict] = None,
         max_attempts: int = 3,
     ) -> dict:
-        """Report hosted Dograh platform usage for a completed workflow run."""
+        """Report hosted EasyTech platform usage for a completed workflow run."""
         if DEPLOYMENT_MODE == "oss":
             raise ValueError("OSS deployments must not report platform usage to MPS")
         if not correlation_id and duration_seconds is None:
@@ -777,11 +777,11 @@ class MPSServiceKeyClient:
         created_by: Optional[str] = None,
     ) -> bool:
         """
-        Synchronously validate a Dograh service key by checking usage via MPS.
+        Synchronously validate a EasyTech service key by checking usage via MPS.
 
         Returns True if the key is valid and False only when MPS authoritatively
         rejects the credential. Dependency failures raise ``MPSUnavailableError``
-        so callers never misreport a Dograh outage as a customer configuration error.
+        so callers never misreport a EasyTech outage as a customer configuration error.
         """
         operation = "validate_service_key"
         try:

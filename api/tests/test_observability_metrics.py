@@ -125,7 +125,7 @@ async def test_production_worker_wiring_exports_a_metric_through_real_pipeline(r
     )
     await asyncio.wait_for(run_pipeline_worker(worker), timeout=5)
     assert (
-        value(runtime, "dograh_ai_latency_seconds_count", service="OpenAILLMService")
+        value(runtime, "easytech_ai_latency_seconds_count", service="OpenAILLMService")
         == 1
     )
 
@@ -149,14 +149,14 @@ async def test_live_call_gauge_survives_duplicate_registration_and_cancellation(
     task = asyncio.create_task(call())
     await entered.wait()
     try:
-        assert value(runtime, "dograh_active_calls") == 2
+        assert value(runtime, "easytech_active_calls") == 2
     finally:
         task.cancel()
         with pytest.raises(asyncio.CancelledError):
             await task
-    assert value(runtime, "dograh_active_calls") == 1
+    assert value(runtime, "easytech_active_calls") == 1
     active_calls.unregister_active_call(43)
-    assert value(runtime, "dograh_active_calls") == 0
+    assert value(runtime, "easytech_active_calls") == 0
 
 
 @pytest.mark.asyncio
@@ -203,21 +203,21 @@ async def test_service_metrics_deduplicate_hops_and_keep_latency_kinds_separate(
     await observer.wait_until_idle()
     await observer.cleanup()
 
-    assert value(runtime, "dograh_ai_latency_seconds_count", kind="ttfb") == 2
+    assert value(runtime, "easytech_ai_latency_seconds_count", kind="ttfb") == 2
     assert value(
-        runtime, "dograh_ai_latency_seconds_sum", kind="ttfb"
+        runtime, "easytech_ai_latency_seconds_sum", kind="ttfb"
     ) == pytest.approx(0.6)
     assert (
-        value(runtime, "dograh_ai_latency_seconds_bucket", kind="ttfb", le="0.3") == 1
+        value(runtime, "easytech_ai_latency_seconds_bucket", kind="ttfb", le="0.3") == 1
     )
-    assert value(runtime, "dograh_ai_latency_seconds_count", kind="ttfa") == 1
-    assert value(runtime, "dograh_ai_latency_seconds_sum", kind="ttfat") == 0.8
-    labels = samples(runtime, "dograh_ai_latency_seconds_count", kind="ttfb")[0].labels
+    assert value(runtime, "easytech_ai_latency_seconds_count", kind="ttfa") == 1
+    assert value(runtime, "easytech_ai_latency_seconds_sum", kind="ttfat") == 0.8
+    labels = samples(runtime, "easytech_ai_latency_seconds_count", kind="ttfb")[0].labels
     assert labels["service"] == "CartesiaTTSService"
     assert labels["conversation_type"] == "voice"
     assert not any("#" in v for v in labels.values())
     # Scraping again must not add another observation.
-    assert value(runtime, "dograh_ai_latency_seconds_count", kind="ttfb") == 2
+    assert value(runtime, "easytech_ai_latency_seconds_count", kind="ttfb") == 2
 
 
 @pytest.mark.asyncio
@@ -239,7 +239,7 @@ async def test_invalid_durations_are_not_exported_and_text_is_labeled(runtime):
     assert (
         value(
             runtime,
-            "dograh_ai_latency_seconds_count",
+            "easytech_ai_latency_seconds_count",
             conversation_type="text",
             service="custom",
             model="unknown",
@@ -279,7 +279,7 @@ async def test_metrics_from_retired_agent_reach_observer_once(runtime):
     )
     await observer.wait_until_idle()
     await observer.cleanup()
-    assert value(runtime, "dograh_ai_latency_seconds_count") == 1
+    assert value(runtime, "easytech_ai_latency_seconds_count") == 1
 
 
 @pytest.mark.asyncio
@@ -291,7 +291,7 @@ async def test_only_user_to_bot_latency_is_exported_from_existing_observer(runti
     await latency.on_push_frame(pushed(ClientConnectedFrame()))
     now[0] = 10.5
     await latency.on_push_frame(pushed(BotStartedSpeakingFrame()))
-    assert not samples(runtime, "dograh_response_latency_seconds_count")
+    assert not samples(runtime, "easytech_response_latency_seconds_count")
     now[0] = 11.0
     await latency.on_push_frame(
         pushed(VADUserStoppedSpeakingFrame(timestamp=11, stop_secs=0.2))
@@ -301,10 +301,10 @@ async def test_only_user_to_bot_latency_is_exported_from_existing_observer(runti
     for observer in [latency, *observers]:
         await observer.cleanup()
     assert not samples(
-        runtime, "dograh_response_latency_seconds_count", kind="first_speech"
+        runtime, "easytech_response_latency_seconds_count", kind="first_speech"
     )
     assert value(
-        runtime, "dograh_response_latency_seconds_sum", kind="user_to_bot"
+        runtime, "easytech_response_latency_seconds_sum", kind="user_to_bot"
     ) == pytest.approx(1)
 
 
@@ -313,9 +313,9 @@ def test_scrape_exports_only_the_three_requested_metric_families(runtime):
     runtime.response_latency.record(1.0, {"kind": "user_to_bot"})
     families = text_string_to_metric_families(runtime.render().decode())
     assert {family.name for family in families} == {
-        "dograh_active_calls",
-        "dograh_ai_latency_seconds",
-        "dograh_response_latency_seconds",
+        "easytech_active_calls",
+        "easytech_ai_latency_seconds",
+        "easytech_response_latency_seconds",
     }
 
 
@@ -329,18 +329,18 @@ def test_scrape_exports_only_the_three_requested_metric_families(runtime):
     ],
 )
 def test_scrape_requires_ops_secret(runtime, monkeypatch, secret, header, status):
-    monkeypatch.setattr("api.constants.DOGRAH_DEVOPS_SECRET", secret)
+    monkeypatch.setattr("api.constants.EASYTECH_DEVOPS_SECRET", secret)
     app = FastAPI()
     app.add_api_route("/api/v1/metrics", main_routes.prometheus_metrics)
     with TestClient(app) as client:
         response = client.get(
             "/api/v1/metrics",
-            headers={"X-Dograh-Devops-Secret": header} if header else {},
+            headers={"X-EasyTech-Devops-Secret": header} if header else {},
         )
     assert response.status_code == status
     if status == 200:
         assert response.headers["content-type"].startswith("text/plain")
-        assert "dograh_active_calls" in response.text
+        assert "easytech_active_calls" in response.text
         assert response.headers["cache-control"] == "no-store"
 
 

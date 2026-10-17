@@ -23,7 +23,7 @@ describe("provider field controls", () => {
     });
 
     it("allows trailing empty rows for required string arrays", () => {
-        render(<Editor schema={{ required: ["keyterms"], properties: { keyterms: { type: "array", title: "Keyterms", items: { type: "string" } } } }} initial={{ keyterms: ["Dograh", ""] }} />);
+        render(<Editor schema={{ required: ["keyterms"], properties: { keyterms: { type: "array", title: "Keyterms", items: { type: "string" } } } }} initial={{ keyterms: ["EasyTech", ""] }} />);
         expect((screen.getByLabelText("Keyterms") as HTMLInputElement).required).toBe(true);
         expect((screen.getByLabelText("keyterms 2") as HTMLInputElement).required).toBe(false);
     });
@@ -90,7 +90,7 @@ describe("provider field controls", () => {
 
     it("uses removable input rows for free-form lists", () => {
         const onSave = vi.fn();
-        render(<Editor schema={{ properties: { keyterms: { type: "array", title: "Keyterms", items: { type: "string" } } } }} initial={{ keyterms: ["Dograh"] }} onSave={onSave} />);
+        render(<Editor schema={{ properties: { keyterms: { type: "array", title: "Keyterms", items: { type: "string" } } } }} initial={{ keyterms: ["EasyTech"] }} onSave={onSave} />);
         fireEvent.click(screen.getByRole("button", { name: "Add keyterms" }));
         fireEvent.change(screen.getByLabelText("keyterms 2"), { target: { value: "Flux" } });
         fireEvent.click(screen.getByRole("button", { name: "Remove keyterms 1" }));

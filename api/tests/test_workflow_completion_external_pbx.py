@@ -2,7 +2,7 @@
 
 The write-back has silently stopped running twice, both times because of where
 it was wired rather than what it did: once hung off the ARI hangup strategy,
-which only executes when Dograh ends the call, and once off a trigger that ran
+which only executes when EasyTech ends the call, and once off a trigger that ran
 before the disposition existed. Neither had a test on the wiring itself. These
 cover that seam.
 """

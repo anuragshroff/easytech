@@ -1,4 +1,4 @@
-"""OpenAI Live with Dograh workflow tools and conversation controls."""
+"""OpenAI Live with EasyTech workflow tools and conversation controls."""
 
 import asyncio
 from collections.abc import Sequence
@@ -51,7 +51,7 @@ Current workflow:
 """
 
 
-class DograhOpenAILiveLLMService(RealtimeConversationMixin, OpenAILiveLLMService):
+class EasyTechOpenAILiveLLMService(RealtimeConversationMixin, OpenAILiveLLMService):
     """Keep workflow instructions on the Responses backend of a Live session."""
 
     # Backend tool batches have their own boundaries; voice can start or stop

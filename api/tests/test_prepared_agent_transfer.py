@@ -63,7 +63,7 @@ async def test_transfer_uses_destination_settings_and_original_pooled_key(
     root = await model_connections.resolve_model_configuration(
         1,
         api_override={"llm": {"settings": {"temperature": 0.9}}},
-        preferred_dograh_key="secret-b",
+        preferred_easytech_key="secret-b",
     )
     instance, definition = factory
     instance._run_model_configuration = root.effective
@@ -82,7 +82,7 @@ async def test_transfer_uses_destination_settings_and_original_pooled_key(
 
 
 @pytest.mark.asyncio
-async def test_transfer_cannot_use_a_different_dograh_key(catalog, factory):
+async def test_transfer_cannot_use_a_different_easytech_key(catalog, factory):
     row = connection(keys="root-key")
     catalog(row, default=True)
     root = await model_connections.resolve_model_configuration(1)

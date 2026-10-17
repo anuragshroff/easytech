@@ -86,7 +86,7 @@ def test_soniox_stt_passes_keyterms_as_context_terms():
     user_config = _soniox_config(language="en")
 
     with patch("api.services.pipecat.service_factory.SonioxSTTService") as stt_service:
-        create_stt_service(user_config, _audio_config(), keyterms=["Dograh", "Soniox"])
+        create_stt_service(user_config, _audio_config(), keyterms=["EasyTech", "Soniox"])
 
     kwargs = stt_service.call_args.kwargs
-    assert kwargs["settings"].context.terms == ["Dograh", "Soniox"]
+    assert kwargs["settings"].context.terms == ["EasyTech", "Soniox"]

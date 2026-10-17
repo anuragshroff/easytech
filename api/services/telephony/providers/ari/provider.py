@@ -63,7 +63,7 @@ class ARIProvider(TelephonyProvider):
 
         ``app_name`` authenticates to Asterisk; ``stasis_app_name`` names the
         dialplan application calls are placed into. Asterisk treats these as
-        unrelated namespaces, and Dograh generates the second one so two
+        unrelated namespaces, and EasyTech generates the second one so two
         configurations can never claim the same application. Configurations
         written before the split have only ``app_name`` and use it for both.
         """
@@ -113,7 +113,7 @@ class ARIProvider(TelephonyProvider):
         dial_string = build_dial_string(to_number, self.dial_string_template)
 
         # Prepare channel creation data
-        channel_id = f"dograh-call-{uuid.uuid4()}"
+        channel_id = f"easytech-call-{uuid.uuid4()}"
         params = {
             "channelId": channel_id,
             "endpoint": dial_string,

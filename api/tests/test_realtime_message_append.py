@@ -6,14 +6,14 @@ from pipecat.frames.frames import LLMMessagesAppendFrame
 from pipecat.services.openai.realtime import events
 
 from api.services.pipecat.realtime.openai_realtime import (
-    DograhOpenAIRealtimeLLMService,
+    EasyTechOpenAIRealtimeLLMService,
 )
 from api.services.workflow.pipecat_engine_callbacks import handle_user_idle
 
 
 @pytest.mark.asyncio
 async def test_openai_realtime_messages_append_frame_sends_conversation_item():
-    service = DograhOpenAIRealtimeLLMService(api_key="test")
+    service = EasyTechOpenAIRealtimeLLMService(api_key="test")
     service._api_session_ready = True
     service.send_client_event = AsyncMock()
     service._send_manual_response_create = AsyncMock()

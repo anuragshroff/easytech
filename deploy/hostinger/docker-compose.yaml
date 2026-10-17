@@ -1,4 +1,4 @@
-# Dograh — Hostinger VPS Docker Manager deployment
+# EasyTech — Hostinger VPS Docker Manager deployment
 # =================================================================
 # This variant is for environments where a SHARED, MANAGED Traefik
 # (with Let's Encrypt) already terminates TLS and routes ingress —
@@ -14,7 +14,7 @@
 #     an HTTP reverse proxy.
 #   - `api` runs ENVIRONMENT=production (correct public ICE-candidate
 #     filtering + UDP-first TURN).
-#   - coturn is configured entirely from CLI flags (no `dograh-init`
+#   - coturn is configured entirely from CLI flags (no `easytech-init`
 #     renderer, no host bind-mounts). The whole stack is therefore a single
 #     self-contained file — nothing outside it needs to exist on the host,
 #     which is what a catalog compose-import requires.
@@ -66,9 +66,9 @@ services:
       - app-network
 
   minio:
-    # Built from the community MinIO fork by github.com/dograh-hq/minio; upstream
+    # Built from the community MinIO fork by github.com/anuragshroff/minio; upstream
     # MinIO no longer publishes images.
-    image: ${REGISTRY:-dograhai}/minio:2026.09.22
+    image: ${REGISTRY:-easytech}/minio:2026.09.22
     container_name: minio
     restart: unless-stopped
     command: server /data --console-address ":9001"
@@ -91,12 +91,12 @@ services:
       - "traefik.enable=true"
       - "traefik.docker.network=${TRAEFIK_NETWORK:-traefik-proxy}"
       # Audio file downloads. Highest priority so it wins over the UI catch-all.
-      - "traefik.http.routers.dograh-audio.rule=Host(`${PUBLIC_HOST}`) && PathPrefix(`/voice-audio`)"
-      - "traefik.http.routers.dograh-audio.entrypoints=${TRAEFIK_ENTRYPOINT:-websecure}"
-      - "traefik.http.routers.dograh-audio.tls=true"
-      - "traefik.http.routers.dograh-audio.tls.certresolver=${TRAEFIK_CERTRESOLVER:-letsencrypt}"
-      - "traefik.http.routers.dograh-audio.priority=20"
-      - "traefik.http.services.dograh-audio.loadbalancer.server.port=9000"
+      - "traefik.http.routers.easytech-audio.rule=Host(`${PUBLIC_HOST}`) && PathPrefix(`/voice-audio`)"
+      - "traefik.http.routers.easytech-audio.entrypoints=${TRAEFIK_ENTRYPOINT:-websecure}"
+      - "traefik.http.routers.easytech-audio.tls=true"
+      - "traefik.http.routers.easytech-audio.tls.certresolver=${TRAEFIK_CERTRESOLVER:-letsencrypt}"
+      - "traefik.http.routers.easytech-audio.priority=20"
+      - "traefik.http.services.easytech-audio.loadbalancer.server.port=9000"
     networks:
       - app-network
       - traefik
@@ -121,7 +121,7 @@ services:
       - "--min-port=49152"
       - "--max-port=49200"
       - "--external-ip=${TURN_HOST}"
-      - "--realm=dograh.com"
+      - "--realm=easytech.com"
       - --use-auth-secret
       - "--static-auth-secret=${TURN_SECRET}"
       - --fingerprint
@@ -138,7 +138,7 @@ services:
       - app-network
 
   api:
-    image: ${REGISTRY:-dograhai}/dograh-api:${DOGRAH_VERSION:-latest}
+    image: ${REGISTRY:-easytech}/easytech-api:${EASYTECH_VERSION:-latest}
     restart: unless-stopped
     environment:
       # production => drop private-IP host ICE candidates on a public VPS and
@@ -215,18 +215,18 @@ services:
       # REST API + the signaling WebSocket (/api/v1/ws/signaling/...).
       # Traefik upgrades WebSockets automatically — no extra labels needed.
       # Higher priority than the UI so /api/v1 is matched first.
-      - "traefik.http.routers.dograh-api.rule=Host(`${PUBLIC_HOST}`) && PathPrefix(`/api/v1`)"
-      - "traefik.http.routers.dograh-api.entrypoints=${TRAEFIK_ENTRYPOINT:-websecure}"
-      - "traefik.http.routers.dograh-api.tls=true"
-      - "traefik.http.routers.dograh-api.tls.certresolver=${TRAEFIK_CERTRESOLVER:-letsencrypt}"
-      - "traefik.http.routers.dograh-api.priority=10"
-      - "traefik.http.services.dograh-api.loadbalancer.server.port=8000"
+      - "traefik.http.routers.easytech-api.rule=Host(`${PUBLIC_HOST}`) && PathPrefix(`/api/v1`)"
+      - "traefik.http.routers.easytech-api.entrypoints=${TRAEFIK_ENTRYPOINT:-websecure}"
+      - "traefik.http.routers.easytech-api.tls=true"
+      - "traefik.http.routers.easytech-api.tls.certresolver=${TRAEFIK_CERTRESOLVER:-letsencrypt}"
+      - "traefik.http.routers.easytech-api.priority=10"
+      - "traefik.http.services.easytech-api.loadbalancer.server.port=8000"
     networks:
       - app-network
       - traefik
 
   ui:
-    image: ${REGISTRY:-dograhai}/dograh-ui:${DOGRAH_VERSION:-latest}
+    image: ${REGISTRY:-easytech}/easytech-ui:${EASYTECH_VERSION:-latest}
     restart: unless-stopped
     environment:
       HOSTNAME: "0.0.0.0"
@@ -253,12 +253,12 @@ services:
       - "traefik.enable=true"
       - "traefik.docker.network=${TRAEFIK_NETWORK:-traefik-proxy}"
       # Catch-all for everything that is not /api/v1 or /voice-audio.
-      - "traefik.http.routers.dograh-ui.rule=Host(`${PUBLIC_HOST}`)"
-      - "traefik.http.routers.dograh-ui.entrypoints=${TRAEFIK_ENTRYPOINT:-websecure}"
-      - "traefik.http.routers.dograh-ui.tls=true"
-      - "traefik.http.routers.dograh-ui.tls.certresolver=${TRAEFIK_CERTRESOLVER:-letsencrypt}"
-      - "traefik.http.routers.dograh-ui.priority=1"
-      - "traefik.http.services.dograh-ui.loadbalancer.server.port=3010"
+      - "traefik.http.routers.easytech-ui.rule=Host(`${PUBLIC_HOST}`)"
+      - "traefik.http.routers.easytech-ui.entrypoints=${TRAEFIK_ENTRYPOINT:-websecure}"
+      - "traefik.http.routers.easytech-ui.tls=true"
+      - "traefik.http.routers.easytech-ui.tls.certresolver=${TRAEFIK_CERTRESOLVER:-letsencrypt}"
+      - "traefik.http.routers.easytech-ui.priority=1"
+      - "traefik.http.services.easytech-ui.loadbalancer.server.port=3010"
     networks:
       - app-network
       - traefik

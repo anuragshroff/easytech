@@ -38,7 +38,7 @@ async def test_hook_keeps_model_overrides_separate_and_sends_stable_run_key(
     assert result.initial_context == {"customer": "Jane"}
     assert result.model_overrides == {"tts": {"settings": {"voice": "Alice"}}}
     assert result.outcome == "completed"
-    assert requests[0].headers["Idempotency-Key"] == "dograh-pre-call-51"
+    assert requests[0].headers["Idempotency-Key"] == "easytech-pre-call-51"
     assert b'"workflow_run_id":51' in requests[0].content
 
 

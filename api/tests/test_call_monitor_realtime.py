@@ -22,7 +22,7 @@ from pipecat.processors.filters.identity_filter import IdentityFilter
 
 from api.services.pipecat.call_monitor_processor import CallMonitorProcessor
 from api.services.pipecat.pipeline_builder import build_realtime_pipeline
-from api.services.pipecat.realtime.gemini_live import DograhGeminiLiveLLMService
+from api.services.pipecat.realtime.gemini_live import EasyTechGeminiLiveLLMService
 from api.services.pipecat.speech_playback import SpeechPlaybackTracker
 from api.services.pipecat.worker_runner import (
     create_worker_runner,
@@ -32,7 +32,7 @@ from api.services.pipecat.worker_runner import (
 from api.tests.test_call_monitor import ControlledOutput
 
 
-class OfflineGemini(DograhGeminiLiveLLMService):
+class OfflineGemini(EasyTechGeminiLiveLLMService):
     """Keep the production handlers; only disable provider client creation."""
 
     def create_client(self):

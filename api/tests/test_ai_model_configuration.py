@@ -74,8 +74,8 @@ async def test_retired_inline_workflow_model_keys_are_ignored(
     if use_v2_override:
         config = {
             WORKFLOW_MODEL_CONFIGURATION_V2_OVERRIDE_KEY: {
-                "mode": "dograh",
-                "dograh": {"api_key": "private-test-key", "temperature": -1},
+                "mode": "easytech",
+                "easytech": {"api_key": "private-test-key", "temperature": -1},
             }
         }
     else:

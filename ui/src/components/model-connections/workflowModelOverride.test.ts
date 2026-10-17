@@ -7,7 +7,7 @@ import { applyModelPatch, customOverride, describeWorkflowModel, followOverride,
 
 const connection = (uuid: string, name: string, provider: string): ProviderConnection =>
     ({ uuid, name, provider, connection_settings: {}, configured_credentials: ["api_key"], is_active: true, revision: 1 });
-const connections = [connection("openai-a", "OpenAI prod", "openai"), connection("openai-b", "OpenAI backup", "openai"), connection("eleven", "ElevenLabs", "elevenlabs"), connection("dograh", "Dograh", "dograh")];
+const connections = [connection("openai-a", "OpenAI prod", "openai"), connection("openai-b", "OpenAI backup", "openai"), connection("eleven", "ElevenLabs", "elevenlabs"), connection("easytech", "EasyTech", "easytech")];
 const cascade: ConfigurationSpec = {
     version: 3, mode: "pipeline",
     llm: { provider_connection_uuid: "openai-a", settings: { model: "gpt-4.1", temperature: 0.2 } },
@@ -57,7 +57,7 @@ describe("applyModelPatch", () => {
 
     it("keeps settings across accounts of one provider and resets them across providers", () => {
         expect(applyModelPatch(cascade, { tts: { provider_connection_uuid: "openai-b" } }, connections).tts).toEqual({ provider_connection_uuid: "openai-b", settings: { voice: "Sophie" } });
-        expect(applyModelPatch(cascade, { llm: { provider_connection_uuid: "dograh" } }, connections).llm).toEqual({ provider_connection_uuid: "dograh", settings: {} });
+        expect(applyModelPatch(cascade, { llm: { provider_connection_uuid: "easytech" } }, connections).llm).toEqual({ provider_connection_uuid: "easytech", settings: {} });
         expect(applyModelPatch(cascade, { tts: { provider_connection_uuid: "eleven", settings: { voice: "Rachel" } } }, connections).tts).toEqual({ provider_connection_uuid: "eleven", settings: { voice: "Rachel" } });
     });
 
@@ -115,8 +115,8 @@ describe("custom overrides", () => {
     it("summarizes brain model and voice per mode", () => {
         expect(summarizeConfiguration(cascade, connections)).toBe("gpt-4.1 / Sophie");
         expect(summarizeConfiguration({ ...cascade, mode: "realtime", realtime: { provider_connection_uuid: "openai-a", settings: { model: "gpt-realtime", voice: "marin" } } }, connections)).toBe("gpt-realtime / marin");
-        const managed: ConfigurationSpec = { version: 3, mode: "pipeline", llm: { provider_connection_uuid: "dograh", settings: {} }, stt: { provider_connection_uuid: "dograh", settings: {} }, tts: { provider_connection_uuid: "dograh", settings: { voice: "af_heart" } } };
-        expect(summarizeConfiguration(managed, connections)).toBe("Dograh / af_heart");
+        const managed: ConfigurationSpec = { version: 3, mode: "pipeline", llm: { provider_connection_uuid: "easytech", settings: {} }, stt: { provider_connection_uuid: "easytech", settings: {} }, tts: { provider_connection_uuid: "easytech", settings: { voice: "af_heart" } } };
+        expect(summarizeConfiguration(managed, connections)).toBe("EasyTech / af_heart");
         expect(summarizeConfiguration({ ...cascade, llm: { provider_connection_uuid: "openai-a", settings: {} }, tts: { provider_connection_uuid: "openai-a", settings: {} } }, connections)).toBe("OpenAI prod / default voice");
         expect(summarizeConfiguration(null, connections)).toBe("Not configured");
     });

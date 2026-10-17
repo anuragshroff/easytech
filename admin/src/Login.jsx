@@ -28,7 +28,7 @@ export default function Login() {
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-950">
       <form onSubmit={onSubmit} className="w-full max-w-sm rounded-xl bg-gray-900 p-8 shadow-lg">
-        <h1 className="text-2xl font-bold text-white">Dograh Admin</h1>
+        <h1 className="text-2xl font-bold text-white">EasyTech Admin</h1>
         <p className="mt-1 text-sm text-gray-400">Platform administration console</p>
         <div className="mt-6 space-y-4">
           <input

@@ -23,8 +23,8 @@ async def create_org(client):
 async def create_connection(client, org, key="original"):
     return await client.create_provider_connection(
         org,
-        name="Dograh",
-        provider="dograh",
+        name="EasyTech",
+        provider="easytech",
         credentials={"api_key": key},
         connection_settings={},
     )
@@ -42,7 +42,7 @@ def pipeline(connection):
 
 
 @pytest.mark.asyncio
-async def test_catalog_isolation_and_multiple_dograh_connections(db_session):
+async def test_catalog_isolation_and_multiple_easytech_connections(db_session):
     org = await create_org(db_session)
     other = await create_org(db_session)
     first = await create_connection(db_session, org)

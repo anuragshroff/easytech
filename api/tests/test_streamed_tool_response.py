@@ -40,7 +40,7 @@ def live_event(kind, *, response_id="response-1", **data):
 
 
 async def tool_event(service, name, call_id, *, response_id="response-1"):
-    if type(service).__name__ == "DograhOpenAILiveLLMService":
+    if type(service).__name__ == "EasyTechOpenAILiveLLMService":
         await service._handle_evt_response(
             live_event(
                 "response.output_item.done",
@@ -57,13 +57,13 @@ async def tool_event(service, name, call_id, *, response_id="response-1"):
     else:
         service._pending_function_calls[call_id] = SimpleNamespace(name=name)
         data = {"call_id": call_id, "name": name, "arguments": "{}"}
-        if type(service).__name__ != "DograhGrokRealtimeLLMService":
+        if type(service).__name__ != "EasyTechGrokRealtimeLLMService":
             data["response_id"] = response_id
         await service._handle_evt_function_call_arguments_done(SimpleNamespace(**data))
 
 
 async def response_done(service, status="completed", *, response_id="response-1"):
-    if type(service).__name__ == "DograhOpenAILiveLLMService":
+    if type(service).__name__ == "EasyTechOpenAILiveLLMService":
         await service._handle_evt_response(
             live_event(
                 f"response.{status}",
@@ -132,9 +132,9 @@ async def stream_engine(realtime_service, simple_workflow):
         engine.active_agent.bind_tool(engine, end, is_node_transition=True),
         is_node_transition=True,
     )
-    if type(service).__name__ == "DograhOpenAILiveLLMService":
+    if type(service).__name__ == "EasyTechOpenAILiveLLMService":
         await service._handle_evt_response(live_event("response.created"))
-    elif type(service).__name__ == "DograhGrokRealtimeLLMService":
+    elif type(service).__name__ == "EasyTechGrokRealtimeLLMService":
         await service._handle_evt_response_created(
             SimpleNamespace(response=SimpleNamespace(id="response-1"))
         )

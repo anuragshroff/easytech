@@ -144,7 +144,7 @@ def upgrade() -> None:
 
 def downgrade() -> None:
     # Fold the rows back into the credentials blob so a rollback keeps working
-    # trunks. The Dograh-side trunk id was the row's primary key from here on,
+    # trunks. The EasyTech-side trunk id was the row's primary key from here on,
     # so it is written back as text.
     op.execute(
         """

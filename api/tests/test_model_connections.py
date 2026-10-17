@@ -15,7 +15,7 @@ from api.schemas.model_connections import (
 from api.services.configuration import model_connections as service
 
 
-def connection(provider="dograh", keys=None, **kwargs):
+def connection(provider="easytech", keys=None, **kwargs):
     return SimpleNamespace(
         uuid=str(uuid4()),
         provider=provider,
@@ -93,12 +93,12 @@ def catalog(monkeypatch):
 
 @pytest.mark.asyncio
 async def test_four_layers_and_named_reset(catalog):
-    dograh = connection()
-    catalog(dograh, default=True)
-    other = pipeline(dograh)
+    easytech = connection()
+    catalog(easytech, default=True)
+    other = pipeline(easytech)
     other["llm"]["settings"] = {"temperature": 0.7}
     other["tts"]["settings"] = {"voice": "Bob"}
-    named = catalog(dograh, configuration=other)
+    named = catalog(easytech, configuration=other)
     result = await service.resolve_model_configuration(
         1,
         workflow_override={"llm": {"settings": {"temperature": 0.4}}},
@@ -117,10 +117,10 @@ async def test_four_layers_and_named_reset(catalog):
 
 @pytest.mark.asyncio
 async def test_same_provider_connection_preserves_settings(catalog):
-    dograh = connection()
-    config = pipeline(dograh)
+    easytech = connection()
+    config = pipeline(easytech)
     config["llm"]["settings"] = {"temperature": 0.3, "model": "saved-tier"}
-    catalog(dograh, default=True, configuration=config)
+    catalog(easytech, default=True, configuration=config)
     second = catalog(connection())
     result = await service.resolve_model_configuration(
         1, api_override={"llm": {"provider_connection_uuid": second.uuid}}
@@ -131,10 +131,10 @@ async def test_same_provider_connection_preserves_settings(catalog):
 
 @pytest.mark.asyncio
 async def test_new_provider_drops_previous_provider_settings(catalog):
-    dograh = connection()
-    config = pipeline(dograh)
+    easytech = connection()
+    config = pipeline(easytech)
     config["llm"]["settings"] = {"temperature": 0.3, "model": "saved-tier"}
-    catalog(dograh, default=True, configuration=config)
+    catalog(easytech, default=True, configuration=config)
     google = catalog(connection("google"))
     result = await service.resolve_model_configuration(
         1,
@@ -147,7 +147,7 @@ async def test_new_provider_drops_previous_provider_settings(catalog):
     )
     assert result.effective.llm.temperature == 0.8
     assert result.effective.llm.model != "saved-tier"
-    assert result.effective.tts.provider == "dograh"
+    assert result.effective.tts.provider == "easytech"
 
 
 @pytest.mark.asyncio
@@ -256,7 +256,7 @@ async def test_masked_configuration_includes_fallback_without_credentials(catalo
 
 
 @pytest.mark.asyncio
-async def test_common_dograh_key_is_reused_on_hydration(catalog):
+async def test_common_easytech_key_is_reused_on_hydration(catalog):
     one = connection(keys=["first", "shared"])
     two = catalog(connection(keys=["shared", "other"]))
     config = pipeline(one)
@@ -326,7 +326,7 @@ async def test_managed_model_and_language_hints_survive_overrides_and_snapshot(c
 
 
 @pytest.mark.asyncio
-async def test_disjoint_dograh_keys_are_rejected(catalog):
+async def test_disjoint_easytech_keys_are_rejected(catalog):
     one = connection(keys=["a", "b"])
     two = catalog(connection(keys=["c", "d"]))
     config = pipeline(one)
@@ -338,14 +338,14 @@ async def test_disjoint_dograh_keys_are_rejected(catalog):
 
 @pytest.mark.asyncio
 async def test_inactive_pipeline_services_do_not_affect_realtime_authorization(catalog):
-    dograh = catalog(connection(keys="unrelated"))
+    easytech = catalog(connection(keys="unrelated"))
     llm = catalog(connection("openai"))
     realtime = catalog(connection("openai_realtime"))
     config = {
         "mode": "realtime",
         "llm": selection(llm),
         "realtime": selection(realtime),
-        "tts": selection(dograh),
+        "tts": selection(easytech),
     }
     result = await service.resolve_inline_model_configuration(1, config)
     assert result.effective.managed_service_version is None
@@ -404,11 +404,11 @@ async def test_realtime_requires_text_llm(catalog):
 
 @pytest.mark.asyncio
 async def test_computed_tts_model_is_not_an_input_setting(catalog):
-    dograh = connection()
-    config = pipeline(dograh)
+    easytech = connection()
+    config = pipeline(easytech)
     deepgram = catalog(connection("deepgram"))
     config["tts"] = selection(deepgram, voice="aura-2-asteria-en")
-    catalog(dograh, default=True, configuration=config)
+    catalog(easytech, default=True, configuration=config)
     result = await service.resolve_model_configuration(1)
     assert result.effective.tts.model == "aura-2"
     assert "model" not in result.snapshot["services"]["tts"]["settings"]
@@ -544,22 +544,22 @@ async def test_snapshot_still_rejects_a_different_runtime_provider(catalog, prov
 
 
 def test_connection_validation_is_local_and_rejects_unknown_credentials():
-    service.validate_provider_connection("dograh", {"api_key": ["one", "two"]}, {})
+    service.validate_provider_connection("easytech", {"api_key": ["one", "two"]}, {})
     with pytest.raises(HTTPException):
-        service.validate_provider_connection("dograh", {"password": "secret"}, {})
+        service.validate_provider_connection("easytech", {"password": "secret"}, {})
     with pytest.raises(HTTPException):
-        service.validate_provider_connection("dograh", {"api_key": ""}, {})
+        service.validate_provider_connection("easytech", {"api_key": ""}, {})
 
 
 @pytest.mark.asyncio
-async def test_transfer_can_reuse_existing_authorized_dograh_key(catalog):
+async def test_transfer_can_reuse_existing_authorized_easytech_key(catalog):
     catalog(connection(keys=["other", "authorized"]), default=True)
     result = await service.resolve_model_configuration(
-        1, preferred_dograh_key="authorized"
+        1, preferred_easytech_key="authorized"
     )
     assert result.effective.llm.api_key == "authorized"
     with pytest.raises(HTTPException):
-        await service.resolve_model_configuration(1, preferred_dograh_key="unrelated")
+        await service.resolve_model_configuration(1, preferred_easytech_key="unrelated")
 
 
 @pytest.mark.asyncio
@@ -599,7 +599,7 @@ async def test_embedding_index_compatibility_checks_only_selected_documents(
 @pytest.mark.parametrize(
     "provider,expected_provider",
     [
-        ("dograh", "dograh"),
+        ("easytech", "easytech"),
         ("openai_realtime", "openai"),
         ("google_realtime", "google"),
         ("google_vertex_realtime", "google_vertex"),
@@ -693,13 +693,13 @@ def fallback_rule(row, condition=None, **settings):
 
 
 @pytest.mark.asyncio
-async def test_dograh_rejects_fallback_rules_but_allows_disabling_them(catalog):
+async def test_easytech_rejects_fallback_rules_but_allows_disabling_them(catalog):
     primary = connection()
     backup = connection("openai")
     catalog(primary)
     catalog(backup)
     config = {**pipeline(primary), "llm_fallback": {"rules": [fallback_rule(backup)]}}
-    with pytest.raises(HTTPException, match="unavailable in Dograh mode") as exc:
+    with pytest.raises(HTTPException, match="unavailable in EasyTech mode") as exc:
         await service.resolve_inline_model_configuration(1, config)
     assert exc.value.status_code == 422
 
@@ -709,21 +709,21 @@ async def test_dograh_rejects_fallback_rules_but_allows_disabling_them(catalog):
 
 
 @pytest.mark.asyncio
-async def test_dograh_override_must_disable_inherited_fallbacks(catalog):
+async def test_easytech_override_must_disable_inherited_fallbacks(catalog):
     primary = connection("openai")
-    dograh = connection()
-    catalog(dograh)
+    easytech = connection()
+    catalog(easytech)
     backup = connection("google")
     catalog(backup)
     config = {**pipeline(primary), "llm_fallback": {"rules": [fallback_rule(backup)]}}
     catalog(primary, default=True, configuration=config)
-    override = {"llm": selection(dograh)}
-    with pytest.raises(HTTPException, match="unavailable in Dograh mode"):
+    override = {"llm": selection(easytech)}
+    with pytest.raises(HTTPException, match="unavailable in EasyTech mode"):
         await service.resolve_model_configuration(1, api_override=override)
 
     override["llm_fallback"] = {"rules": []}
     resolved = await service.resolve_model_configuration(1, api_override=override)
-    assert resolved.effective.llm.provider == "dograh"
+    assert resolved.effective.llm.provider == "easytech"
     assert resolved.effective.llm_fallback.rules == []
 
 
@@ -842,9 +842,9 @@ async def test_fallback_cannot_repeat_primary_connection_and_settings(catalog):
 @pytest.mark.parametrize(
     "condition", [{"type": "error"}, {"type": "no_output", "after_ms": 900}]
 )
-async def test_dograh_cannot_be_a_fallback_target(catalog, mode, condition):
+async def test_easytech_cannot_be_a_fallback_target(catalog, mode, condition):
     primary = connection("openai")
-    backup = connection("dograh", keys="managed-key")
+    backup = connection("easytech", keys="managed-key")
     catalog(backup)
     config = pipeline(primary)
     if mode == "realtime":

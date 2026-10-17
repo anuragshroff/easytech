@@ -47,9 +47,9 @@ from api.services.configuration.registry import (
 from api.services.pipecat.pipeline_metrics_aggregator import PipelineMetricsAggregator
 from api.services.pipecat.realtime.openai_live import (
     VOICE_INSTRUCTIONS,
-    DograhOpenAILiveLLMService,
+    EasyTechOpenAILiveLLMService,
 )
-from api.services.pipecat.realtime.openai_realtime import DograhOpenAIRealtimeLLMService
+from api.services.pipecat.realtime.openai_realtime import EasyTechOpenAIRealtimeLLMService
 from api.services.pipecat.run_pipeline import _create_realtime_user_turn_config
 from api.services.pipecat.service_factory import create_realtime_llm_service
 from api.services.pipecat.worker_runner import run_pipeline_worker
@@ -57,7 +57,7 @@ from api.services.workflow.pipecat_engine import PipecatEngine
 
 
 def make_service():
-    service = DograhOpenAILiveLLMService(
+    service = EasyTechOpenAILiveLLMService(
         api_key="test-key", backend_model="gpt-5.4-mini"
     )
     service.send_client_event = AsyncMock()
@@ -96,9 +96,9 @@ async def test_model_dropdown_has_one_openai_provider_with_both_model_families()
 @pytest.mark.parametrize(
     "model,service_type",
     [
-        ("gpt-live-1", DograhOpenAILiveLLMService),
-        ("gpt-realtime-2.1", DograhOpenAIRealtimeLLMService),
-        ("gpt-realtime-2", DograhOpenAIRealtimeLLMService),
+        ("gpt-live-1", EasyTechOpenAILiveLLMService),
+        ("gpt-realtime-2.1", EasyTechOpenAIRealtimeLLMService),
+        ("gpt-realtime-2", EasyTechOpenAIRealtimeLLMService),
     ],
 )
 def test_saved_openai_provider_routes_by_model(model, service_type):
@@ -311,11 +311,11 @@ async def test_muted_startup_greeting_reaches_playback_and_releases_initial_mute
             pass
 
     socket = ClockedLiveSocket()
-    service = DograhOpenAILiveLLMService(
+    service = EasyTechOpenAILiveLLMService(
         api_key="test-key", backend_model="gpt-5.4-mini"
     )
     context = LLMContext()
-    service._context = context  # Dograh's engine initializes this before greeting.
+    service._context = context  # EasyTech's engine initializes this before greeting.
     turns, _ = _create_realtime_user_turn_config("openai_realtime", "gpt-live-1")
     aggregators = LLMContextAggregatorPair(
         context,
@@ -410,7 +410,7 @@ async def test_live_seconds_are_deduplicated_and_backend_tokens_keep_their_model
         value=LLMTokenUsage(prompt_tokens=10, completion_tokens=5, total_tokens=15),
     )
     with patch.object(OpenAILiveLLMService, "push_frame", new_callable=AsyncMock):
-        await DograhOpenAILiveLLMService.push_frame(
+        await EasyTechOpenAILiveLLMService.push_frame(
             service, MetricsFrame(data=[tokens])
         )
     assert tokens.model == "gpt-5.4-mini"
@@ -473,7 +473,7 @@ async def test_end_node_keeps_live_open_until_last_audio_reaches_caller(
             pass
 
     socket = ClosingAnnouncementSocket()
-    service = DograhOpenAILiveLLMService(api_key="test", backend_model="gpt-5.4-mini")
+    service = EasyTechOpenAILiveLLMService(api_key="test", backend_model="gpt-5.4-mini")
     context = LLMContext()
     service._context = context
     # Begin in an established conversation, just before the end-node transition.

@@ -1,9 +1,9 @@
-"""Dograh subclass of pipecat's Ultravox realtime LLM service.
+"""EasyTech subclass of pipecat's Ultravox realtime LLM service.
 
 Ultravox is audio-native and realtime. Its native call stages allow a client
 tool result to atomically change the system prompt and tools while preserving
 the call's server-side conversation history. This wrapper adapts that model to
-the Dograh engine contract by:
+the EasyTech engine contract by:
 
 - deferring the first call creation until the engine queues the initial node
   opening via ``TTSSpeakFrame`` or ``LLMContextFrame``
@@ -12,7 +12,7 @@ the Dograh engine contract by:
 - updating the next stage's system prompt and selected tools without a
   disconnect/reconnect cycle
 - deferring a lone workflow-control tool until playback ends
-- handling Dograh-only frames such as user mute and idle append prompts
+- handling EasyTech-only frames such as user mute and idle append prompts
 - tagging user transcripts with ``finalized=True`` for downstream parity
 """
 
@@ -43,10 +43,10 @@ from pipecat.utils.time import time_now_iso8601
 from pipecat.utils.types import NotGiven, assert_given
 
 
-class DograhUltravoxOneShotInputParams(OneShotInputParams):
-    """Dograh-friendly OneShot params with string voice support."""
+class EasyTechUltravoxOneShotInputParams(OneShotInputParams):
+    """EasyTech-friendly OneShot params with string voice support."""
 
-    # Ultravox accepts built-in voice names as well as UUIDs. Dograh stores the
+    # Ultravox accepts built-in voice names as well as UUIDs. EasyTech stores the
     # former (for example, "Mark"), while upstream narrows this field to UUID.
     voice: str | None = Field(  # pyright: ignore[reportIncompatibleVariableOverride]
         default=None
@@ -56,10 +56,10 @@ class DograhUltravoxOneShotInputParams(OneShotInputParams):
 _ULTRAVOX_MAX_TOOL_TIMEOUT_SECS = 40.0
 
 
-class DograhUltravoxRealtimeLLMService(
+class EasyTechUltravoxRealtimeLLMService(
     RealtimeConversationMixin, UltravoxRealtimeLLMService
 ):
-    """Ultravox realtime with Dograh engine integration quirks."""
+    """Ultravox realtime with EasyTech engine integration quirks."""
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
@@ -75,7 +75,7 @@ class DograhUltravoxRealtimeLLMService(
         self._pending_user_text_messages: list[str] = []
 
     async def start(self, frame):
-        # Dograh defers call creation until the engine queues the node opening.
+        # EasyTech defers call creation until the engine queues the node opening.
         await LLMService.start(self, frame)
 
     async def process_frame(self, frame: Frame, direction: FrameDirection):
@@ -200,7 +200,7 @@ class DograhUltravoxRealtimeLLMService(
         """Commit any received final user transcript before changing stages.
 
         Ultravox preserves its own audio-native history across a stage change,
-        but Dograh's local context still needs the final transcript before the
+        but EasyTech's local context still needs the final transcript before the
         transition handler updates the workflow node.
         """
         return True
@@ -435,7 +435,7 @@ class DograhUltravoxRealtimeLLMService(
         *,
         greeting_text: str | None,
         agent_speaks_first: bool,
-    ) -> DograhUltravoxOneShotInputParams:
+    ) -> EasyTechUltravoxOneShotInputParams:
         current_params = self._params
         extra = {
             key: value
@@ -453,7 +453,7 @@ class DograhUltravoxRealtimeLLMService(
         if isinstance(output_medium, NotGiven):
             output_medium = current_params.output_medium
 
-        return DograhUltravoxOneShotInputParams(
+        return EasyTechUltravoxOneShotInputParams(
             api_key=current_params.api_key,
             system_prompt=self._current_system_instruction(),
             temperature=current_params.temperature,

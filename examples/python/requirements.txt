@@ -1,2 +1,2 @@
-dograh-sdk
+easytech-sdk
 python-dotenv

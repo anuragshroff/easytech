@@ -3,6 +3,8 @@
 import sentry_sdk
 
 from api.constants import (
+    APP_NAME,
+    APP_URL,
     CORS_ALLOWED_ORIGINS,
     DEPLOYMENT_MODE,
     ENABLE_TELEMETRY,
@@ -109,13 +111,13 @@ async def lifespan(app: FastAPI):
 
 
 app = FastAPI(
-    title="Dograh API",
-    description="API for the Dograh app",
+    title=f"{APP_NAME} API",
+    description=f"API for the {APP_NAME} app",
     version="1.0.0",
     openapi_url=f"{API_PREFIX}/openapi.json",
     lifespan=lifespan,
     servers=[
-        {"url": "https://app.dograh.com", "description": "Production"},
+        {"url": APP_URL, "description": "App"},
         {"url": "http://localhost:8000", "description": "Local development"},
     ],
 )
@@ -126,7 +128,7 @@ async def handle_mps_unavailable_error(
     _request: Request,
     _exc: MPSUnavailableError,
 ) -> JSONResponse:
-    """Tell callers this is a Dograh outage, not invalid customer config."""
+    """Tell callers this is a EasyTech outage, not invalid customer config."""
 
     return JSONResponse(
         status_code=503,

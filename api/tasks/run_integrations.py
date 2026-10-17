@@ -14,7 +14,7 @@ from api.db import db_client
 from api.db.models import WorkflowRunModel
 from api.enums import OrganizationConfigurationKey
 from api.errors.failure import (
-    DograhFailure,
+    EasyTechFailure,
     ErrorSource,
     ErrorType,
     classify_exception,
@@ -318,7 +318,7 @@ async def run_integrations_post_workflow_run(_ctx, workflow_run_id: int):
                 webhook_node = WebhookRFNode.model_validate(node)
             except ValidationError as e:
                 log_failure(
-                    DograhFailure(
+                    EasyTechFailure(
                         source=ErrorSource.WEBHOOK,
                         type=ErrorType.CONFIG_ERROR,
                         code="webhook-invalid-config",

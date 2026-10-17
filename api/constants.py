@@ -68,6 +68,12 @@ CORS_ALLOWED_ORIGINS = [
 AUTH_PROVIDER = os.getenv("AUTH_PROVIDER", "local")
 ENABLE_SIGNUP = os.getenv("ENABLE_SIGNUP", "true").lower() == "true"
 
+# Branding. APP_NAME is the product name shown to users (API title, error
+# messages, embed snippets). APP_URL is the public app origin used in links;
+# defaults to UI_APP_URL.
+APP_NAME = os.getenv("APP_NAME", "EasyTech")
+APP_URL = os.getenv("APP_URL") or UI_APP_URL
+
 # Stripe Payment Links top-up webhook signing secret. When unset, the webhook
 # endpoint refuses requests (nothing to verify against).
 STRIPE_WEBHOOK_SECRET = os.getenv("STRIPE_WEBHOOK_SECRET")
@@ -80,9 +86,9 @@ STRIPE_WEBHOOK_TOLERANCE_SECONDS = int(
 # needs them baked into the bundle at build time.
 STACK_AUTH_PROJECT_ID = os.getenv("STACK_AUTH_PROJECT_ID")
 STACK_PUBLISHABLE_CLIENT_KEY = os.getenv("STACK_PUBLISHABLE_CLIENT_KEY")
-DOGRAH_MPS_SECRET_KEY = os.getenv("DOGRAH_MPS_SECRET_KEY", None)
-MPS_API_URL = os.getenv("MPS_API_URL", "https://services.dograh.com")
-DOGRAH_DEVOPS_SECRET = os.getenv("DOGRAH_DEVOPS_SECRET") or None
+EASYTECH_MPS_SECRET_KEY = os.getenv("EASYTECH_MPS_SECRET_KEY", None)
+MPS_API_URL = os.getenv("MPS_API_URL", "https://services.easytech.com")
+EASYTECH_DEVOPS_SECRET = os.getenv("EASYTECH_DEVOPS_SECRET") or None
 ENABLE_PROMETHEUS_METRICS = (
     os.getenv("ENABLE_PROMETHEUS_METRICS", "false").lower() == "true"
 )

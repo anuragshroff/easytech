@@ -1,6 +1,6 @@
 # UI - Frontend Application
 
-Next.js 15 frontend for the Dograh voice AI platform.
+Next.js 15 frontend for the EasyTech voice AI platform.
 
 ## Project Structure
 

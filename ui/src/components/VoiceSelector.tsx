@@ -60,7 +60,7 @@ export const VoiceSelector: React.FC<VoiceSelectorProps> = ({
         if (authLoading || !userId) return;
         // The backend's voice_catalog field metadata opts providers into this control.
         const providerKey = provider as VoiceCatalogProvider;
-        if (providerKey !== "dograh" && !providerConnectionUuid) {
+        if (providerKey !== "easytech" && !providerConnectionUuid) {
             setError("Select a provider connection to load voices.");
             return;
         }
@@ -74,7 +74,7 @@ export const VoiceSelector: React.FC<VoiceSelectorProps> = ({
                     query: {
                         ...(model ? { model } : {}),
                         ...(language ? { language } : {}),
-                        ...(providerKey !== "dograh" ? { provider_connection_uuid: providerConnectionUuid } : {}),
+                        ...(providerKey !== "easytech" ? { provider_connection_uuid: providerConnectionUuid } : {}),
                     },
                     signal: controller.signal,
                 });

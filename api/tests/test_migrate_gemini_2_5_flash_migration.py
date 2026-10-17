@@ -32,8 +32,8 @@ def test_legacy_v1_user_configuration_llm_is_migrated():
     payload, changed = _migrate(
         {
             "llm": {"provider": "google", "model": "gemini-2.5-flash", "api_key": "k"},
-            "stt": {"provider": "dograh", "model": "default"},
-            "tts": {"provider": "dograh", "model": "default", "voice": "default"},
+            "stt": {"provider": "easytech", "model": "default"},
+            "tts": {"provider": "easytech", "model": "default", "voice": "default"},
         }
     )
     assert changed is True

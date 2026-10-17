@@ -7,10 +7,10 @@ Pre-Call Data Fetch lets you enrich the call context and select model settings b
 
 ## How It Works
 
-1. Dograh resolves and saves the call's model setup from the organization default, the workflow override, and the API-trigger override, checks billing and quota, and connects the call.
-2. As soon as the call is connected, Dograh sends a **POST** request to your endpoint. The caller hears a ringer while the request is in flight. For outbound calls this happens after the callee answers.
+1. EasyTech resolves and saves the call's model setup from the organization default, the workflow override, and the API-trigger override, checks billing and quota, and connects the call.
+2. As soon as the call is connected, EasyTech sends a **POST** request to your endpoint. The caller hears a ringer while the request is in flight. For outbound calls this happens after the callee answers.
 3. Your API returns context variables, model overrides, or both.
-4. Dograh merges the context, applies any model overrides to the agent's LLM, LLM fallback, and TTS, and validates the result.
+4. EasyTech merges the context, applies any model overrides to the agent's LLM, LLM fallback, and TTS, and validates the result.
 5. The agent starts and plays its greeting.
 
 ## Configuration
@@ -20,12 +20,12 @@ Open the [**Start Call**](/voice-agent/start-call) node editor and expand **Adva
 | Field | Description |
 | --- | --- |
 | **Pre-Call Data Fetch** | **Disabled**, **Always**, **Inbound calls only**, or **Outbound calls only**. Calls without an inbound or outbound direction run the fetch only in **Always** mode. |
-| **Endpoint URL** | The URL Dograh will send the POST request to. |
+| **Endpoint URL** | The URL EasyTech will send the POST request to. |
 | **Authentication** | Optional credential for authenticating the request. Supports API key, bearer token, basic auth, and custom header. |
 
 ## Request Format
 
-Dograh sends a `POST` request with the following JSON payload:
+EasyTech sends a `POST` request with the following JSON payload:
 
 ```json
 {
@@ -49,7 +49,7 @@ Dograh sends a `POST` request with the following JSON payload:
 
 The `Content-Type` header is `application/json`. If you configured a credential, its authentication header is included. Caller and callee numbers are supplied when known at the time the call connects.
 
-The request includes an `Idempotency-Key` header such as `dograh-pre-call-456`. Dograh sends the request once per call. Make your endpoint idempotent using this key if it performs writes or other side effects.
+The request includes an `Idempotency-Key` header such as `easytech-pre-call-456`. EasyTech sends the request once per call. Make your endpoint idempotent using this key if it performs writes or other side effects.
 
 ## Expected Response Format
 
@@ -120,7 +120,7 @@ Return `model_overrides` beside `initial_context`, either at the top level or in
 
 Use a voice supported by the selected TTS provider. You may return only `model_overrides` when no context enrichment is needed. If you use the `call_inbound` envelope, put both fields inside it.
 
-Fetched model settings take precedence over workflow and API-trigger settings for the services the agent owns: `llm`, `llm_fallback`, and `tts`. A service may also select a `provider_connection_uuid`, following the same-provider and different-provider rules of [API trigger overrides](/voice-agent/api-trigger#choosing-models-for-one-call), as long as it keeps the Dograh service key the call was authorized with.
+Fetched model settings take precedence over workflow and API-trigger settings for the services the agent owns: `llm`, `llm_fallback`, and `tts`. A service may also select a `provider_connection_uuid`, following the same-provider and different-provider rules of [API trigger overrides](/voice-agent/api-trigger#choosing-models-for-one-call), as long as it keeps the EasyTech service key the call was authorized with.
 
 The call is already connected when your endpoint answers, so the hook cannot change what the call pipeline was built with: it cannot select a named configuration (`model_configuration_uuid`) or change `mode`, `stt`, `realtime`, or `embeddings`. Set those on the workflow or the API trigger instead. Realtime (speech-to-speech) agents ignore `model_overrides` entirely.
 
@@ -181,7 +181,7 @@ Use actual telephony numbers when present. Test context is useful for WebRTC cal
 A simple Node.js endpoint that looks up a customer by phone number:
 
 ```javascript
-app.post("/dograh/pre-call", async (req, res) => {
+app.post("/easytech/pre-call", async (req, res) => {
   const { call_inbound } = req.body;
 
   const customer = await db.customers.findOne({

@@ -37,7 +37,7 @@ def _audio_config() -> AudioConfig:
 
 def _build_llm(location):
     with patch(
-        "api.services.pipecat.service_factory.DograhGoogleVertexLLMService"
+        "api.services.pipecat.service_factory.EasyTechGoogleVertexLLMService"
     ) as mock:
         create_llm_service_from_provider(
             provider=ServiceProviders.GOOGLE_VERTEX.value,
@@ -66,7 +66,7 @@ def _build_realtime(location):
     )
     target = (
         "api.services.pipecat.realtime.gemini_live_vertex."
-        "DograhGeminiLiveVertexLLMService"
+        "EasyTechGeminiLiveVertexLLMService"
     )
     with patch(target) as mock:
         create_realtime_llm_service(user_config, _audio_config())

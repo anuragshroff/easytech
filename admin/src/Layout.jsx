@@ -18,7 +18,7 @@ export default function Layout() {
     <div className="flex min-h-screen bg-gray-100">
       <aside className="flex w-56 flex-col bg-gray-950">
         <div className="px-5 py-5">
-          <div className="text-lg font-bold text-white">Dograh Admin</div>
+          <div className="text-lg font-bold text-white">EasyTech Admin</div>
         </div>
         <nav className="flex-1 space-y-1 px-3">
           {links.map((l) => (

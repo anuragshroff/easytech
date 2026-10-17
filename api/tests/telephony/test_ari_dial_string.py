@@ -21,7 +21,7 @@ from api.services.telephony.providers.ari.provider import ARIProvider
 
 BASE = {
     "ari_endpoint": "http://pbx.example.com:8088",
-    "app_name": "dograh",
+    "app_name": "easytech",
     "app_password": "s3cr3t",
 }
 
@@ -45,7 +45,7 @@ def test_plain_number_uses_the_configured_template():
 
 
 def test_local_channel_template_routes_through_the_dialplan():
-    """FreePBX outbound routes pick the trunk, so Dograh must not."""
+    """FreePBX outbound routes pick the trunk, so EasyTech must not."""
     assert (
         build_dial_string("+966500000000", "Local/{number}@from-internal")
         == "Local/+966500000000@from-internal"

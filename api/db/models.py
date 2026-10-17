@@ -121,7 +121,7 @@ class OrganizationModel(Base):
         comment="Deprecated. MPS owns quota and credit ledger state.",
         info={"deprecated": True},
     )
-    quota_dograh_tokens = Column(
+    quota_easytech_tokens = Column(
         Integer,
         nullable=False,
         default=0,
@@ -377,10 +377,10 @@ class TelephonyTrunkModel(Base):
     single route through that account — a primary carrier, a failover, a second
     region.
 
-    Only providers whose Dograh integration declares ``trunk_settings_cls`` get
+    Only providers whose EasyTech integration declares ``trunk_settings_cls`` get
     rows here. That is a statement about our integration, not about the vendor:
     Twilio, Plivo and Telnyx all sell SIP trunking and let you assign numbers to
-    a trunk in their own consoles, but Dograh drives them through their
+    a trunk in their own consoles, but EasyTech drives them through their
     call-control APIs, where the account itself is the only route. Their numbers
     carry a null trunk.
 
@@ -406,8 +406,8 @@ class TelephonyTrunkModel(Base):
     # Provider-specific payload, validated by the provider's trunk settings
     # schema: region and sip_domain for Cloudonix, endpoint details for ARI.
     settings = Column(JSON, nullable=False, default=dict)
-    # The provider's own identifier for this trunk, recorded when Dograh
-    # provisions it remotely. Kept out of ``settings`` because it is Dograh's
+    # The provider's own identifier for this trunk, recorded when EasyTech
+    # provisions it remotely. Kept out of ``settings`` because it is EasyTech's
     # bookkeeping rather than operator input, and is stripped from responses.
     external_id = Column(String(255), nullable=True)
     created_at = Column(DateTime(timezone=True), default=lambda: datetime.now(UTC))
@@ -833,13 +833,13 @@ class OrganizationUsageCycleModel(Base):
     organization_id = Column(Integer, ForeignKey("organizations.id"), nullable=False)
     period_start = Column(DateTime(timezone=True), nullable=False)
     period_end = Column(DateTime(timezone=True), nullable=False)
-    quota_dograh_tokens = Column(
+    quota_easytech_tokens = Column(
         Integer,
         nullable=False,
         comment="Deprecated. MPS owns quota and credit ledger state.",
         info={"deprecated": True},
     )
-    used_dograh_tokens = Column(Float, nullable=False, default=0)
+    used_easytech_tokens = Column(Float, nullable=False, default=0)
     total_duration_seconds = Column(
         Integer, nullable=False, default=0, server_default=text("0")
     )

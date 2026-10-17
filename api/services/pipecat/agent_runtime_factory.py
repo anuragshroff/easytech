@@ -99,7 +99,7 @@ class AgentRuntimeFactory:
         # The run's pinned definition and the call-scoped configuration it
         # was authorized with. The first visit is populated from these; a
         # transfer destination resolves its own but must keep the same
-        # Dograh service key.
+        # EasyTech service key.
         self._run_definition = run_definition
         self._run_model_configuration = run_model_configuration
 
@@ -150,11 +150,11 @@ class AgentRuntimeFactory:
             get_workflow_model_override,
             validate_workflow_model_compatibility,
         )
-        from api.services.managed_model_services import get_dograh_service_api_key
+        from api.services.managed_model_services import get_easytech_service_api_key
 
         run_configs = definition.workflow_configurations or {}
         run_key = (
-            get_dograh_service_api_key(self._run_model_configuration)
+            get_easytech_service_api_key(self._run_model_configuration)
             if self._run_model_configuration is not None
             else None
         )
@@ -162,13 +162,13 @@ class AgentRuntimeFactory:
             resolved = await resolve_model_configuration(
                 self._organization_id,
                 workflow_override=get_workflow_model_override(run_configs),
-                preferred_dograh_key=run_key,
+                preferred_easytech_key=run_key,
             )
             user_config = resolved.effective
-            if get_dograh_service_api_key(user_config) and not run_key:
+            if get_easytech_service_api_key(user_config) and not run_key:
                 raise HTTPException(
                     status_code=422,
-                    detail="Transfer cannot introduce an unauthorized Dograh service key.",
+                    detail="Transfer cannot introduce an unauthorized EasyTech service key.",
                 )
             await validate_workflow_model_compatibility(
                 self._organization_id, user_config, definition

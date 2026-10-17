@@ -9,7 +9,7 @@ from loguru import logger
 
 from api.db import db_client
 from api.errors.failure import (
-    DograhFailure,
+    EasyTechFailure,
     ErrorSource,
     ErrorType,
     classify_exception,
@@ -349,7 +349,7 @@ async def execute_http_tool(
                 logger.debug(f"Applied credential '{credential.name}' to tool request")
             else:
                 log_failure(
-                    DograhFailure(
+                    EasyTechFailure(
                         source=ErrorSource.TOOL,
                         type=ErrorType.CONFIG_ERROR,
                         code="custom-http-credential-not-found",
@@ -411,7 +411,7 @@ async def execute_http_tool(
             )
         except ValueError as e:
             log_failure(
-                DograhFailure(
+                EasyTechFailure(
                     source=ErrorSource.TOOL,
                     type=ErrorType.CONFIG_ERROR,
                     code="custom-http-invalid-preset",

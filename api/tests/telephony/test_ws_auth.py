@@ -282,9 +282,9 @@ async def test_ari_transport_data_carries_token(secret):
         organization_id=3,
         telephony_configuration_id=1,
         ari_endpoint="http://asterisk:8088",
-        app_name="dograh",
+        app_name="easytech",
         app_password="pw",
-        ws_client_name="dograh-ws",
+        ws_client_name="easytech-ws",
     )
     captured = {}
 

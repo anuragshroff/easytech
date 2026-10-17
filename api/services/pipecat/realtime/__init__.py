@@ -1,4 +1,4 @@
-"""Dograh-specific subclasses of pipecat realtime LLM services.
+"""EasyTech-specific subclasses of pipecat realtime LLM services.
 
 RealtimeConversationMixin owns the opening TTSSpeakFrame trigger and replaces
 muted caller audio with silence. The engine skips configured edge/tool text
@@ -18,6 +18,6 @@ Node updates retain each provider's protocol:
 Provider adapters own readiness, context replay, and tool-result timing.
 Reconnecting a node must not reset the conversation's opening-greeting guard.
 
-The pipecat fork's services stay close to upstream — Dograh behavior lives
+The pipecat fork's services stay close to upstream — EasyTech behavior lives
 here.
 """

@@ -11,11 +11,11 @@ from pipecat.frames.frames import (
     TranscriptionFrame,
 )
 from pipecat.services.deepgram.flux.stt import DeepgramFluxSTTService
-from pipecat.services.dograh.flux.stt import DograhFluxSTTService
+from pipecat.services.easytech.flux.stt import EasyTechFluxSTTService
 
 
 @pytest.mark.asyncio
-@pytest.mark.parametrize("service_type", [DeepgramFluxSTTService, DograhFluxSTTService])
+@pytest.mark.parametrize("service_type", [DeepgramFluxSTTService, EasyTechFluxSTTService])
 async def test_start_and_updates_emit_partials_before_the_single_final(service_type):
     service = service_type(api_key="test-key")
     frames = []

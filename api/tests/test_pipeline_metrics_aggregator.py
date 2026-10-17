@@ -13,11 +13,11 @@ from pipecat.metrics.metrics import (
 from pipecat.processors.frame_processor import FrameDirection
 
 from api.services.pipecat.pipeline_metrics_aggregator import PipelineMetricsAggregator
-from api.services.pipecat.realtime.aws_nova_sonic import DograhAWSNovaSonicLLMService
-from api.services.pipecat.realtime.gemini_live import DograhGeminiLiveLLMService
+from api.services.pipecat.realtime.aws_nova_sonic import EasyTechAWSNovaSonicLLMService
+from api.services.pipecat.realtime.gemini_live import EasyTechGeminiLiveLLMService
 from api.services.workflow.run_usage_response import format_public_usage_info
 
-PROCESSOR = "DograhGeminiLiveLLMService#0"
+PROCESSOR = "EasyTechGeminiLiveLLMService#0"
 MODEL = "gemini-3.1-flash-live-preview"
 USAGE_KEY = f"{PROCESSOR}|||{MODEL}"
 OPTIONAL_TOKEN_FIELDS = (
@@ -49,7 +49,7 @@ async def _report(aggregator, usage, *, processor=PROCESSOR, model=MODEL):
 async def test_gemini_modality_counts_survive_aggregation_and_public_serialization(
     aggregator, monkeypatch
 ):
-    service = DograhGeminiLiveLLMService(api_key="test-key")
+    service = EasyTechGeminiLiveLLMService(api_key="test-key")
     emit_usage = AsyncMock()
     monkeypatch.setattr(service, "start_llm_usage_metrics", emit_usage)
     message = LiveServerMessage(
@@ -102,12 +102,12 @@ async def test_gemini_modality_counts_survive_aggregation_and_public_serializati
 async def test_nova_audio_counts_survive_aggregation_and_public_serialization(
     aggregator, monkeypatch
 ):
-    service = DograhAWSNovaSonicLLMService(
+    service = EasyTechAWSNovaSonicLLMService(
         secret_access_key="test-secret", access_key_id="test-key", region="us-east-1"
     )
     emit_usage = AsyncMock()
     monkeypatch.setattr(service, "start_llm_usage_metrics", emit_usage)
-    processor = "DograhAWSNovaSonicLLMService#0"
+    processor = "EasyTechAWSNovaSonicLLMService#0"
     model = "amazon.nova-2-sonic-v1:0"
     for delta, total in (
         (

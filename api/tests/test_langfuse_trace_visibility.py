@@ -51,7 +51,7 @@ def test_org_project_honours_its_own_opt_in(exporter):
 
 
 def test_org_project_ignores_the_env_flag(exporter):
-    """The env flag belongs to Dograh's project; an org's own is unaffected."""
+    """The env flag belongs to EasyTech's project; an org's own is unaffected."""
     exporter.register_org(ORG, **CREDS, traces_public=False)
     set_current_org_id(ORG)
 
@@ -79,7 +79,7 @@ def test_visibility_toggle_lands_without_a_credential_change(exporter):
 
 
 def test_org_without_own_project_follows_the_env_flag(exporter):
-    """Unregistered orgs export to Dograh's project, so its policy applies."""
+    """Unregistered orgs export to EasyTech's project, so its policy applies."""
     set_current_org_id(ORG)
 
     assert resolve("true") is True

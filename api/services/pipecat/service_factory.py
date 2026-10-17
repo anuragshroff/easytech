@@ -32,7 +32,7 @@ from api.services.configuration.registry import (
 from api.services.configuration.temperature import resolve_temperature
 from api.services.pipecat.fallback_llm import FallbackLLMProcessor, FallbackRoute
 from api.services.pipecat.gemini_json_schema_adapter import (
-    DograhGeminiJSONSchemaAdapter,
+    EasyTechGeminiJSONSchemaAdapter,
 )
 from api.utils.url_security import validate_user_configured_service_url
 from pipecat.services.assemblyai.stt import AssemblyAISTTService, AssemblyAISTTSettings
@@ -53,10 +53,10 @@ from pipecat.services.deepgram.flux.stt import (
 )
 from pipecat.services.deepgram.stt import DeepgramSTTService, DeepgramSTTSettings
 from pipecat.services.deepgram.tts import DeepgramTTSService, DeepgramTTSSettings
-from pipecat.services.dograh.flux.stt import DograhFluxSTTService
-from pipecat.services.dograh.llm import DograhLLMService
-from pipecat.services.dograh.stt import DograhSTTService, DograhSTTSettings
-from pipecat.services.dograh.tts import DograhTTSService, DograhTTSSettings
+from pipecat.services.easytech.flux.stt import EasyTechFluxSTTService
+from pipecat.services.easytech.llm import EasyTechLLMService
+from pipecat.services.easytech.stt import EasyTechSTTService, EasyTechSTTSettings
+from pipecat.services.easytech.tts import EasyTechTTSService, EasyTechTTSSettings
 from pipecat.services.elevenlabs.dialogue.tts import (
     ElevenLabsDialogueTTSService,
     ElevenLabsDialogueTTSSettings,
@@ -148,7 +148,7 @@ def _report_service_factory_failures(
 
             provider_value = getattr(provider, "value", provider)
             error_owner = (
-                "operator" if str(provider_value).lower() == "dograh" else "user"
+                "operator" if str(provider_value).lower() == "easytech" else "user"
             )
             try:
                 service = factory(*args, **kwargs)
@@ -217,7 +217,7 @@ def _resolve_deepgram_flux_language_hints(
     )
 
 
-def dograh_stt_uses_flux_language(language: str | None) -> bool:
+def easytech_stt_uses_flux_language(language: str | None) -> bool:
     if not language or language.lower() == "multi":
         return True
     return _resolve_deepgram_flux_language_hint(language) is not None
@@ -273,18 +273,18 @@ def stt_uses_external_turns(user_config) -> bool:
     if user_config.stt.provider == ServiceProviders.DEEPGRAM.value:
         return user_config.stt.model in DEEPGRAM_FLUX_MODELS
     if user_config.stt.provider == ServiceProviders.DOGRAH.value:
-        return dograh_stt_uses_flux_language(getattr(user_config.stt, "language", None))
+        return easytech_stt_uses_flux_language(getattr(user_config.stt, "language", None))
     if user_config.stt.provider == ServiceProviders.CARTESIA.value:
         return user_config.stt.model == "ink-2"
     return False
 
 
-class DograhGoogleLLMService(GoogleLLMService):
-    adapter_class = DograhGeminiJSONSchemaAdapter
+class EasyTechGoogleLLMService(GoogleLLMService):
+    adapter_class = EasyTechGeminiJSONSchemaAdapter
 
 
-class DograhGoogleVertexLLMService(GoogleVertexLLMService):
-    adapter_class = DograhGeminiJSONSchemaAdapter
+class EasyTechGoogleVertexLLMService(GoogleVertexLLMService):
+    adapter_class = EasyTechGeminiJSONSchemaAdapter
 
 
 def _validate_runtime_service_url(url: str, field_name: str) -> None:
@@ -482,8 +482,8 @@ def create_stt_service(
         base_url = MPS_API_URL.replace("http://", "ws://").replace("https://", "wss://")
         language = getattr(user_config.stt, "language", None) or "multi"
 
-        if dograh_stt_uses_flux_language(language):
-            # Dograh's Flux proxy only supports multilingual auto-detect and the
+        if easytech_stt_uses_flux_language(language):
+            # EasyTech's Flux proxy only supports multilingual auto-detect and the
             # same language hint subset as Deepgram Flux multilingual.
             settings_kwargs = {
                 "model": "flux-general-multi",
@@ -497,7 +497,7 @@ def create_stt_service(
             )
             if language_hints:
                 settings_kwargs["language_hints"] = language_hints
-            return DograhFluxSTTService(
+            return EasyTechFluxSTTService(
                 base_url=base_url,
                 api_key=user_config.stt.api_key,
                 correlation_id=correlation_id,
@@ -506,11 +506,11 @@ def create_stt_service(
                 sample_rate=audio_config.transport_in_sample_rate,
             )
 
-        return DograhSTTService(
+        return EasyTechSTTService(
             base_url=base_url,
             api_key=user_config.stt.api_key,
             correlation_id=correlation_id,
-            settings=DograhSTTSettings(
+            settings=EasyTechSTTSettings(
                 model=user_config.stt.model,
                 language=language,
             ),
@@ -871,11 +871,11 @@ def create_tts_service(
     elif user_config.tts.provider == ServiceProviders.DOGRAH.value:
         # Convert HTTP URL to WebSocket URL for TTS
         base_url = MPS_API_URL.replace("http://", "ws://").replace("https://", "wss://")
-        return DograhTTSService(
+        return EasyTechTTSService(
             base_url=base_url,
             api_key=user_config.tts.api_key,
             correlation_id=correlation_id,
-            settings=DograhTTSSettings(
+            settings=EasyTechTTSSettings(
                 model=user_config.tts.model,
                 voice=user_config.tts.voice,
                 speed=user_config.tts.speed,
@@ -1175,7 +1175,7 @@ def create_llm_service_from_provider(
 
     Args:
         usage_context: Optional tag describing what the LLM instance is used for
-            (e.g. "voicemail_detection"). Sent as request metadata by the Dograh
+            (e.g. "voicemail_detection"). Sent as request metadata by the EasyTech
             provider; ignored by other providers.
     """
     # Vertex builds its endpoint from the location, so it is part of what this
@@ -1273,7 +1273,7 @@ def create_llm_service_from_provider(
         if not is_vertex:
             model = _migrate_deprecated_google_model(model)
         service_class = (
-            DograhGoogleVertexLLMService if is_vertex else DograhGoogleLLMService
+            EasyTechGoogleVertexLLMService if is_vertex else EasyTechGoogleLLMService
         )
         settings_class = GoogleVertexLLMSettings if is_vertex else GoogleLLMSettings
 
@@ -1301,7 +1301,7 @@ def create_llm_service_from_provider(
         # Gemini's opaque signatures may not transfer between platforms,
         # projects or models. Scope provider-specific context to this target;
         # standard text and tool history remains available to every adapter.
-        adapter = cast(DograhGeminiJSONSchemaAdapter, service.get_llm_adapter())
+        adapter = cast(EasyTechGeminiJSONSchemaAdapter, service.get_llm_adapter())
         adapter.signature_scope = hashlib.sha256(
             json.dumps([provider, connection], sort_keys=True).encode()
         ).hexdigest()
@@ -1317,7 +1317,7 @@ def create_llm_service_from_provider(
             settings=AzureLLMSettings(model=model, **sampling_settings),
         )
     elif provider == ServiceProviders.DOGRAH.value:
-        return DograhLLMService(
+        return EasyTechLLMService(
             base_url=f"{MPS_API_URL}/api/v1/llm",
             enable_direct_mode=enable_direct_mode,
             api_key=api_key,
@@ -1407,19 +1407,19 @@ def create_realtime_llm_service(user_config, audio_config: "AudioConfig"):
     )
 
     if provider == ServiceProviders.OPENAI_REALTIME.value and model == "gpt-live-1":
-        from api.services.pipecat.realtime.openai_live import DograhOpenAILiveLLMService
+        from api.services.pipecat.realtime.openai_live import EasyTechOpenAILiveLLMService
 
-        return DograhOpenAILiveLLMService(
+        return EasyTechOpenAILiveLLMService(
             api_key=api_key,
             backend_model=realtime_config.backend_model,
-            settings=DograhOpenAILiveLLMService.Settings(
+            settings=EasyTechOpenAILiveLLMService.Settings(
                 model=model,
                 voice=voice or "marin",
             ),
         )
     elif provider == ServiceProviders.OPENAI_REALTIME.value:
         from api.services.pipecat.realtime.openai_realtime import (
-            DograhOpenAIRealtimeLLMService,
+            EasyTechOpenAIRealtimeLLMService,
         )
         from pipecat.services.openai.realtime.events import (
             AudioConfiguration,
@@ -1436,9 +1436,9 @@ def create_realtime_llm_service(user_config, audio_config: "AudioConfig"):
         if language:
             transcription_kwargs["language"] = language
 
-        return DograhOpenAIRealtimeLLMService(
+        return EasyTechOpenAIRealtimeLLMService(
             api_key=api_key,
-            settings=DograhOpenAIRealtimeLLMService.Settings(
+            settings=EasyTechOpenAIRealtimeLLMService.Settings(
                 model=model,
                 session_properties=SessionProperties(
                     audio=AudioConfiguration(
@@ -1456,7 +1456,7 @@ def create_realtime_llm_service(user_config, audio_config: "AudioConfig"):
         )
     elif provider == ServiceProviders.GROK_REALTIME.value:
         from api.services.pipecat.realtime.grok_realtime import (
-            DograhGrokRealtimeLLMService,
+            EasyTechGrokRealtimeLLMService,
         )
         from pipecat.services.xai.realtime.events import (
             AudioConfiguration,
@@ -1469,9 +1469,9 @@ def create_realtime_llm_service(user_config, audio_config: "AudioConfig"):
         if grok_voice.lower() in {"ara", "rex", "sal", "eve", "leo"}:
             grok_voice = grok_voice.lower()
 
-        return DograhGrokRealtimeLLMService(
+        return EasyTechGrokRealtimeLLMService(
             api_key=api_key,
-            settings=DograhGrokRealtimeLLMService.Settings(
+            settings=EasyTechGrokRealtimeLLMService.Settings(
                 model=model,
                 session_properties=SessionProperties(
                     voice=grok_voice,
@@ -1485,30 +1485,30 @@ def create_realtime_llm_service(user_config, audio_config: "AudioConfig"):
         )
     elif provider == ServiceProviders.ULTRAVOX_REALTIME.value:
         from api.services.pipecat.realtime.ultravox_realtime import (
-            DograhUltravoxOneShotInputParams,
-            DograhUltravoxRealtimeLLMService,
+            EasyTechUltravoxOneShotInputParams,
+            EasyTechUltravoxRealtimeLLMService,
         )
 
-        return DograhUltravoxRealtimeLLMService(
-            params=DograhUltravoxOneShotInputParams(
+        return EasyTechUltravoxRealtimeLLMService(
+            params=EasyTechUltravoxOneShotInputParams(
                 api_key=api_key,
                 model=model,
                 voice=voice,
                 output_medium="voice",
                 temperature=realtime_config.temperature,
             ),
-            settings=DograhUltravoxRealtimeLLMService.Settings(
+            settings=EasyTechUltravoxRealtimeLLMService.Settings(
                 model=model,
                 output_medium="voice",
             ),
         )
     elif provider == ServiceProviders.AWS_NOVA_SONIC.value:
         from api.services.pipecat.realtime.aws_nova_sonic import (
-            DograhAWSNovaSonicLLMService,
+            EasyTechAWSNovaSonicLLMService,
         )
         from pipecat.services.aws.nova_sonic.llm import AudioConfig as NovaAudioConfig
 
-        return DograhAWSNovaSonicLLMService(
+        return EasyTechAWSNovaSonicLLMService(
             secret_access_key=realtime_config.aws_secret_key,
             access_key_id=realtime_config.aws_access_key,
             session_token=realtime_config.aws_session_token or None,
@@ -1517,7 +1517,7 @@ def create_realtime_llm_service(user_config, audio_config: "AudioConfig"):
                 input_sample_rate=audio_config.transport_in_sample_rate,
                 output_sample_rate=audio_config.transport_out_sample_rate,
             ),
-            settings=DograhAWSNovaSonicLLMService.Settings(
+            settings=EasyTechAWSNovaSonicLLMService.Settings(
                 model=model,
                 voice=voice or "matthew",
                 endpointing_sensitivity=realtime_config.endpointing_sensitivity,
@@ -1528,7 +1528,7 @@ def create_realtime_llm_service(user_config, audio_config: "AudioConfig"):
         )
     elif provider == ServiceProviders.GOOGLE_REALTIME.value:
         from api.services.pipecat.realtime.gemini_live import (
-            DograhGeminiLiveLLMService,
+            EasyTechGeminiLiveLLMService,
         )
 
         # Gemini Live enables input/output audio transcription by default
@@ -1539,13 +1539,13 @@ def create_realtime_llm_service(user_config, audio_config: "AudioConfig"):
         }
         if language:
             settings_kwargs["language"] = language
-        return DograhGeminiLiveLLMService(
+        return EasyTechGeminiLiveLLMService(
             api_key=api_key,
-            settings=DograhGeminiLiveLLMService.Settings(**settings_kwargs),
+            settings=EasyTechGeminiLiveLLMService.Settings(**settings_kwargs),
         )
     elif provider == ServiceProviders.GOOGLE_VERTEX_REALTIME.value:
         from api.services.pipecat.realtime.gemini_live_vertex import (
-            DograhGeminiLiveVertexLLMService,
+            EasyTechGeminiLiveVertexLLMService,
         )
 
         project_id = getattr(realtime_config, "project_id", None)
@@ -1557,15 +1557,15 @@ def create_realtime_llm_service(user_config, audio_config: "AudioConfig"):
         }
         if language:
             settings_kwargs["language"] = language
-        return DograhGeminiLiveVertexLLMService(
+        return EasyTechGeminiLiveVertexLLMService(
             credentials=credentials,
             project_id=project_id,
             location=vertex_location,
-            settings=DograhGeminiLiveVertexLLMService.Settings(**settings_kwargs),
+            settings=EasyTechGeminiLiveVertexLLMService.Settings(**settings_kwargs),
         )
     elif provider == ServiceProviders.AZURE_REALTIME.value:
         from api.services.pipecat.realtime.azure_realtime import (
-            DograhAzureRealtimeLLMService,
+            EasyTechAzureRealtimeLLMService,
         )
         from pipecat.services.openai.realtime.events import (
             AudioConfiguration,
@@ -1604,10 +1604,10 @@ def create_realtime_llm_service(user_config, audio_config: "AudioConfig"):
                 "",
             )
         )
-        return DograhAzureRealtimeLLMService(
+        return EasyTechAzureRealtimeLLMService(
             api_key=api_key,
             base_url=wss_url,
-            settings=DograhAzureRealtimeLLMService.Settings(
+            settings=EasyTechAzureRealtimeLLMService.Settings(
                 model=model,
                 session_properties=SessionProperties(
                     audio=AudioConfiguration(

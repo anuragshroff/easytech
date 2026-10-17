@@ -18,20 +18,20 @@ const provider = { credential_fields: {}, connection_fields: {}, settings_schema
 } } };
 const elevenlabs = { ...provider, title: "ElevenLabs", connection_fields: { region: { type: "string", title: "Region" } } };
 const catalog: ModelConnectionCatalog = { services: {
-    llm: { openai: provider, google: provider, dograh: { ...provider, settings_schema: { properties: {
+    llm: { openai: provider, google: provider, easytech: { ...provider, settings_schema: { properties: {
         model: { type: "string", title: "LLM model", default: "default", examples: ["default", "accurate", "fast", "lite", "zen"], option_labels: { default: "default (recommended)" }, allow_custom_input: true },
         temperature: { type: "number", title: "Temperature", default: 0.1 },
     } } } },
-    stt: { openai: provider, dograh: { ...provider, settings_schema: { properties: {
+    stt: { openai: provider, easytech: { ...provider, settings_schema: { properties: {
         language: { type: "string", title: "Language", default: "multi", examples: ["multi", "en", "en-GB", "es", "ar"] },
         language_hints: { type: "array", title: "Language hints", items: { type: "string" }, examples: ["en", "es", "de"], visible_for_languages: ["multi", "en", "es", "de"] },
     } } } },
-    tts: { openai: provider, elevenlabs, dograh: { ...provider, settings_schema: { properties: { voice: { type: "string", title: "Voice", default: "Alice", voice_catalog: "dialog", allow_custom_input: true }, speed: { type: "number", title: "Speed", default: 1 } } } } },
-    embeddings: { openai: provider, dograh: provider },
+    tts: { openai: provider, elevenlabs, easytech: { ...provider, settings_schema: { properties: { voice: { type: "string", title: "Voice", default: "Alice", voice_catalog: "dialog", allow_custom_input: true }, speed: { type: "number", title: "Speed", default: 1 } } } } },
+    embeddings: { openai: provider, easytech: provider },
     realtime: { openai: provider },
 } };
 const connection = (uuid: string, provider: string): ProviderConnection => ({ uuid, provider, name: uuid, configured_credentials: ["api_key"], connection_settings: {}, is_active: true, revision: 1 });
-const connections = [connection("Dograh primary", "dograh"), connection("Dograh secondary", "dograh"), connection("OpenAI", "openai"), connection("Google", "google"), { ...connection("Archived Dograh", "dograh"), is_active: false }];
+const connections = [connection("EasyTech primary", "easytech"), connection("EasyTech secondary", "easytech"), connection("OpenAI", "openai"), connection("Google", "google"), { ...connection("Archived EasyTech", "easytech"), is_active: false }];
 
 function Editor({ available = connections }: { available?: ProviderConnection[] }) {
     const [current, setCurrent] = useState(available);
@@ -48,11 +48,11 @@ const created = { ...connection("Studio voice", "elevenlabs"), configured_creden
 beforeEach(() => vi.clearAllMocks());
 
 describe("configuration modes", () => {
-    it("offers the three modes as one choice, Dograh selected when an account exists", () => {
+    it("offers the three modes as one choice, EasyTech selected when an account exists", () => {
         render(<Editor />);
         expect(screen.getAllByRole("radio").map(item => item.getAttribute("aria-labelledby") && document.getElementById(item.getAttribute("aria-labelledby")!)?.textContent))
-            .toEqual(["Realtime", "Dograh", "BYOK"]);
-        expect(selectedMode()).toBe("Dograh");
+            .toEqual(["Realtime", "EasyTech", "BYOK"]);
+        expect(selectedMode()).toBe("EasyTech");
         expect(screen.queryByRole("tab")).toBeNull();
     });
 
@@ -66,20 +66,20 @@ describe("configuration modes", () => {
         expect(onChange.mock.calls[0][0]).not.toHaveProperty("realtime");
     });
 
-    it("uses one Dograh account for all services and preserves settings when changing accounts", () => {
+    it("uses one EasyTech account for all services and preserves settings when changing accounts", () => {
         const onChange = vi.fn();
-        const configuration: ConfigurationSpec = { ...emptyConfiguration(catalog, connections), llm: { provider_connection_uuid: "Dograh primary", settings: { model: "zen", temperature: 0.8 } }, stt: { provider_connection_uuid: "Dograh primary", settings: { language: "multi", language_hints: ["en", "es"] } } };
+        const configuration: ConfigurationSpec = { ...emptyConfiguration(catalog, connections), llm: { provider_connection_uuid: "EasyTech primary", settings: { model: "zen", temperature: 0.8 } }, stt: { provider_connection_uuid: "EasyTech primary", settings: { language: "multi", language_hints: ["en", "es"] } } };
         render(<ConfigurationFields catalog={catalog} connections={connections} configuration={configuration} onChange={onChange} />);
-        expect(selectedMode()).toBe("Dograh");
+        expect(selectedMode()).toBe("EasyTech");
         expect(screen.getAllByRole("combobox")).toHaveLength(3);
         expect(screen.queryByLabelText("Enable embeddings")).toBeNull();
         for (const label of ["LLM model", "Temperature", "Voice", "Speed", "Language"]) expect(screen.getByLabelText(label)).toBeDefined();
         expect(screen.getByRole("checkbox", { name: "English" }).getAttribute("aria-checked")).toBe("true");
         expect(screen.getByRole("checkbox", { name: "Spanish" }).getAttribute("aria-checked")).toBe("true");
-        expect(selectOptions("Dograh account")).toEqual(["Dograh primary", "Dograh secondary", "Add a Dograh account"]);
-        selectOption("Dograh account", "Dograh secondary");
+        expect(selectOptions("EasyTech account")).toEqual(["EasyTech primary", "EasyTech secondary", "Add a EasyTech account"]);
+        selectOption("EasyTech account", "EasyTech secondary");
         const saved = cleanConfiguration(onChange.mock.calls[0][0], catalog, connections);
-        for (const role of ["llm", "stt", "tts", "embeddings"] as const) expect(saved[role]?.provider_connection_uuid).toBe("Dograh secondary");
+        for (const role of ["llm", "stt", "tts", "embeddings"] as const) expect(saved[role]?.provider_connection_uuid).toBe("EasyTech secondary");
         expect(saved.llm.settings.temperature).toBe(0.8);
         expect(saved.llm.settings.model).toBe("zen");
         expect(saved.stt?.settings.language_hints).toEqual(["en", "es"]);
@@ -133,10 +133,10 @@ describe("configuration modes", () => {
         expect(screen.getAllByRole("tab").map(item => item.textContent)).toEqual(["Realtime openai", "LLM openai", "Embedding openai"]);
         expect(selectOptions(providerSelect("Realtime"))).toEqual(["openai", "Add a provider"]);
         expect(within(servicePanel("LLM")).getByText(/This text LLM handles variable extraction/)).toBeDefined();
-        chooseMode("Dograh");
+        chooseMode("EasyTech");
         expect(screen.queryByRole("button", { name: "Configure fallbacks" })).toBeNull();
         expect(screen.queryByLabelText("Enable embeddings")).toBeNull();
-        expect(screen.getByLabelText("Dograh account")).toBeDefined();
+        expect(screen.getByLabelText("EasyTech account")).toBeDefined();
     });
 
     it("opens a saved Realtime configuration on its realtime model", () => {
@@ -154,8 +154,8 @@ describe("configuration modes", () => {
         expect(screen.getByRole("tab", { name: "STT" }).textContent).toBe("STT openai");
     });
 
-    it("marks services without a provider when switching a Dograh configuration to BYOK", () => {
-        render(<Editor available={connections.filter(item => item.provider === "dograh")} />);
+    it("marks services without a provider when switching a EasyTech configuration to BYOK", () => {
+        render(<Editor available={connections.filter(item => item.provider === "easytech")} />);
         chooseMode("BYOK");
         expect(selectedMode()).toBe("BYOK");
         for (const role of ["LLM", "STT", "TTS"]) {
@@ -167,16 +167,16 @@ describe("configuration modes", () => {
             expect(options).toHaveLength(1);
             expect(options[0]).toMatch(/^Add a provider/);
         }
-        chooseMode("Dograh");
-        expect(selectedMode()).toBe("Dograh");
+        chooseMode("EasyTech");
+        expect(selectedMode()).toBe("EasyTech");
     });
 
-    it("requires a Dograh account before saving Dograh mode when none exists", () => {
-        render(<Editor available={connections.filter(item => item.provider !== "dograh")} />);
-        chooseMode("Dograh");
-        expect(selectedMode()).toBe("Dograh");
-        expect(screen.getByLabelText("Dograh account").getAttribute("aria-required")).toBe("true");
-        expect(screen.getByLabelText("Dograh account").textContent).toBe("Choose an account");
+    it("requires a EasyTech account before saving EasyTech mode when none exists", () => {
+        render(<Editor available={connections.filter(item => item.provider !== "easytech")} />);
+        chooseMode("EasyTech");
+        expect(selectedMode()).toBe("EasyTech");
+        expect(screen.getByLabelText("EasyTech account").getAttribute("aria-required")).toBe("true");
+        expect(screen.getByLabelText("EasyTech account").textContent).toBe("Choose an account");
         fireEvent.click(screen.getByRole("button", { name: "Save" }));
         expect(onSubmit).not.toHaveBeenCalled();
     });
@@ -222,7 +222,7 @@ describe("compact density", () => {
 
     it("shows only the quick fields and leaves out embeddings", () => {
         render(<CompactEditor />);
-        expect(selectedMode()).toBe("Dograh");
+        expect(selectedMode()).toBe("EasyTech");
         expect(screen.getByLabelText("Voice")).toBeDefined();
         expect(screen.getByLabelText("LLM model")).toBeDefined();
         expect(screen.queryByLabelText("Speed")).toBeNull();

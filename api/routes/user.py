@@ -369,7 +369,7 @@ async def reactivate_api_key(
 
 
 # Voice Configuration Endpoints
-TTSProvider = Literal["elevenlabs", "deepgram", "sarvam", "cartesia", "dograh", "rime"]
+TTSProvider = Literal["elevenlabs", "deepgram", "sarvam", "cartesia", "easytech", "rime"]
 
 
 @router.get("/configurations/voices/{provider}")
@@ -383,7 +383,7 @@ async def get_voices(
     provider_connection_uuid: Optional[str] = None,
     user: UserModel = Depends(get_user),
 ) -> VoicesResponse:
-    """Get voices from Dograh's managed catalog or a saved provider connection.
+    """Get voices from EasyTech's managed catalog or a saved provider connection.
 
     External providers require provider_connection_uuid for an active connection
     in the selected organization. Model and language filtering depends on the
@@ -391,7 +391,7 @@ async def get_voices(
     """
     if not user.selected_organization_id:
         raise HTTPException(status_code=400, detail="No organization selected")
-    if provider != "dograh":
+    if provider != "easytech":
         if not provider_connection_uuid:
             raise HTTPException(
                 status_code=400,
@@ -432,7 +432,7 @@ async def get_voices(
             classify_exception(
                 e,
                 source=ErrorSource.PLATFORM,
-                provider="dograh",
+                provider="easytech",
                 error_owner="operator",
             ),
             organization_id=user.selected_organization_id,

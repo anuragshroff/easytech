@@ -321,7 +321,7 @@ export default function APIKeysPage() {
 
     return (
         <>
-            <PageLayout title="Developer Portal" description="Manage your API keys to access Dograh services programmatically">
+            <PageLayout title="Developer Portal" description="Manage your API keys to access EasyTech services programmatically">
 
                 {error && (
                     <div className="mb-4 p-4 bg-destructive/10 border border-destructive/20 rounded-lg text-destructive">
@@ -423,9 +423,9 @@ export default function APIKeysPage() {
                     )}
                 </PageSection>
 
-                {/* Dograh Service Keys Section */}
-                <PageSection title="Dograh Service Keys"
-                    description="Manage service keys for accessing Dograh AI services (LLM, TTS, STT)"
+                {/* EasyTech Service Keys Section */}
+                <PageSection title="EasyTech Service Keys"
+                    description="Manage service keys for accessing EasyTech AI services (LLM, TTS, STT)"
                     actions={<>{showServiceKeyArchiveControls && (
                         <Button
                             variant="outline"
@@ -446,7 +446,7 @@ export default function APIKeysPage() {
                             </Button>
                         ) : (
                             <span className="text">
-                                To generate additional service keys, <a href="https://app.dograh.com" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">Sign up on app.dograh.com</a>
+                                Service key creation is unavailable in this environment.
                             </span>
                         )}</>}>
                     {isServiceKeysLoading ? (
@@ -613,7 +613,7 @@ export default function APIKeysPage() {
                     <DialogHeader>
                         <DialogTitle>Create New Service Key</DialogTitle>
                         <DialogDescription>
-                            Create a service key to access Dograh AI services (LLM, TTS, STT)
+                            Create a service key to access EasyTech AI services (LLM, TTS, STT)
                         </DialogDescription>
                     </DialogHeader>
                     <div className="grid gap-4 py-4">
@@ -666,7 +666,7 @@ export default function APIKeysPage() {
                             </div>
                             <div className="p-4 bg-blue-500/10 border border-blue-500/20 rounded-lg">
                                 <p className="text-sm text-blue-600 dark:text-blue-500">
-                                    This key provides access to Dograh AI services including LLM, Text-to-Speech, and Speech-to-Text.
+                                    This key provides access to EasyTech AI services including LLM, Text-to-Speech, and Speech-to-Text.
                                     {createdServiceKey.expires_at && (
                                         <span className="block mt-1">
                                             Expires on: {formatDate(createdServiceKey.expires_at)}

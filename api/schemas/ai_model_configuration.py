@@ -30,13 +30,13 @@ class EffectiveAIModelConfiguration(BaseModel):
         if not self.llm_fallback or not self.llm_fallback.rules:
             return self
         if self.llm is None or self.llm.provider == ServiceProviders.DOGRAH:
-            raise ValueError("LLM fallbacks require a non-Dograh primary LLM")
+            raise ValueError("LLM fallbacks require a non-EasyTech primary LLM")
         if any(
             rule.target.provider == ServiceProviders.DOGRAH
             for rule in self.llm_fallback.rules
         ):
             raise ValueError(
-                "Dograh manages its own fallbacks and cannot be a fallback target"
+                "EasyTech manages its own fallbacks and cannot be a fallback target"
             )
         return self
 

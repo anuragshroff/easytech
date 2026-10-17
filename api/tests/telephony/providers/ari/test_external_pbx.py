@@ -24,13 +24,13 @@ def _vicidial_config() -> dict:
             "url": "https://vici.example.com/agc/api.php",
             "username": "agent-api-user",
             "password": "secret",
-            "source": "dograh",
+            "source": "easytech",
         },
         "non_agent_api": {
             "url": "https://vici.example.com/vicidial/non_agent_api.php",
             "username": "lead-api-user",
             "password": "secret",
-            "source": "dograh",
+            "source": "easytech",
         },
     }
 
@@ -525,7 +525,7 @@ def _ari_connection(monkeypatch, variables: dict[str, str]):
         organization_id=7,
         telephony_configuration_id=1,
         ari_endpoint="http://asterisk.example.com",
-        app_name="dograh",
+        app_name="easytech",
         app_password="secret",
         external_pbx_config=_vicidial_config(),
     )
@@ -796,7 +796,7 @@ async def test_hangup_strategy_ends_the_customer_leg_without_writing_the_lead(
 ):
     """The lead write-back moved to workflow completion.
 
-    This strategy only runs when Dograh ends the call, so a write here misses
+    This strategy only runs when EasyTech ends the call, so a write here misses
     every call the customer hung up on first.
     """
     redis = AsyncMock()
@@ -930,7 +930,7 @@ def _stub_run_lookup(monkeypatch, run) -> AsyncMock:
 _HANGUP_CONTEXT = {
     "channel_id": "channel-1",
     "ari_endpoint": "http://asterisk.test:8088",
-    "app_name": "dograh",
+    "app_name": "easytech",
     "app_password": "secret",
 }
 
@@ -947,7 +947,7 @@ async def test_hangup_lets_the_external_pbx_send_the_bye(monkeypatch):
 
     assert result is True
     assert len(session.get_calls) == 3
-    # Deleting the channel here is exactly what the PBX reports as Dograh
+    # Deleting the channel here is exactly what the PBX reports as EasyTech
     # dropping a live call, so the whole point is that it never happens.
     assert session.delete_calls == []
 
@@ -969,7 +969,7 @@ async def test_hangup_falls_back_when_the_external_pbx_never_sends_the_bye(monke
 
 @pytest.mark.asyncio
 async def test_hangup_does_not_wait_when_the_external_pbx_rejects_it(monkeypatch):
-    """A rejected hangup leaves no BYE coming; Dograh has to end the call."""
+    """A rejected hangup leaves no BYE coming; EasyTech has to end the call."""
     _stub_run_lookup(monkeypatch, _external_pbx_run())
     adapter = _hangup_adapter(ok=False)
     session = _ARISession()
@@ -1036,7 +1036,7 @@ def test_vicidial_adapter_writes_a_mapped_disposition_as_the_lead_status():
 def test_vicidial_adapter_drops_a_disposition_the_column_cannot_hold():
     """``vicidial_list.status`` is VARCHAR(6); a longer code would truncate.
 
-    An unmapped Dograh disposition lands here verbatim, and VICIdial writes
+    An unmapped EasyTech disposition lands here verbatim, and VICIdial writes
     RAXFER when it hands a lead to a remote agent -- so leaving the status alone
     keeps a missing mapping visible in the customer's reports instead of
     recording a truncated code that reads like a real disposition.
@@ -1227,7 +1227,7 @@ async def test_transfer_records_xfer_before_handing_the_customer_over():
     provider = ARIProvider(
         {
             "ari_endpoint": "http://pbx.example.com:8088",
-            "app_name": "dograh",
+            "app_name": "easytech",
             "app_password": "s3cr3t",
             "external_pbx": _vicidial_config(),
         }

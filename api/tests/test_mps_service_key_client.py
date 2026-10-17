@@ -41,7 +41,7 @@ async def test_credit_ledger_forwards_filters_with_organization_auth(
         ),
     )
     monkeypatch.setattr(mps_client_module, "DEPLOYMENT_MODE", "saas")
-    monkeypatch.setattr(mps_client_module, "DOGRAH_MPS_SECRET_KEY", "mps-secret")
+    monkeypatch.setattr(mps_client_module, "EASYTECH_MPS_SECRET_KEY", "mps-secret")
     filters = (
         dict(
             entry_type=entry_type,
@@ -89,10 +89,10 @@ async def test_credit_ledger_forwards_filters_with_organization_auth(
             "saas",
             42,
             "11111111-1111-4111-8111-111111111111",
-            "dograh-mps-secret",
+            "easytech-mps-secret",
             {
                 "Content-Type": "application/json",
-                "X-Secret-Key": "dograh-mps-secret",
+                "X-Secret-Key": "easytech-mps-secret",
                 "X-Organization-Id": "42",
             },
         ),
@@ -109,7 +109,7 @@ async def test_ensure_cloudonix_domain_uses_owner_scope_headers(
     calls = []
     payload = {
         "provisioning_id": "11111111-1111-4111-8111-111111111111",
-        "domain_name": "oss-dograh-11111111",
+        "domain_name": "oss-easytech-11111111",
         "domain_uuid": "22222222-2222-4222-8222-222222222222",
         "bearer_token": "domain-bearer",
         "status": "ready",
@@ -131,7 +131,7 @@ async def test_ensure_cloudonix_domain_uses_owner_scope_headers(
 
     monkeypatch.setattr(mps_client_module.httpx, "AsyncClient", FakeAsyncClient)
     monkeypatch.setattr(mps_client_module, "DEPLOYMENT_MODE", deployment_mode)
-    monkeypatch.setattr(mps_client_module, "DOGRAH_MPS_SECRET_KEY", mps_secret)
+    monkeypatch.setattr(mps_client_module, "EASYTECH_MPS_SECRET_KEY", mps_secret)
     client = MPSServiceKeyClient()
 
     assert (
@@ -248,8 +248,8 @@ def test_validate_service_key_classifies_mps_http_failure(monkeypatch):
     assert len(emitted) == 1
     failure, context = emitted[0]
     assert failure.type == ErrorType.SYSTEM_ERROR
-    assert failure.code == "dograh-503"
-    assert failure.provider == "dograh"
+    assert failure.code == "easytech-503"
+    assert failure.provider == "easytech"
     assert failure.error_owner.value == "operator"
     assert "mps_sk_secret" not in failure.internal_message
     assert context == {
@@ -262,7 +262,7 @@ def test_validate_service_key_classifies_mps_connection_failure(monkeypatch):
     emitted = []
     request_error = httpx.ConnectError(
         "All connection attempts failed",
-        request=httpx.Request("GET", "https://services.dograh.com"),
+        request=httpx.Request("GET", "https://services.easytech.com"),
     )
 
     class FakeClient:
@@ -295,7 +295,7 @@ def test_validate_service_key_classifies_mps_connection_failure(monkeypatch):
     assert len(emitted) == 1
     failure, context = emitted[0]
     assert failure.type == ErrorType.SYSTEM_ERROR
-    assert failure.code == "dograh-connection"
+    assert failure.code == "easytech-connection"
     assert failure.retryable is True
     assert context == {
         "organization_id": 42,
@@ -338,12 +338,12 @@ async def test_pricing_and_voice_failures_each_emit_one_classified_record(monkey
     assert len(emitted) == 2
     pricing_failure, pricing_context = emitted[0]
     voice_failure, voice_context = emitted[1]
-    assert pricing_failure.code == "dograh-502"
+    assert pricing_failure.code == "easytech-502"
     assert pricing_context == {
         "organization_id": 42,
         "operation": "get_billing_pricing",
     }
-    assert voice_failure.code == "dograh-503"
+    assert voice_failure.code == "easytech-503"
     assert voice_context == {
         "organization_id": 42,
         "operation": "get_voices",
@@ -464,7 +464,7 @@ async def test_authorize_workflow_run_start_uses_hosted_org_auth(monkeypatch):
     )
     monkeypatch.setattr("api.services.mps_service_key_client.DEPLOYMENT_MODE", "saas")
     monkeypatch.setattr(
-        "api.services.mps_service_key_client.DOGRAH_MPS_SECRET_KEY", "mps-secret"
+        "api.services.mps_service_key_client.EASYTECH_MPS_SECRET_KEY", "mps-secret"
     )
 
     client = MPSServiceKeyClient()
@@ -595,7 +595,7 @@ async def test_ensure_billing_account_v2_uses_balance_endpoint(monkeypatch):
     )
     monkeypatch.setattr("api.services.mps_service_key_client.DEPLOYMENT_MODE", "saas")
     monkeypatch.setattr(
-        "api.services.mps_service_key_client.DOGRAH_MPS_SECRET_KEY", "mps-secret"
+        "api.services.mps_service_key_client.EASYTECH_MPS_SECRET_KEY", "mps-secret"
     )
 
     client = MPSServiceKeyClient()
@@ -644,7 +644,7 @@ async def test_get_billing_pricing_uses_hosted_organization_auth(monkeypatch):
                 {
                     "organization_id": 42,
                     "platform_usage": {"price_per_minute": 0.01},
-                    "dograh_model": {"price_per_minute": 0.07},
+                    "easytech_model": {"price_per_minute": 0.07},
                 },
             )
 
@@ -653,7 +653,7 @@ async def test_get_billing_pricing_uses_hosted_organization_auth(monkeypatch):
     )
     monkeypatch.setattr("api.services.mps_service_key_client.DEPLOYMENT_MODE", "saas")
     monkeypatch.setattr(
-        "api.services.mps_service_key_client.DOGRAH_MPS_SECRET_KEY", "mps-secret"
+        "api.services.mps_service_key_client.EASYTECH_MPS_SECRET_KEY", "mps-secret"
     )
 
     client = MPSServiceKeyClient()
@@ -661,7 +661,7 @@ async def test_get_billing_pricing_uses_hosted_organization_auth(monkeypatch):
     assert await client.get_billing_pricing(42) == {
         "organization_id": 42,
         "platform_usage": {"price_per_minute": 0.01},
-        "dograh_model": {"price_per_minute": 0.07},
+        "easytech_model": {"price_per_minute": 0.07},
     }
     assert calls == [
         (
@@ -709,7 +709,7 @@ async def test_get_credit_ledger_sends_page_and_limit(monkeypatch):
     )
     monkeypatch.setattr("api.services.mps_service_key_client.DEPLOYMENT_MODE", "saas")
     monkeypatch.setattr(
-        "api.services.mps_service_key_client.DOGRAH_MPS_SECRET_KEY", "mps-secret"
+        "api.services.mps_service_key_client.EASYTECH_MPS_SECRET_KEY", "mps-secret"
     )
 
     client = MPSServiceKeyClient()
@@ -763,7 +763,7 @@ async def test_report_platform_usage_uses_hosted_secret_auth(monkeypatch):
     )
     monkeypatch.setattr("api.services.mps_service_key_client.DEPLOYMENT_MODE", "saas")
     monkeypatch.setattr(
-        "api.services.mps_service_key_client.DOGRAH_MPS_SECRET_KEY", "mps-secret"
+        "api.services.mps_service_key_client.EASYTECH_MPS_SECRET_KEY", "mps-secret"
     )
 
     client = MPSServiceKeyClient()
@@ -815,7 +815,7 @@ async def test_report_platform_usage_sends_duration_without_correlation(monkeypa
     )
     monkeypatch.setattr("api.services.mps_service_key_client.DEPLOYMENT_MODE", "saas")
     monkeypatch.setattr(
-        "api.services.mps_service_key_client.DOGRAH_MPS_SECRET_KEY", "mps-secret"
+        "api.services.mps_service_key_client.EASYTECH_MPS_SECRET_KEY", "mps-secret"
     )
 
     client = MPSServiceKeyClient()

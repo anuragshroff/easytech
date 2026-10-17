@@ -522,7 +522,7 @@ async def test_call_ended_carries_the_host(monkeypatch):
     """Multi-host installations can tell which instance handled each call."""
     sink = _RecordingSink()
     observer = _observer(sink=sink)
-    monkeypatch.setenv("DOGRAH_INSTANCE", "api-2")
+    monkeypatch.setenv("EASYTECH_INSTANCE", "api-2")
 
     observer.call_ended("completed", 1.0)
 
@@ -530,12 +530,12 @@ async def test_call_ended_carries_the_host(monkeypatch):
 
 
 async def test_call_ended_host_falls_back_to_the_hostname(monkeypatch):
-    """Without DOGRAH_INSTANCE, the hostname identifies the host."""
+    """Without EASYTECH_INSTANCE, the hostname identifies the host."""
     import socket
 
     sink = _RecordingSink()
     observer = _observer(sink=sink)
-    monkeypatch.delenv("DOGRAH_INSTANCE", raising=False)
+    monkeypatch.delenv("EASYTECH_INSTANCE", raising=False)
 
     observer.call_ended("completed", 1.0)
 

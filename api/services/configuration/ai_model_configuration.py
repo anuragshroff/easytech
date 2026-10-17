@@ -75,7 +75,7 @@ async def get_effective_ai_model_configuration_for_workflow(
     return resolved_config.effective
 
 
-def dograh_embeddings_base_url() -> str:
+def easytech_embeddings_base_url() -> str:
     # AsyncOpenAI appends "/embeddings"; MPS exposes that under /api/v1/llm.
     return f"{MPS_API_URL}/api/v1/llm"
 
@@ -86,5 +86,5 @@ def apply_managed_embeddings_base_url(
     base_url: str | None,
 ) -> str | None:
     if provider == ServiceProviders.DOGRAH.value or provider == ServiceProviders.DOGRAH:
-        return dograh_embeddings_base_url()
+        return easytech_embeddings_base_url()
     return base_url

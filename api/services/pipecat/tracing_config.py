@@ -44,7 +44,7 @@ class _OrgAttributeSpanProcessor(SpanProcessor):
 
         org_id = get_current_org_id()
         if org_id:
-            span.set_attribute("dograh.org_id", str(org_id))
+            span.set_attribute("easytech.org_id", str(org_id))
 
     def on_end(self, span):
         pass
@@ -59,7 +59,7 @@ class _OrgAttributeSpanProcessor(SpanProcessor):
 class _OrgRoutingExporter(SpanExporter):
     """Routes spans to org-specific or default Langfuse exporter.
 
-    Spans with a ``dograh.org_id`` attribute whose org has registered
+    Spans with a ``easytech.org_id`` attribute whose org has registered
     credentials are forwarded to that org's exporter.  All other spans
     go to the default exporter (env-var credentials).
     """
@@ -147,7 +147,7 @@ class _OrgRoutingExporter(SpanExporter):
             if scope is not None and scope.name == "fastmcp":
                 continue
 
-            org_id = span.attributes.get("dograh.org_id") if span.attributes else None
+            org_id = span.attributes.get("easytech.org_id") if span.attributes else None
             if org_id and str(org_id) in self._org_exporters:
                 org_buckets.setdefault(str(org_id), []).append(span)
             else:
@@ -191,7 +191,7 @@ def _resolve_trace_public() -> bool:
     all of them bound for the env-configured project — follows
     ``LANGFUSE_TRACES_PUBLIC``.
 
-    Routing reads ``dograh.org_id``, stamped from this same context var by
+    Routing reads ``easytech.org_id``, stamped from this same context var by
     ``_OrgAttributeSpanProcessor.on_start``, so both see one org id per span.
     """
     org_id = get_current_org_id()
@@ -226,7 +226,7 @@ def ensure_tracing() -> bool:
         )
 
     _org_routing_exporter = _OrgRoutingExporter(default_exporter)
-    setup_tracing(service_name="dograh-pipeline", exporter=_org_routing_exporter)
+    setup_tracing(service_name="easytech-pipeline", exporter=_org_routing_exporter)
 
     # Spans fan out to per-org Langfuse projects, so trace visibility can't come
     # from a single env flag — see _resolve_trace_public.

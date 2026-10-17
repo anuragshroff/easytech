@@ -1,4 +1,4 @@
-"""Quota checking service for Dograh credits.
+"""Quota checking service for EasyTech credits.
 
 This module provides reusable quota checking functionality that can be used
 across different endpoints (WebRTC signaling, telephony, public API triggers).
@@ -15,7 +15,7 @@ from api.constants import DEPLOYMENT_MODE
 from api.db import db_client
 from api.db.models import UserModel
 from api.errors.failure import (
-    DograhFailure,
+    EasyTechFailure,
     ErrorSource,
     ErrorType,
     classify_exception,
@@ -30,13 +30,13 @@ from api.services.configuration.run_model_configuration import (
 )
 from api.services.managed_model_services import (
     MPS_CORRELATION_ID_CONTEXT_KEY,
-    get_dograh_service_api_key,
+    get_easytech_service_api_key,
     uses_managed_model_services_v2,
 )
 from api.services.mps_service_key_client import mps_service_key_client
 from api.services.wallet_billing import check_pre_call_balance
 
-MINIMUM_DOGRAH_CREDITS_FOR_CALL = 0.10
+MINIMUM_EASYTECH_CREDITS_FOR_CALL = 0.10
 
 _MPS_UNREACHABLE_ERRORS = (
     httpx.TimeoutException,
@@ -47,23 +47,23 @@ _MPS_UNREACHABLE_ERRORS = (
 
 OSS_QUOTA_EXCEEDED_MESSAGE = (
     "You have exhausted your trial credits. "
-    "Please sign up on app.dograh.com to create a "
+    "Please sign up on app.easytech.com to create a "
     "new service key and set up in your model configurations."
 )
 
 HOSTED_QUOTA_EXCEEDED_MESSAGE = (
-    "You have exhausted your Dograh credits. "
+    "You have exhausted your EasyTech credits. "
     "Please purchase more credits from /billing "
     "or change providers in Models configurations."
 )
 
 OSS_HOSTED_KEY_QUOTA_EXCEEDED_MESSAGE = (
-    "The organization linked to this Dograh service key has insufficient credits. "
-    "Please add credits at app.dograh.com or change providers in Models configurations."
+    "The organization linked to this EasyTech service key has insufficient credits. "
+    "Please add credits at app.easytech.com or change providers in Models configurations."
 )
 
 SERVICE_TOKEN_ORG_MISMATCH_MESSAGE = (
-    "The Dograh service token being used is created from another account. "
+    "The EasyTech service token being used is created from another account. "
     "Please create a new service token from the Developers tab and use it in "
     "your model configuration."
 )
@@ -90,7 +90,7 @@ def _log_mps_exception(
         classify_exception(
             error,
             source=ErrorSource.PLATFORM,
-            provider="dograh",
+            provider="easytech",
             error_owner="operator",
         ),
         organization_id=organization_id,
@@ -107,13 +107,13 @@ def _log_mps_system_failure(
     workflow_run_id: int | None = None,
 ) -> None:
     log_failure(
-        DograhFailure(
+        EasyTechFailure(
             source=ErrorSource.PLATFORM,
             type=ErrorType.SYSTEM_ERROR,
-            code=f"dograh-{code}",
+            code=f"easytech-{code}",
             internal_message=message,
-            external_message="Dograh could not verify managed model access.",
-            provider="dograh",
+            external_message="EasyTech could not verify managed model access.",
+            provider="easytech",
             error_owner="operator",
             retryable=None,
         ),
@@ -122,19 +122,19 @@ def _log_mps_system_failure(
     )
 
 
-def _log_insufficient_dograh_credits(
+def _log_insufficient_easytech_credits(
     *,
     organization_id: int | None = None,
     workflow_run_id: int | None = None,
 ) -> None:
     log_failure(
-        DograhFailure(
+        EasyTechFailure(
             source=ErrorSource.PLATFORM,
             type=ErrorType.QUOTA_ERROR,
-            code="dograh-insufficient-credits",
-            internal_message="Insufficient Dograh credits",
-            external_message="Your organization has insufficient Dograh credits.",
-            provider="dograh",
+            code="easytech-insufficient-credits",
+            internal_message="Insufficient EasyTech credits",
+            external_message="Your organization has insufficient EasyTech credits.",
+            provider="easytech",
             error_owner="user",
             retryable=False,
         ),
@@ -186,7 +186,7 @@ def _managed_v2_authorization_failed_result() -> QuotaCheckResult:
     return QuotaCheckResult(
         has_quota=False,
         error_code="quota_check_failed",
-        error_message="Could not verify Dograh credits. Please try again.",
+        error_message="Could not verify EasyTech credits. Please try again.",
     )
 
 
@@ -215,18 +215,18 @@ def _oss_run_authorization_denied_result(
     return _insufficient_oss_quota_result()
 
 
-def _service_uses_dograh(service: Any) -> bool:
+def _service_uses_easytech(service: Any) -> bool:
     provider = getattr(service, "provider", None)
     return (
         provider == ServiceProviders.DOGRAH or provider == ServiceProviders.DOGRAH.value
     )
 
 
-def _dograh_api_keys(user_config: Any) -> set[str]:
+def _easytech_api_keys(user_config: Any) -> set[str]:
     api_keys: set[str] = set()
     for section_name in ("llm", "stt", "tts", "embeddings"):
         service = getattr(user_config, section_name, None)
-        if not _service_uses_dograh(service):
+        if not _service_uses_easytech(service):
             continue
         if hasattr(service, "get_all_api_keys"):
             all_api_keys = [
@@ -305,12 +305,12 @@ async def _authorize_hosted_workflow_run_start(
         workflow_run_id and uses_managed_model_services_v2(user_config)
     )
     service_key = (
-        get_dograh_service_api_key(user_config) if requires_correlation else None
+        get_easytech_service_api_key(user_config) if requires_correlation else None
     )
     if requires_correlation and not service_key:
         _log_mps_system_failure(
             "invalid-service-key",
-            "Managed-v2 workflow configuration has no Dograh service key",
+            "Managed-v2 workflow configuration has no EasyTech service key",
             organization_id=organization_id,
             workflow_run_id=workflow_run_id,
         )
@@ -329,14 +329,14 @@ async def _authorize_hosted_workflow_run_start(
             workflow_run_id=workflow_run_id,
             service_key=service_key,
             require_correlation_id=requires_correlation,
-            minimum_credits=MINIMUM_DOGRAH_CREDITS_FOR_CALL,
+            minimum_credits=MINIMUM_EASYTECH_CREDITS_FOR_CALL,
             created_by=(
                 str(workflow_owner.provider_id)
                 if workflow_owner.provider_id is not None
                 else None
             ),
             metadata={
-                "dograh_user_id": str(workflow_owner.id),
+                "easytech_user_id": str(workflow_owner.id),
                 "workflow_id": workflow_id,
             },
         )
@@ -368,15 +368,15 @@ async def _authorize_hosted_workflow_run_start(
         return QuotaCheckResult(
             has_quota=False,
             error_code="quota_check_failed",
-            error_message="Could not verify Dograh credits. Please try again.",
+            error_message="Could not verify EasyTech credits. Please try again.",
         )
 
     remaining = _safe_float(authorization.get("remaining_credits"))
     if (
         not authorization.get("allowed", False)
-        or remaining < MINIMUM_DOGRAH_CREDITS_FOR_CALL
+        or remaining < MINIMUM_EASYTECH_CREDITS_FOR_CALL
     ):
-        _log_insufficient_dograh_credits(
+        _log_insufficient_easytech_credits(
             organization_id=organization_id,
             workflow_run_id=workflow_run_id,
         )
@@ -407,33 +407,33 @@ async def _authorize_hosted_workflow_run_start(
         return QuotaCheckResult(
             has_quota=False,
             error_code="quota_check_failed",
-            error_message="Could not verify Dograh credits. Please try again.",
+            error_message="Could not verify EasyTech credits. Please try again.",
         )
     logger.info(
-        "Dograh run authorization passed for org {}: {:.2f} credits remaining",
+        "EasyTech run authorization passed for org {}: {:.2f} credits remaining",
         organization_id,
         remaining,
     )
     return QuotaCheckResult(has_quota=True)
 
 
-async def _authorize_oss_dograh_keys(
+async def _authorize_oss_easytech_keys(
     *,
-    dograh_api_keys: set[str],
+    easytech_api_keys: set[str],
 ) -> QuotaCheckResult:
     """Check per-key MPS credits for OSS deployments before a run starts."""
-    for api_key in dograh_api_keys:
+    for api_key in easytech_api_keys:
         try:
             usage = await mps_service_key_client.check_service_key_usage(api_key)
             remaining = usage.get("remaining_credits", 0.0)
 
             # Require at least $0.10 for a short call
-            if remaining < MINIMUM_DOGRAH_CREDITS_FOR_CALL:
-                _log_insufficient_dograh_credits()
+            if remaining < MINIMUM_EASYTECH_CREDITS_FOR_CALL:
+                _log_insufficient_easytech_credits()
                 return _insufficient_oss_quota_result()
 
             logger.info(
-                f"Dograh quota check passed for key ...{api_key[-8:]}: "
+                f"EasyTech quota check passed for key ...{api_key[-8:]}: "
                 f"{remaining:.2f} credits remaining"
             )
         except _MPS_UNREACHABLE_ERRORS as e:
@@ -450,7 +450,7 @@ async def _authorize_oss_dograh_keys(
             return QuotaCheckResult(
                 has_quota=False,
                 error_code="quota_check_failed",
-                error_message="Could not verify Dograh credits. Please try again.",
+                error_message="Could not verify EasyTech credits. Please try again.",
             )
 
     return QuotaCheckResult(has_quota=True)
@@ -465,11 +465,11 @@ async def _authorize_oss_managed_v2_correlation(
     if not workflow_run_id or not uses_managed_model_services_v2(user_config):
         return QuotaCheckResult(has_quota=True)
 
-    service_key = get_dograh_service_api_key(user_config)
+    service_key = get_easytech_service_api_key(user_config)
     if not service_key:
         _log_mps_system_failure(
             "invalid-service-key",
-            "OSS managed-v2 workflow configuration has no Dograh service key",
+            "OSS managed-v2 workflow configuration has no EasyTech service key",
             workflow_run_id=workflow_run_id,
         )
         return QuotaCheckResult(
@@ -514,7 +514,7 @@ async def _authorize_oss_managed_v2_correlation(
         return QuotaCheckResult(
             has_quota=False,
             error_code="quota_check_failed",
-            error_message="Could not verify Dograh credits. Please try again.",
+            error_message="Could not verify EasyTech credits. Please try again.",
         )
 
     return QuotaCheckResult(has_quota=True)
@@ -532,7 +532,7 @@ async def _authorize_oss_managed_v2_run(
             service_key=service_key,
             workflow_run_id=workflow_run_id,
             require_correlation_id=True,
-            minimum_credits=MINIMUM_DOGRAH_CREDITS_FOR_CALL,
+            minimum_credits=MINIMUM_EASYTECH_CREDITS_FOR_CALL,
             metadata={"workflow_id": workflow_id},
         )
     except httpx.HTTPStatusError as e:
@@ -546,15 +546,15 @@ async def _authorize_oss_managed_v2_run(
             return QuotaCheckResult(
                 has_quota=False,
                 error_code="quota_check_failed",
-                error_message="Could not verify Dograh credits. Please try again.",
+                error_message="Could not verify EasyTech credits. Please try again.",
             )
 
         logger.info(
             "MPS service-key run authorization is unavailable; using legacy "
             "quota and correlation endpoints"
         )
-        legacy_quota = await _authorize_oss_dograh_keys(
-            dograh_api_keys={service_key},
+        legacy_quota = await _authorize_oss_easytech_keys(
+            easytech_api_keys={service_key},
         )
         if not legacy_quota.has_quota:
             return legacy_quota
@@ -579,15 +579,15 @@ async def _authorize_oss_managed_v2_run(
         return QuotaCheckResult(
             has_quota=False,
             error_code="quota_check_failed",
-            error_message="Could not verify Dograh credits. Please try again.",
+            error_message="Could not verify EasyTech credits. Please try again.",
         )
 
     remaining = _safe_float(authorization.get("remaining_credits"))
     if (
         not authorization.get("allowed", False)
-        or remaining < MINIMUM_DOGRAH_CREDITS_FOR_CALL
+        or remaining < MINIMUM_EASYTECH_CREDITS_FOR_CALL
     ):
-        _log_insufficient_dograh_credits(workflow_run_id=workflow_run_id)
+        _log_insufficient_easytech_credits(workflow_run_id=workflow_run_id)
         return _oss_run_authorization_denied_result(authorization)
 
     correlation_id = _required_correlation_id(authorization)
@@ -613,11 +613,11 @@ async def _authorize_oss_managed_v2_run(
         return QuotaCheckResult(
             has_quota=False,
             error_code="quota_check_failed",
-            error_message="Could not verify Dograh credits. Please try again.",
+            error_message="Could not verify EasyTech credits. Please try again.",
         )
 
     logger.info(
-        "Dograh run authorization passed for key ...{}: {:.2f} credits remaining",
+        "EasyTech run authorization passed for key ...{}: {:.2f} credits remaining",
         service_key[-8:],
         remaining,
     )
@@ -821,19 +821,19 @@ async def authorize_workflow_run_start(
                 user_config=user_config,
             )
 
-        dograh_api_keys = _dograh_api_keys(user_config)
+        easytech_api_keys = _easytech_api_keys(user_config)
         if workflow_run_id is None or not uses_managed_model_services_v2(user_config):
-            if dograh_api_keys:
-                return await _authorize_oss_dograh_keys(
-                    dograh_api_keys=dograh_api_keys,
+            if easytech_api_keys:
+                return await _authorize_oss_easytech_keys(
+                    easytech_api_keys=easytech_api_keys,
                 )
             return QuotaCheckResult(has_quota=True)
 
-        correlation_service_key = get_dograh_service_api_key(user_config)
+        correlation_service_key = get_easytech_service_api_key(user_config)
         if not correlation_service_key:
             _log_mps_system_failure(
                 "invalid-service-key",
-                "Managed-v2 workflow configuration has no Dograh service key",
+                "Managed-v2 workflow configuration has no EasyTech service key",
                 organization_id=organization_id,
                 workflow_run_id=workflow_run_id,
             )
@@ -846,10 +846,10 @@ async def authorize_workflow_run_start(
                 ),
             )
 
-        keys_requiring_legacy_check = dograh_api_keys - {correlation_service_key}
+        keys_requiring_legacy_check = easytech_api_keys - {correlation_service_key}
         if keys_requiring_legacy_check:
-            oss_result = await _authorize_oss_dograh_keys(
-                dograh_api_keys=keys_requiring_legacy_check,
+            oss_result = await _authorize_oss_easytech_keys(
+                easytech_api_keys=keys_requiring_legacy_check,
             )
             if not oss_result.has_quota:
                 return oss_result
@@ -886,5 +886,5 @@ async def authorize_workflow_run_start(
         return QuotaCheckResult(
             has_quota=False,
             error_code="quota_check_failed",
-            error_message="Could not verify Dograh credits. Please try again.",
+            error_message="Could not verify EasyTech credits. Please try again.",
         )

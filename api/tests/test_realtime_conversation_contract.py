@@ -19,18 +19,18 @@ from pipecat.processors.frame_processor import FrameDirection
 from pipecat.services.aws.nova_sonic.llm import Role
 from pipecat.services.google.gemini_live.vertex.llm import GeminiLiveVertexLLMService
 
-from api.services.pipecat.realtime.aws_nova_sonic import DograhAWSNovaSonicLLMService
-from api.services.pipecat.realtime.azure_realtime import DograhAzureRealtimeLLMService
-from api.services.pipecat.realtime.gemini_live import DograhGeminiLiveLLMService
+from api.services.pipecat.realtime.aws_nova_sonic import EasyTechAWSNovaSonicLLMService
+from api.services.pipecat.realtime.azure_realtime import EasyTechAzureRealtimeLLMService
+from api.services.pipecat.realtime.gemini_live import EasyTechGeminiLiveLLMService
 from api.services.pipecat.realtime.gemini_live_vertex import (
-    DograhGeminiLiveVertexLLMService,
+    EasyTechGeminiLiveVertexLLMService,
 )
-from api.services.pipecat.realtime.grok_realtime import DograhGrokRealtimeLLMService
-from api.services.pipecat.realtime.openai_live import DograhOpenAILiveLLMService
-from api.services.pipecat.realtime.openai_realtime import DograhOpenAIRealtimeLLMService
+from api.services.pipecat.realtime.grok_realtime import EasyTechGrokRealtimeLLMService
+from api.services.pipecat.realtime.openai_live import EasyTechOpenAILiveLLMService
+from api.services.pipecat.realtime.openai_realtime import EasyTechOpenAIRealtimeLLMService
 from api.services.pipecat.realtime.ultravox_realtime import (
-    DograhUltravoxOneShotInputParams,
-    DograhUltravoxRealtimeLLMService,
+    EasyTechUltravoxOneShotInputParams,
+    EasyTechUltravoxRealtimeLLMService,
 )
 from api.services.pipecat.speech_playback import PlaybackOutcome
 from api.services.workflow.pipecat_engine import PipecatEngine
@@ -44,39 +44,39 @@ def realtime_service(request, monkeypatch):
     provider = request.param
     if provider in {"gemini", "vertex"}:
         monkeypatch.setattr(
-            DograhGeminiLiveLLMService, "create_client", lambda self: None
+            EasyTechGeminiLiveLLMService, "create_client", lambda self: None
         )
         monkeypatch.setattr(
             GeminiLiveVertexLLMService, "_get_credentials", lambda *args: None
         )
         if provider == "vertex":
-            service = DograhGeminiLiveVertexLLMService(
+            service = EasyTechGeminiLiveVertexLLMService(
                 project_id="test", location="us-central1"
             )
             assert service._get_history_config() is None
             assert service._project_id == "test"
         else:
-            service = DograhGeminiLiveLLMService(api_key="test")
+            service = EasyTechGeminiLiveLLMService(api_key="test")
     elif provider == "nova":
-        service = DograhAWSNovaSonicLLMService(
+        service = EasyTechAWSNovaSonicLLMService(
             secret_access_key="test", access_key_id="test", region="us-east-1"
         )
     elif provider == "ultravox":
-        service = DograhUltravoxRealtimeLLMService(
-            params=DograhUltravoxOneShotInputParams(api_key="test")
+        service = EasyTechUltravoxRealtimeLLMService(
+            params=EasyTechUltravoxOneShotInputParams(api_key="test")
         )
     elif provider == "live":
-        service = DograhOpenAILiveLLMService(
+        service = EasyTechOpenAILiveLLMService(
             api_key="test", backend_model="gpt-5.4-mini"
         )
     elif provider == "azure":
-        service = DograhAzureRealtimeLLMService(
+        service = EasyTechAzureRealtimeLLMService(
             api_key="test", base_url="wss://example.test/openai/v1/realtime"
         )
     elif provider == "grok":
-        service = DograhGrokRealtimeLLMService(api_key="test")
+        service = EasyTechGrokRealtimeLLMService(api_key="test")
     else:
-        service = DograhOpenAIRealtimeLLMService(api_key="test")
+        service = EasyTechOpenAIRealtimeLLMService(api_key="test")
     service.push_frame = AsyncMock()
     service.send_client_event = AsyncMock()
     return service
@@ -84,7 +84,7 @@ def realtime_service(request, monkeypatch):
 
 def audio_sender(service):
     """Replace only the network boundary, retaining upstream audio handling."""
-    if isinstance(service, DograhGeminiLiveLLMService):
+    if isinstance(service, EasyTechGeminiLiveLLMService):
         service._session = SimpleNamespace(send_realtime_input=AsyncMock())
         service._ready_for_realtime_input = True
         service._vad_disabled = False
@@ -95,7 +95,7 @@ def audio_sender(service):
             lambda call: call.kwargs["audio"].data,
             16000,
         )
-    if isinstance(service, DograhAWSNovaSonicLLMService):
+    if isinstance(service, EasyTechAWSNovaSonicLLMService):
         service._send_user_audio_event = AsyncMock()
         return (
             service._handle_input_audio_frame,
@@ -103,7 +103,7 @@ def audio_sender(service):
             lambda call: call.args[0],
             16000,
         )
-    if isinstance(service, DograhUltravoxRealtimeLLMService):
+    if isinstance(service, EasyTechUltravoxRealtimeLLMService):
         service._socket = SimpleNamespace()
         service._send = AsyncMock()
         return (
@@ -112,11 +112,11 @@ def audio_sender(service):
             lambda call: call.args[0],
             service._sample_rate,
         )
-    if isinstance(service, DograhOpenAILiveLLMService):
+    if isinstance(service, EasyTechOpenAILiveLLMService):
         service._session_started = True
     else:
         service._api_session_ready = True
-    rate = 16000 if isinstance(service, DograhGrokRealtimeLLMService) else 24000
+    rate = 16000 if isinstance(service, EasyTechGrokRealtimeLLMService) else 24000
     return (
         service._send_user_audio,
         service.send_client_event,
@@ -170,9 +170,9 @@ async def test_muted_audio_keeps_duration_and_never_modifies_recording(
 async def test_only_opening_text_is_accepted_even_while_connecting(realtime_service):
     service = realtime_service
     service._context = LLMContext()
-    if isinstance(service, DograhUltravoxRealtimeLLMService):
+    if isinstance(service, EasyTechUltravoxRealtimeLLMService):
         service._connect_call = AsyncMock()
-    if isinstance(service, DograhAWSNovaSonicLLMService):
+    if isinstance(service, EasyTechAWSNovaSonicLLMService):
         service._finish_connecting_if_context_available = AsyncMock()
     greeting = AsyncMock(wraps=service._handle_initial_greeting)
     service._handle_initial_greeting = greeting
@@ -277,7 +277,7 @@ async def test_nova_recorded_greeting_never_asks_for_a_turn():
     whenever the answer supervisor releases after the callee has spoken. The
     open has to swallow it, or the model talks over the recording.
     """
-    service = DograhAWSNovaSonicLLMService(
+    service = EasyTechAWSNovaSonicLLMService(
         secret_access_key="test", access_key_id="test", region="us-east-1"
     )
     context = LLMContext()
@@ -311,8 +311,8 @@ async def test_nova_recorded_greeting_never_asks_for_a_turn():
 
 @pytest.mark.asyncio
 async def test_gemini_mute_preserves_readiness_and_manual_activity_windows(monkeypatch):
-    monkeypatch.setattr(DograhGeminiLiveLLMService, "create_client", lambda self: None)
-    service = DograhGeminiLiveLLMService(api_key="test")
+    monkeypatch.setattr(EasyTechGeminiLiveLLMService, "create_client", lambda self: None)
+    service = EasyTechGeminiLiveLLMService(api_key="test")
     send, output, decode, _ = audio_sender(service)
     service._user_is_muted = True
     frame = InputAudioRawFrame(b"\x01\x02" * 320, 16000, 1)
@@ -343,7 +343,7 @@ async def test_azure_shared_wrapper_retains_native_authentication(auth, monkeypa
     credentials = (
         {"api_key": "test-key"} if auth == "key" else {"token_provider": token_provider}
     )
-    service = DograhAzureRealtimeLLMService(
+    service = EasyTechAzureRealtimeLLMService(
         base_url="wss://example.test/openai/v1/realtime?model=my-deployment",
         **credentials,
     )
@@ -368,9 +368,9 @@ async def test_azure_shared_wrapper_retains_native_authentication(auth, monkeypa
 @pytest.mark.parametrize("provider", ["openai", "azure", "grok"])
 async def test_prompt_update_keeps_existing_realtime_connection(provider):
     cls = {
-        "openai": DograhOpenAIRealtimeLLMService,
-        "azure": DograhAzureRealtimeLLMService,
-        "grok": DograhGrokRealtimeLLMService,
+        "openai": EasyTechOpenAIRealtimeLLMService,
+        "azure": EasyTechAzureRealtimeLLMService,
+        "grok": EasyTechGrokRealtimeLLMService,
     }[provider]
     kwargs = (
         {"base_url": "wss://example.test/openai/v1/realtime"}
@@ -409,9 +409,9 @@ async def test_prompt_update_keeps_existing_realtime_connection(provider):
 async def test_openai_encoded_audio_uses_codec_silence(encoding, silence):
     from pipecat.services.openai.realtime import events
 
-    service = DograhOpenAIRealtimeLLMService(
+    service = EasyTechOpenAIRealtimeLLMService(
         api_key="test",
-        settings=DograhOpenAIRealtimeLLMService.Settings(
+        settings=EasyTechOpenAIRealtimeLLMService.Settings(
             session_properties=events.SessionProperties(
                 audio={"input": {"format": {"type": encoding}}}
             )
@@ -435,7 +435,7 @@ def prerecorded_greeting_probe(service):
     Returns a callable run after ``handle_prerecorded_greeting`` that checks
     the provider seeded the spoken greeting without requesting a turn.
     """
-    if isinstance(service, DograhGeminiLiveLLMService):
+    if isinstance(service, EasyTechGeminiLiveLLMService):
         service._session = SimpleNamespace(
             send_client_content=AsyncMock(), send_realtime_input=AsyncMock()
         )
@@ -457,7 +457,7 @@ def prerecorded_greeting_probe(service):
 
         return check
 
-    if isinstance(service, DograhUltravoxRealtimeLLMService):
+    if isinstance(service, EasyTechUltravoxRealtimeLLMService):
         service._connect_call = AsyncMock()
 
         def check():
@@ -468,7 +468,7 @@ def prerecorded_greeting_probe(service):
 
         return check
 
-    if isinstance(service, DograhAWSNovaSonicLLMService):
+    if isinstance(service, EasyTechAWSNovaSonicLLMService):
         # Replace only the wire, not _send_text_event: the interactive
         # suppression that keeps Nova silent lives in that method, and mocking
         # it would step over the thing under test. Upstream's connect path is
@@ -499,7 +499,7 @@ def prerecorded_greeting_probe(service):
 
         return check
 
-    if isinstance(service, DograhOpenAILiveLLMService):
+    if isinstance(service, EasyTechOpenAILiveLLMService):
         service._session_started = True
         service.send_client_event = AsyncMock()
 

@@ -7,8 +7,6 @@ import { useEffect } from 'react';
 
 import { useAuth } from '@/lib/auth';
 
-import Footer from './Footer';
-
 // Only load Stack's SignIn component when Stack provider is active
 const SignIn = dynamic(
   () => import('@stackframe/stack').then(mod => ({ default: mod.SignIn })),
@@ -33,10 +31,5 @@ export default function SignInClient() {
     );
   }
 
-  return (
-    <>
-      <SignIn />
-      <Footer />
-    </>
-  );
+  return <SignIn />;
 }

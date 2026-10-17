@@ -62,6 +62,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import { DOCS_BASE } from "@/constants/documentation";
 import { useAppConfig } from "@/context/AppConfigContext";
 import { useOrgConfig } from "@/context/OrgConfigContext";
 import { useOrganizationTimezone } from "@/hooks/useOrganizationTimezone";
@@ -84,7 +85,7 @@ export default function TelephonyConfigurationDetailPage() {
   const organizationTimezone = useOrganizationTimezone();
   const inboundWebhookUrl = `${resolveWebhookBaseUrl(appConfig?.tunnelUrl)}${INBOUND_WEBHOOK_PATH}`;
   const [config, setConfig] = useState<TelephonyConfigurationDetail | null>(null);
-  // ARI only: Dograh generates the Stasis application name, so the dialplan
+  // ARI only: EasyTech generates the Stasis application name, so the dialplan
   // line cannot be written until the configuration has been saved.
   const stasisAppName =
     typeof config?.credentials?.stasis_app_name === "string"
@@ -312,7 +313,7 @@ export default function TelephonyConfigurationDetailPage() {
                     This configuration is disabled
                   </p>
                   <p className="text-muted-foreground">
-                    Dograh stopped reconnecting after repeated connection
+                    EasyTech stopped reconnecting after repeated connection
                     failures
                     {config.inactive_reason ? `: ${config.inactive_reason}` : ""}.
                     Calls will not work until it is reconnected. Correct the
@@ -347,7 +348,7 @@ export default function TelephonyConfigurationDetailPage() {
               <p className="text-xs text-muted-foreground">
                 Add this line to your Asterisk <code>extensions.conf</code>, then run{" "}
                 <code>dialplan reload</code>. Until you do, calls reach Asterisk but never
-                arrive at Dograh.
+                arrive at EasyTech.
               </p>
               <button
                 type="button"
@@ -419,7 +420,7 @@ export default function TelephonyConfigurationDetailPage() {
               Numbers used as caller ID for outbound and accepted for inbound matching.
               SIP URIs and extensions are supported alongside PSTN numbers.{" "}
               <a
-                href="https://docs.dograh.com/integrations/telephony/inbound"
+                href={`${DOCS_BASE}/integrations/telephony/inbound`}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="inline-flex items-center gap-0.5 underline"

@@ -4,7 +4,7 @@ from api.routes import organization
 def _credentials(password: str = "agent-secret") -> dict:
     return {
         "ari_endpoint": "https://asterisk.example.com",
-        "app_name": "dograh",
+        "app_name": "easytech",
         "app_password": "ari-secret",
         "external_pbx": {
             "type": "vicidial",

@@ -51,7 +51,7 @@ def test_routing_account_id_is_none_when_unset_or_provider_has_no_account():
     assert routing_account_id("twilio", {"account_sid": ""}) is None
     assert routing_account_id("twilio", None) is None
     # ARI has no account concept; its inbound path is keyed differently.
-    assert routing_account_id("ari", {"app_name": "dograh"}) is None
+    assert routing_account_id("ari", {"app_name": "easytech"}) is None
     assert routing_account_id("nonexistent-provider", {"account_sid": "AC1"}) is None
 
 
@@ -68,7 +68,7 @@ async def test_no_query_for_a_provider_without_an_account_field():
     db = _db()
     await assert_no_inbound_routing_conflict(
         provider="ari",
-        credentials={"app_name": "dograh"},
+        credentials={"app_name": "easytech"},
         addresses=["+19789911885"],
         organization_id=11,
         db=db,

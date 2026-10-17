@@ -231,8 +231,8 @@
 
   /* Matte app background — flat charcoal (dark) / soft paper (light), NO
      gradients, with one subtle graphic in BOTH themes: the giant faded
-     "dograh" wordmark (--brand-imprint, defined in :root/.dark) pinned to
-     the bottom of the viewport, echoing the dograh.com footer. */
+     "EasyTech" wordmark (--brand-imprint, defined in :root/.dark) pinned to
+     the bottom of the viewport, echoing the the app footer. */
   /* NOTE: background-attachment: fixed positions in VIEWPORT space but only
      paints inside .app-surface, which starts right of the ~270px sidebar —
      the +135px x-shift recentres the wordmark on the VISIBLE canvas. */
@@ -254,7 +254,7 @@
     background-color: oklch(0.165 0.002 80);
   }
 
-  /* Giant faded "dograh" imprint for the auth pages (applied to the AuthShell
+  /* Giant faded "EasyTech" imprint for the auth pages (applied to the AuthShell
      form column, shared by Stack + OSS login/signup). Same --brand-imprint as
      .app-surface; element-relative here (no fixed attachment), so it centers
      and scales to whatever element carries the class. */
@@ -391,27 +391,3 @@
   border-bottom-color: var(--cta);
 }
 
-/* Event banner (Dograh Cloud only, NEXT_PUBLIC_EVENT_BANNER=1). The bar is
-   sticky at top-0 in the root layout, so while it is up it permanently owns
-   --event-banner-h pixels at the top of the viewport. Two things have to give
-   way, and both are utility-class'd primitives we do not want to fork:
-
-   - the shadcn sidebar's FIXED container (inset-y-0 h-svh), which would
-     otherwise start underneath the bar and run past the bottom of the screen;
-   - every full-height page shell (min-h-screen / min-h-svh: the sidebar
-     wrapper, the app shell, the auth shell), which would otherwise demand a
-     full viewport BELOW the bar and add a phantom scrollbar.
-
-   Both rules are gated on [data-event-banner], set on <html> by EventBanner
-   only while the bar is actually rendered — dismissed or env-gated off, these
-   selectors do not match and the layout is byte-for-byte what it was before
-   this block existed. */
-[data-event-banner] [data-slot="sidebar-container"] {
-  top: var(--event-banner-h, 0px);
-  height: calc(100svh - var(--event-banner-h, 0px));
-}
-
-[data-event-banner] [class~="min-h-screen"],
-[data-event-banner] [class~="min-h-svh"] {
-  min-height: calc(100svh - var(--event-banner-h, 0px));
-}

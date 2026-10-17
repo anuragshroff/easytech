@@ -12,7 +12,7 @@ from loguru import logger
 
 from api.db import db_client
 from api.errors.failure import (
-    DograhFailure,
+    EasyTechFailure,
     ErrorSource,
     ErrorType,
     classify_exception,
@@ -118,7 +118,7 @@ async def execute_pre_call_fetch_result(
     # Build headers
     headers: Dict[str, str] = {"Content-Type": "application/json"}
     if workflow_run_id is not None:
-        headers["Idempotency-Key"] = f"dograh-pre-call-{workflow_run_id}"
+        headers["Idempotency-Key"] = f"easytech-pre-call-{workflow_run_id}"
         payload["call_inbound"]["workflow_run_id"] = workflow_run_id
 
     if credential_uuid:
@@ -130,7 +130,7 @@ async def execute_pre_call_fetch_result(
                 headers.update(build_auth_header(credential))
             else:
                 log_failure(
-                    DograhFailure(
+                    EasyTechFailure(
                         source=ErrorSource.INTEGRATION,
                         type=ErrorType.CONFIG_ERROR,
                         code="pre-call-fetch-credential-not-found",
@@ -169,7 +169,7 @@ async def execute_pre_call_fetch_result(
             if response.is_success:
                 if not isinstance(response_data, dict):
                     log_failure(
-                        DograhFailure(
+                        EasyTechFailure(
                             source=ErrorSource.INTEGRATION,
                             type=ErrorType.CONFIG_ERROR,
                             code="pre-call-fetch-invalid-response",

@@ -1,7 +1,7 @@
 """Stasis application naming for ARI configurations.
 
 Asterisk hands a Stasis application to whichever ARI WebSocket registered for it
-last and silently stops delivering events to the previous holder. Two Dograh
+last and silently stops delivering events to the previous holder. Two EasyTech
 configurations naming the same application on one PBX therefore do not both
 work: one goes deaf with no error on either side, and the survivor receives the
 other's calls — stamping its own organization into the media-socket URL, which
@@ -25,9 +25,9 @@ from api.services.telephony.providers.ari.provider import ARIProvider
 
 BASE = {
     "ari_endpoint": "http://pbx.example.com:8088",
-    "app_name": "dograh",
+    "app_name": "easytech",
     "app_password": "s3cr3t",
-    "ws_client_name": "dograh",
+    "ws_client_name": "easytech",
 }
 
 
@@ -45,13 +45,13 @@ def _legacy(**overrides):
 async def test_create_generates_a_stasis_app_name():
     created = await _preprocess_credentials_on_save(_legacy(), None)
 
-    assert created["stasis_app_name"].startswith("dograh_")
+    assert created["stasis_app_name"].startswith("easytech_")
     assert created["stasis_app_name"] != created["app_name"]
 
 
 @pytest.mark.asyncio
 async def test_two_configurations_never_share_a_generated_name():
-    """The whole point: two customers both typing "dograh" must not collide."""
+    """The whole point: two customers both typing "easytech" must not collide."""
     first = await _preprocess_credentials_on_save(_legacy(), None)
     second = await _preprocess_credentials_on_save(_legacy(), None)
 
@@ -95,10 +95,10 @@ def test_generated_name_is_returned_to_the_customer():
     """Server-managed fields are hidden by default; this one has to be readable
     because the customer pastes it into their own extensions.conf."""
     displayed = _credentials_for_display(
-        "ari", _legacy(stasis_app_name="dograh_a1b2c3d4e5f6")
+        "ari", _legacy(stasis_app_name="easytech_a1b2c3d4e5f6")
     )
 
-    assert displayed["stasis_app_name"] == "dograh_a1b2c3d4e5f6"
+    assert displayed["stasis_app_name"] == "easytech_a1b2c3d4e5f6"
     assert displayed["app_password"] != "s3cr3t", "password must still be masked"
 
 
@@ -111,9 +111,9 @@ def test_stasis_app_name_is_not_accepted_from_the_client():
     submitted = spec.config_request_cls(
         provider="ari",
         ari_endpoint="http://pbx.example.com:8088",
-        app_name="dograh",
+        app_name="easytech",
         app_password="s3cr3t",
-        stasis_app_name="dograh_someone_elses_app",
+        stasis_app_name="easytech_someone_elses_app",
     )
     assert "stasis_app_name" not in submitted.model_dump()
 
@@ -121,10 +121,10 @@ def test_stasis_app_name_is_not_accepted_from_the_client():
 @pytest.mark.asyncio
 async def test_client_supplied_name_is_overwritten_on_create():
     created = await _preprocess_credentials_on_save(
-        _legacy(stasis_app_name="dograh_someone_elses_app"), None
+        _legacy(stasis_app_name="easytech_someone_elses_app"), None
     )
 
-    assert created["stasis_app_name"] != "dograh_someone_elses_app"
+    assert created["stasis_app_name"] != "easytech_someone_elses_app"
 
 
 # --------------------------------------------------------------------------
@@ -137,25 +137,25 @@ def test_websocket_authenticates_as_the_ari_user_and_subscribes_to_the_app():
         8628,
         1709,
         "http://pbx.example.com:8088",
-        "dograh",
+        "easytech",
         "s3cr3t",
-        "dograh",
+        "easytech",
         None,
-        "dograh_a1b2c3d4e5f6",
+        "easytech_a1b2c3d4e5f6",
     )
 
-    assert "api_key=dograh:s3cr3t" in connection.ws_url
-    assert "app=dograh_a1b2c3d4e5f6" in connection.ws_url
+    assert "api_key=easytech:s3cr3t" in connection.ws_url
+    assert "app=easytech_a1b2c3d4e5f6" in connection.ws_url
 
 
 def test_origination_and_external_media_use_the_stasis_app():
     provider = ARIProvider(
-        _config_loader(_legacy(stasis_app_name="dograh_a1b2c3d4e5f6"))
+        _config_loader(_legacy(stasis_app_name="easytech_a1b2c3d4e5f6"))
     )
 
-    assert provider.stasis_app_name == "dograh_a1b2c3d4e5f6"
+    assert provider.stasis_app_name == "easytech_a1b2c3d4e5f6"
     # Authentication is unchanged — it is the ari.conf section name.
-    assert provider._get_auth().login == "dograh"
+    assert provider._get_auth().login == "easytech"
 
 
 # --------------------------------------------------------------------------
@@ -166,9 +166,9 @@ def test_origination_and_external_media_use_the_stasis_app():
 def test_pre_split_configuration_still_uses_app_name_for_both():
     loaded = _config_loader(_legacy())
     connection = ARIConnection(
-        8434, 1397, "http://pbx.example.com:8088", "dograh", "s3cr3t", "dograh"
+        8434, 1397, "http://pbx.example.com:8088", "easytech", "s3cr3t", "easytech"
     )
 
-    assert loaded["stasis_app_name"] == "dograh"
-    assert ARIProvider(loaded).stasis_app_name == "dograh"
-    assert "app=dograh&" in connection.ws_url
+    assert loaded["stasis_app_name"] == "easytech"
+    assert ARIProvider(loaded).stasis_app_name == "easytech"
+    assert "app=easytech&" in connection.ws_url

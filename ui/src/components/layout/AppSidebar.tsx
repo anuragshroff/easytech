@@ -2,7 +2,6 @@
 
 import {
   AlertTriangle,
-  ArrowUpCircle,
   AudioLines,
   Brain,
   ChevronLeft,
@@ -21,7 +20,6 @@ import {
   Settings,
   ShieldCheck,
   TrendingUp,
-  UserRound,
   Workflow,
   Wrench,
 } from "lucide-react";
@@ -57,9 +55,7 @@ import {
 } from "@/components/ui/sidebar";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { useAppConfig } from "@/context/AppConfigContext";
-import { useLeadForms } from "@/context/LeadFormsContext";
 import { useTelephonyConfigWarnings } from "@/context/TelephonyConfigWarningsContext";
-import { useLatestReleaseVersion } from "@/hooks/useLatestReleaseVersion";
 import type { LocalUser } from "@/lib/auth";
 import { useAuth } from "@/lib/auth";
 import { cn } from "@/lib/utils";
@@ -177,7 +173,6 @@ export function AppSidebar() {
   const { state, isMobile, setOpenMobile } = useSidebar();
   const { provider, logout, user } = useAuth();
   const { config } = useAppConfig();
-  const { openHireExpert } = useLeadForms();
   const {
     telnyxMissingWebhookPublicKeyCount,
     vonageMissingSignatureSecretCount,
@@ -189,12 +184,6 @@ export function AppSidebar() {
 
   // Version info from app config context
   const versionInfo = config ? { ui: config.uiVersion, api: config.apiVersion } : null;
-
-  // Check for updates only on self-hosted (OSS) deployments — cloud is managed for the user.
-  const { latest: latestRelease, isBehind, isLatest } = useLatestReleaseVersion(
-    versionInfo?.ui,
-    { enabled: config?.deploymentMode === "oss" },
-  );
 
   const isActive = (path: string) => pathname.startsWith(path);
 
@@ -306,35 +295,6 @@ export function AppSidebar() {
     </Button>
   );
 
-  // "Hire an Expert" CTA, rendered INSIDE the shared footer pill next to the
-  // profile icon. Expanded: label pill filling the row. Collapsed: icon-only.
-  const hireExpertButton = isCollapsed ? (
-    <Tooltip>
-      <TooltipTrigger asChild>
-        <Button
-          size="icon"
-          className="h-7 w-7 rounded-full"
-          onClick={() => openHireExpert("sidebar")}
-          aria-label="Hire an Expert"
-        >
-          <UserRound className="h-3.5 w-3.5" />
-        </Button>
-      </TooltipTrigger>
-      <TooltipContent side="right">
-        <p>Hire an Expert</p>
-      </TooltipContent>
-    </Tooltip>
-  ) : (
-    <Button
-      size="sm"
-      className="h-7 gap-1.5 rounded-full px-3 text-xs"
-      onClick={() => openHireExpert("sidebar")}
-    >
-      <UserRound className="h-3.5 w-3.5" />
-      Hire an Expert
-    </Button>
-  );
-
   return (
     <Sidebar collapsible="icon" variant="floating" className="app-sidebar-dock py-4">
       <SidebarHeader className="px-2 py-3 notranslate" translate="no">
@@ -355,31 +315,6 @@ export function AppSidebar() {
                 </span>
               )}
             </Link>
-            {isBehind && latestRelease && (
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <span className="inline-flex items-center gap-1 rounded-md border bg-amber-50 px-1.5 py-0.5 text-[10px] font-medium leading-none text-amber-900 dark:bg-amber-950 dark:text-amber-200">
-                    <ArrowUpCircle className="h-3 w-3" />
-                    Update
-                  </span>
-                </TooltipTrigger>
-                <TooltipContent side="bottom">
-                  <p>Latest: {latestRelease}</p>
-                </TooltipContent>
-              </Tooltip>
-            )}
-            {isLatest && (
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <span className="inline-flex items-center rounded-md border bg-emerald-50 px-1.5 py-0.5 text-[10px] font-medium leading-none text-emerald-900 dark:bg-emerald-950 dark:text-emerald-200">
-                    Latest
-                  </span>
-                </TooltipTrigger>
-                <TooltipContent side="bottom">
-                  <p>You&apos;re running the latest release</p>
-                </TooltipContent>
-              </Tooltip>
-            )}
           </div>
 
           <SidebarTrigger className={cn("hover:bg-accent", isCollapsed && "mx-auto")}>
@@ -461,7 +396,6 @@ export function AppSidebar() {
                   </DropdownMenuItem>
                 </DropdownMenuContent>
               </DropdownMenu>
-              {hireExpertButton}
             </div>
           )}
 
@@ -502,7 +436,6 @@ export function AppSidebar() {
                   </DropdownMenuItem>
                 </DropdownMenuContent>
               </DropdownMenu>
-              {hireExpertButton}
             </div>
           )}
 

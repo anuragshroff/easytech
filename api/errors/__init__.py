@@ -1,4 +1,4 @@
 """
-Errors package for the Dograh API.
+Errors package for the EasyTech API.
 Contains centralized error definitions and messages for various domains.
 """

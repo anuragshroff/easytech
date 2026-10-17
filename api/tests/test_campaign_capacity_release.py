@@ -24,7 +24,7 @@ def _ari_connection():
         organization_id=ORG_ID,
         telephony_configuration_id=CONFIG_ID,
         ari_endpoint="http://asterisk:8088",
-        app_name="dograh",
+        app_name="easytech",
         app_password="secret",
     )
 

@@ -7,6 +7,7 @@ import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
+import { DOCS_BASE } from "@/constants/documentation";
 import { useAppConfig } from "@/context/AppConfigContext";
 import { resolveBrowserBackendUrl } from "@/lib/apiClient";
 import { copyTextToClipboard } from "@/lib/clipboard";
@@ -104,7 +105,7 @@ export function MCPSection() {
         For step-by-step setup with Claude Code, Claude Desktop, Cursor, and
         other clients, see the{" "}
         <Link
-          href="https://docs.dograh.com/integrations/mcp"
+          href={`${DOCS_BASE}/integrations/mcp`}
           target="_blank"
           rel="noopener noreferrer"
           className="text-primary underline hover:no-underline"

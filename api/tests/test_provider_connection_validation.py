@@ -204,7 +204,7 @@ async def test_stale_revision_is_rejected_before_probing(api):
 
 
 @pytest.mark.asyncio
-async def test_dograh_checks_keep_organization_context(api, monkeypatch):
+async def test_easytech_checks_keep_organization_context(api, monkeypatch):
     validate = Mock(return_value=True)
     monkeypatch.setattr(
         check_validity.mps_service_key_client, "validate_service_key", validate
@@ -212,8 +212,8 @@ async def test_dograh_checks_keep_organization_context(api, monkeypatch):
     response = await api.client.post(
         "/model-connections/provider-connections",
         json={
-            "name": "Dograh",
-            "provider": "dograh",
+            "name": "EasyTech",
+            "provider": "easytech",
             "credentials": {"api_key": "mps-valid"},
         },
     )

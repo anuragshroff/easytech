@@ -39,9 +39,9 @@ def ari_call(monkeypatch):
     provider = provider_module.ARIProvider(
         {
             "ari_endpoint": "http://asterisk.test:8088",
-            "app_name": "dograh",
+            "app_name": "easytech",
             "app_password": "secret",
-            "stasis_app_name": "dograh-config-10",
+            "stasis_app_name": "easytech-config-10",
         }
     )
     session = MagicMock()
@@ -62,7 +62,7 @@ async def test_destroy_before_originate_response_reaches_terminal_processing(
         organization_id=1,
         telephony_configuration_id=10,
         ari_endpoint="http://asterisk.test:8088",
-        app_name="dograh",
+        app_name="easytech",
         app_password="secret",
     )
     connection._redis_client = ari_call.redis
@@ -138,7 +138,7 @@ async def test_origination_uses_a_unique_registered_id(ari_call, workflow_run_id
     async def originate(url, *, params, auth):
         assert url == "http://asterisk.test:8088/ari/channels"
         assert params["endpoint"] == "PJSIP/1001"
-        assert params["app"] == "dograh-config-10"
+        assert params["app"] == "easytech-config-10"
         assert params["callerId"] == "1002"
         channel_id = params["channelId"]
         key = f"{channel_registry.CHANNEL_KEY_PREFIX}{channel_id}"

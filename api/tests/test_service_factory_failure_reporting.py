@@ -46,7 +46,7 @@ def test_service_factory_tags_success_with_authoritative_ownership():
     assert metadata.error_owner.value == "user"
 
 
-def test_managed_service_constructor_failure_is_attributed_to_dograh(monkeypatch):
+def test_managed_service_constructor_failure_is_attributed_to_easytech(monkeypatch):
     captured = []
     monkeypatch.setattr(
         "api.services.pipecat.service_factory.log_failure",
@@ -54,13 +54,13 @@ def test_managed_service_constructor_failure_is_attributed_to_dograh(monkeypatch
     )
     with (
         patch(
-            "api.services.pipecat.service_factory.DograhLLMService",
+            "api.services.pipecat.service_factory.EasyTechLLMService",
             side_effect=ValueError("bad managed response"),
         ),
         pytest.raises(ValueError),
     ):
         create_llm_service_from_provider(
-            provider="dograh",
+            provider="easytech",
             model="gpt-4.1-mini",
             api_key="managed-key",
         )

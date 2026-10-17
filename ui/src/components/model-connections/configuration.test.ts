@@ -33,7 +33,7 @@ describe("model connection editor settings", () => {
     });
 
     it("preserves mixed managed and external providers on a rename-only save", () => {
-        const available = [...connections, connection("managed", "dograh")];
+        const available = [...connections, connection("managed", "easytech")];
         const mixed: ConfigurationSpec = { ...base, llm: { provider_connection_uuid: "managed", settings: {} }, embeddings: null };
         expect(configurationMode(mixed, available)).toBe("cascade");
         const cleaned = cleanConfiguration(mixed, catalog, available);
@@ -74,17 +74,17 @@ describe("model connection editor settings", () => {
         expect(result).toHaveProperty("llm");
     });
 
-    it("preserves fallback rules between Cascade and Realtime and clears them for Dograh", () => {
-        const available = [...connections, connection("dograh", "dograh")];
+    it("preserves fallback rules between Cascade and Realtime and clears them for EasyTech", () => {
+        const available = [...connections, connection("easytech", "easytech")];
         const configured: ConfigurationSpec = { ...base, llm_fallback: { version: 1, rules: [{ condition: { type: "error" }, target: { provider_connection_uuid: "google", settings: {} } }] } };
         const realtime = configurationForMode("realtime", configured, catalog, available);
         expect(cleanConfiguration(realtime, catalog, available).llm_fallback).toEqual(configured.llm_fallback);
         const cascade = configurationForMode("cascade", realtime, catalog, available);
         expect(cleanConfiguration(cascade, catalog, available).llm_fallback).toEqual(configured.llm_fallback);
-        const dograh = configurationForMode("dograh", cascade, catalog, available);
-        expect(dograh).not.toHaveProperty("llm_fallback");
-        expect(cleanConfiguration({ ...dograh, llm_fallback: configured.llm_fallback }, catalog, available)).not.toHaveProperty("llm_fallback");
-        expect(configurationForMode("cascade", dograh, catalog, available).llm_fallback).toBeUndefined();
+        const easytech = configurationForMode("easytech", cascade, catalog, available);
+        expect(easytech).not.toHaveProperty("llm_fallback");
+        expect(cleanConfiguration({ ...easytech, llm_fallback: configured.llm_fallback }, catalog, available)).not.toHaveProperty("llm_fallback");
+        expect(configurationForMode("cascade", easytech, catalog, available).llm_fallback).toBeUndefined();
     });
 
     it("removes both numeric maximum declarations for custom endpoints", () => {

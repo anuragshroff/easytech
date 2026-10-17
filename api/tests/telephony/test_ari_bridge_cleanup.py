@@ -41,15 +41,15 @@ async def test_bridge_cleanup_verifies_conflicts(
         organization_id=1,
         telephony_configuration_id=10,
         ari_endpoint="http://asterisk.test:8088",
-        app_name="dograh",
+        app_name="easytech",
         app_password="secret",
-        ws_client_name="dograh_ws",
+        ws_client_name="easytech_ws",
     )
 
     await connection._delete_bridge("bridge-1")
 
     url = "http://asterisk.test:8088/ari/bridges/bridge-1"
-    auth = aiohttp.BasicAuth("dograh", "secret")
+    auth = aiohttp.BasicAuth("easytech", "secret")
     session.delete.assert_called_once_with(url, auth=auth)
     if delete_status == 409:
         session.get.assert_called_once_with(url, auth=auth)

@@ -15,7 +15,7 @@ from pydantic import ValidationError
 
 from api.db import db_client
 from api.errors.failure import (
-    DograhFailure,
+    EasyTechFailure,
     ErrorSource,
     ErrorType,
     log_failure,
@@ -70,7 +70,7 @@ async def validate_workflow_model_compatibility(
     from api.services.configuration.model_connections import (
         validate_embedding_compatibility,
     )
-    from api.services.managed_model_services import get_dograh_service_api_key
+    from api.services.managed_model_services import get_easytech_service_api_key
 
     if definition is None:
         # A run that predates pinned definitions has no consumers to check.
@@ -86,17 +86,17 @@ async def validate_workflow_model_compatibility(
     await validate_embedding_compatibility(organization_id, effective, documents)
     # Legacy explicit QA/voicemail settings remain readable, but must not use a
     # correlation ID authorized under an unrelated managed service key.
-    key = get_dograh_service_api_key(effective)
+    key = get_easytech_service_api_key(effective)
     for node in nodes:
         data = node.get("data", {})
         if (
             data.get("qa_use_workflow_llm") is False
-            and data.get("qa_provider") == "dograh"
+            and data.get("qa_provider") == "easytech"
         ):
             if not key or data.get("qa_api_key") != key:
                 raise HTTPException(
                     status_code=422,
-                    detail="QA must use the run's selected Dograh service key.",
+                    detail="QA must use the run's selected EasyTech service key.",
                 )
     voicemail = (definition.workflow_configurations or {}).get(
         "voicemail_detection"
@@ -104,12 +104,12 @@ async def validate_workflow_model_compatibility(
     if (
         voicemail.get("enabled")
         and voicemail.get("use_workflow_llm") is False
-        and voicemail.get("provider") == "dograh"
+        and voicemail.get("provider") == "easytech"
     ):
         if not key or voicemail.get("api_key") != key:
             raise HTTPException(
                 status_code=422,
-                detail="Voicemail detection must use the run's selected Dograh service key.",
+                detail="Voicemail detection must use the run's selected EasyTech service key.",
             )
 
 
@@ -141,7 +141,7 @@ async def resolve_run_model_configuration(
 
     Layers organization, workflow and API overrides, validates, and stores the
     result on the run once. Authorization runs against this setup, so the
-    pre-call fetch applied later can only patch within its Dograh key.
+    pre-call fetch applied later can only patch within its EasyTech key.
     """
     from api.services.configuration.model_connections import (
         hydrate_model_configuration_snapshot,
@@ -209,7 +209,7 @@ async def apply_pre_call_model_overrides(
     except (HTTPException, ValidationError, ValueError) as exc:
         failure = _configuration_failure(exc)
         log_failure(
-            DograhFailure(
+            EasyTechFailure(
                 source=ErrorSource.INTEGRATION,
                 type=ErrorType.CONFIG_ERROR,
                 code="pre-call-model-overrides-rejected",

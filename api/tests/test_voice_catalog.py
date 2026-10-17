@@ -580,21 +580,21 @@ async def test_sarvam_reuses_model_options_without_external_requests(
 
 
 @pytest.mark.asyncio
-async def test_only_dograh_uses_mps_without_a_byok_connection(client, mps_not_used):
+async def test_only_easytech_uses_mps_without_a_byok_connection(client, mps_not_used):
     mps_not_used.side_effect = None
     mps_not_used.return_value = {
-        "provider": "dograh",
-        "voices": [{"voice_id": "dg:voice", "name": "Dograh voice"}],
+        "provider": "easytech",
+        "voices": [{"voice_id": "dg:voice", "name": "EasyTech voice"}],
         "facets": {"languages": ["en"]},
     }
     response = await client.get(
-        "/user/configurations/voices/dograh", params={"language": "en"}
+        "/user/configurations/voices/easytech", params={"language": "en"}
     )
     assert response.status_code == 200
     assert response.json()["voices"][0]["voice_id"] == "dg:voice"
     assert response.json()["facets"]["languages"] == ["en"]
     mps_not_used.assert_awaited_once_with(
-        provider="dograh",
+        provider="easytech",
         model=None,
         language="en",
         q=None,
@@ -614,8 +614,8 @@ def test_dynamic_voice_fields_are_backed_by_catalog_adapters():
         voice = config.model_json_schema()["properties"].get("voice", {})
         if voice.get("voice_catalog"):
             dynamic_providers.add(provider.value)
-    assert dynamic_providers == {"dograh", "elevenlabs", "cartesia", "deepgram", "rime"}
-    assert dynamic_providers - {"dograh"} <= VOICE_CATALOGS.keys()
+    assert dynamic_providers == {"easytech", "elevenlabs", "cartesia", "deepgram", "rime"}
+    assert dynamic_providers - {"easytech"} <= VOICE_CATALOGS.keys()
 
 
 @pytest.mark.asyncio

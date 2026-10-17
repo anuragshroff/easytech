@@ -6,9 +6,9 @@ from unittest.mock import AsyncMock, Mock
 import pytest
 
 from api.schemas.ai_model_configuration import EffectiveAIModelConfiguration
-from api.services.configuration.ai_model_configuration import dograh_embeddings_base_url
+from api.services.configuration.ai_model_configuration import easytech_embeddings_base_url
 from api.services.configuration.registry import (
-    DograhEmbeddingsConfiguration,
+    EasyTechEmbeddingsConfiguration,
     OpenAIEmbeddingsConfiguration,
 )
 from api.services.workflow import pipecat_engine
@@ -44,7 +44,7 @@ async def test_registered_kb_callback_uses_captured_visit_not_active_agent(monke
     engine = engine_stub()
     destination = agent(
         EffectiveAIModelConfiguration(
-            embeddings=DograhEmbeddingsConfiguration(api_key="selected-key")
+            embeddings=EasyTechEmbeddingsConfiguration(api_key="selected-key")
         )
     )
     await pipecat_engine.PipecatEngine._register_knowledge_base_function(
@@ -64,8 +64,8 @@ async def test_registered_kb_callback_uses_captured_visit_not_active_agent(monke
     assert arguments["organization_id"] == 7
     assert arguments["document_uuids"] == ["destination-document"]
     assert arguments["embeddings_api_key"] == "selected-key"
-    assert arguments["embeddings_model"] == "dograh_embedding_v1"
-    assert arguments["embeddings_base_url"] == dograh_embeddings_base_url()
+    assert arguments["embeddings_model"] == "easytech_embedding_v1"
+    assert arguments["embeddings_base_url"] == easytech_embeddings_base_url()
     assert arguments["correlation_id"] == "authorized-run"
     result.assert_awaited_once_with({"chunks": []})
 

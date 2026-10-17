@@ -8,13 +8,13 @@ from pipecat.processors.frame_processor import FrameDirection
 from pipecat.services.openai.realtime import events
 
 from api.services.pipecat.realtime.openai_realtime import (
-    DograhOpenAIRealtimeLLMService,
+    EasyTechOpenAIRealtimeLLMService,
 )
 from api.tests.test_streamed_tool_response import response_done
 
 
-def _make_service() -> DograhOpenAIRealtimeLLMService:
-    service = DograhOpenAIRealtimeLLMService(api_key="test-key")
+def _make_service() -> EasyTechOpenAIRealtimeLLMService:
+    service = EasyTechOpenAIRealtimeLLMService(api_key="test-key")
     service._create_response = AsyncMock()
     service._process_completed_function_calls = AsyncMock()
     return service
@@ -85,13 +85,13 @@ async def test_tts_greeting_waits_for_session_updated_before_sending_prompt():
     service._context = LLMContext()
 
     await service.process_frame(
-        TTSSpeakFrame("Hello from Dograh.", append_to_context=True),
+        TTSSpeakFrame("Hello from EasyTech.", append_to_context=True),
         FrameDirection.DOWNSTREAM,
     )
 
     assert service._handled_initial_context is True
     assert service._run_llm_when_api_session_ready is True
-    assert service._pending_initial_greeting_text == "Hello from Dograh."
+    assert service._pending_initial_greeting_text == "Hello from EasyTech."
 
     service.send_client_event = AsyncMock()
     service.push_frame = AsyncMock()
@@ -109,7 +109,7 @@ async def test_tts_greeting_waits_for_session_updated_before_sending_prompt():
     assert isinstance(response_event, events.ResponseCreateEvent)
     assert response_event.response.tool_choice == "none"
     prompt = response_event.response.instructions
-    assert prompt.endswith('"Hello from Dograh."')
+    assert prompt.endswith('"Hello from EasyTech."')
     assert service._run_llm_when_api_session_ready is False
     assert service._pending_initial_greeting_text is None
     assert service._llm_needs_conversation_setup is False

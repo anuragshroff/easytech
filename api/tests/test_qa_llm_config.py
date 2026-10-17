@@ -209,7 +209,7 @@ async def test_workflow_llm_supports_provider_without_api_key():
     with (
         patch(_CONFIG_FN, AsyncMock(return_value=config)),
         patch(
-            "api.services.pipecat.service_factory.DograhGoogleVertexLLMService"
+            "api.services.pipecat.service_factory.EasyTechGoogleVertexLLMService"
         ) as vertex_service,
     ):
         result = await create_qa_llm_service(

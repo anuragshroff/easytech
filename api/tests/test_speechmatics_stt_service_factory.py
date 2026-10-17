@@ -15,13 +15,13 @@ def test_speechmatics_factory_uses_agent_stt_and_preserves_local_turn_detection(
     service = create_stt_service(
         SimpleNamespace(stt=config),
         SimpleNamespace(transport_in_sample_rate=16000),
-        keyterms=["Dograh"],
+        keyterms=["EasyTech"],
     )
 
     assert isinstance(service, SpeechmaticsSTTService)
     assert service._settings.model == "linden-1"
     assert service._settings.turn_detection_mode == TurnDetectionMode.EXTERNAL
-    assert service._settings.additional_vocab[0].content == "Dograh"
+    assert service._settings.additional_vocab[0].content == "EasyTech"
     assert service.service_metadata_frame().user_turn_strategies is None
 
 

@@ -194,14 +194,14 @@ class SpeechPlaybackTracker:
             # output for another speech request whose boundaries overlap them.
             speech_id = speech.id if speech and not speech.done else str(uuid.uuid4())
             self._response_sources[source] = speech_id
-            frame.metadata["dograh_speech_id"] = speech_id
+            frame.metadata["easytech_speech_id"] = speech_id
             for observer in self._observers:
                 observer.on_response_started(source, speech_id)
             if self._expected_source is source:
                 self._expected_response = None
                 self._expected_source = None
         elif isinstance(frame, LLMFullResponseEndFrame):
-            frame.metadata["dograh_speech_id"] = self._response_sources[source]
+            frame.metadata["easytech_speech_id"] = self._response_sources[source]
             self._response_sources[source] = None
 
     def cancel_all(self, outcome: PlaybackOutcome = PlaybackOutcome.CLOSED) -> None:
@@ -290,8 +290,8 @@ class SpeechPlaybackTracker:
     def _response_boundary(self, frame: Frame) -> SpeechBoundaryFrame | None:
         if not isinstance(frame, (LLMFullResponseStartFrame, LLMFullResponseEndFrame)):
             return None
-        if "dograh_speech_id" in frame.metadata:
-            speech_id = frame.metadata["dograh_speech_id"]
+        if "easytech_speech_id" in frame.metadata:
+            speech_id = frame.metadata["easytech_speech_id"]
             if speech_id:
                 return SpeechBoundaryFrame(
                     speech_id, beginning=isinstance(frame, LLMFullResponseStartFrame)

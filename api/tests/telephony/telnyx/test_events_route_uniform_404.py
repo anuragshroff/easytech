@@ -1,4 +1,4 @@
-"""Uniform-404 behavior of the Telnyx events route (dograh-hq/dograh#780).
+"""Uniform-404 behavior of the Telnyx events route (easytech-hq/easytech#780).
 
 Invalid-signature requests must be indistinguishable from requests for a
 nonexistent run id: run ids are sequential integers, so a distinct 401 on

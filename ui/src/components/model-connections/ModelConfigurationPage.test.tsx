@@ -20,10 +20,10 @@ vi.mock("sonner", () => ({ toast: { success: vi.fn() } }));
 
 const provider = { credential_fields: {}, connection_fields: {}, settings_schema: { properties: {} } };
 const catalog: ModelConnectionCatalog = { services: {
-    llm: { dograh: provider, openai: provider }, stt: { dograh: provider, openai: provider }, embeddings: { dograh: provider },
-    tts: { openai: provider, dograh: { ...provider, settings_schema: { properties: { voice: { type: "string", title: "Voice", default: "alice-id", voice_catalog: "dialog", allow_custom_input: true } } } } },
+    llm: { easytech: provider, openai: provider }, stt: { easytech: provider, openai: provider }, embeddings: { easytech: provider },
+    tts: { openai: provider, easytech: { ...provider, settings_schema: { properties: { voice: { type: "string", title: "Voice", default: "alice-id", voice_catalog: "dialog", allow_custom_input: true } } } } },
 } };
-const connections: ProviderConnection[] = ["Primary", "Secondary"].map(name => ({ uuid: name, name, provider: "dograh", is_active: true, revision: 1, connection_settings: {}, configured_credentials: ["api_key"] }));
+const connections: ProviderConnection[] = ["Primary", "Secondary"].map(name => ({ uuid: name, name, provider: "easytech", is_active: true, revision: 1, connection_settings: {}, configured_credentials: ["api_key"] }));
 const openai: ProviderConnection = { ...connections[0], uuid: "openai", name: "OpenAI", provider: "openai" };
 const service = { provider_connection_uuid: "Primary", settings: {} };
 const configuration: NamedModelConfiguration = { uuid: "sales", name: "Sales", is_active: true, revision: 4, configuration: { version: 3, mode: "pipeline", llm: service, stt: service, tts: { ...service, settings: { voice: "alice-id" } }, embeddings: service } };
@@ -41,7 +41,7 @@ beforeEach(() => {
     vi.mocked(useOrgConfig).mockReturnValue({ refreshConfig } as unknown as ReturnType<typeof useOrgConfig>);
     vi.mocked(createNamedModelConfiguration).mockResolvedValue({ data: { ...configuration, uuid: "new-configuration" } } as never);
     vi.mocked(updateNamedModelConfiguration).mockResolvedValue({ data: configuration } as never);
-    vi.mocked(getVoicesApiV1UserConfigurationsVoicesProviderGet).mockResolvedValue({ data: { provider: "dograh", voices } } as never);
+    vi.mocked(getVoicesApiV1UserConfigurationsVoicesProviderGet).mockResolvedValue({ data: { provider: "easytech", voices } } as never);
 });
 
 describe("model configuration pages", () => {
@@ -80,7 +80,7 @@ describe("model configuration pages", () => {
         expect(vi.mocked(updateNamedModelConfiguration).mock.calls[1][0]?.body?.revision).toBe(updated.revision);
     });
 
-    it("edits on a page and previews, cancels, and selects Dograh voices in a single dialog", async () => {
+    it("edits on a page and previews, cancels, and selects EasyTech voices in a single dialog", async () => {
         render(<ModelConfigurationPage configurationUuid="sales" />);
         expect(screen.getByRole("heading", { name: "Edit Model Configuration" })).toBeDefined();
         expect(screen.queryByRole("dialog")).toBeNull();
@@ -109,7 +109,7 @@ describe("model configuration pages", () => {
         expect(screen.queryByRole("dialog")).toBeNull();
         if (duplicateUuid) expect((screen.getByLabelText("Configuration name") as HTMLInputElement).value).toBe("Sales (copy)");
         fireEvent.change(screen.getByLabelText("Configuration name"), { target: { value: "Managed Support" } });
-        selectOption("Dograh account", "Secondary");
+        selectOption("EasyTech account", "Secondary");
         fireEvent.click(screen.getByRole("button", { name: "Save Configuration" }));
         await waitFor(() => expect(replace).toHaveBeenCalledWith("/model-configurations/new-configuration"));
         const body = vi.mocked(createNamedModelConfiguration).mock.calls[0][0]?.body;
@@ -148,17 +148,17 @@ it("saves the current configuration before opening its fallback URL", async () =
     expect(vi.mocked(updateNamedModelConfiguration).mock.calls[0][0]?.body?.name).toBe("Updated sales");
 });
 
-it.each(["dograh", "cascade", "realtime"] as const)("guards the direct fallback URL in %s mode", mode => {
+it.each(["easytech", "cascade", "realtime"] as const)("guards the direct fallback URL in %s mode", mode => {
     const saved: NamedModelConfiguration = { ...configuration, configuration: {
         ...configuration.configuration,
         mode: mode === "realtime" ? "realtime" : "pipeline",
-        llm: mode === "dograh" ? service : { provider_connection_uuid: openai.uuid, settings: {} },
+        llm: mode === "easytech" ? service : { provider_connection_uuid: openai.uuid, settings: {} },
     } };
     vi.mocked(useModelConnections).mockReturnValue({ catalog, connections: [...connections, openai], configurations: [saved], defaultUuid: "sales", loading: false, error: null, reload, addConnection: vi.fn() });
     render(<LLMConfigurationPage configurationUuid="sales" />);
     expect(screen.getByRole("link", { name: "Back to model configuration" }).getAttribute("href")).toBe("/model-configurations/sales");
-    if (mode === "dograh") {
-        expect(screen.getByRole("alert").textContent).toContain("unavailable in Dograh mode");
+    if (mode === "easytech") {
+        expect(screen.getByRole("alert").textContent).toContain("unavailable in EasyTech mode");
         expect(screen.queryByRole("button", { name: "Save fallbacks" })).toBeNull();
     } else {
         expect(screen.getByRole("button", { name: "Save fallbacks" })).toBeDefined();

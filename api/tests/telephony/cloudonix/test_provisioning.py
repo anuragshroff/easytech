@@ -11,7 +11,7 @@ from api.services.telephony.providers.cloudonix import provisioning
 async def test_managed_configuration_is_created_from_mps_provisioning(monkeypatch):
     mps_result = {
         "provisioning_id": "11111111-1111-4111-8111-111111111111",
-        "domain_name": "oss-dograh-11111111",
+        "domain_name": "oss-easytech-11111111",
         "domain_uuid": "22222222-2222-4222-8222-222222222222",
         "bearer_token": "domain-bearer",
         "status": "ready",
@@ -22,7 +22,7 @@ async def test_managed_configuration_is_created_from_mps_provisioning(monkeypatc
         "domain_uuid": mps_result["domain_uuid"],
         "managed_by": provisioning.MANAGED_BY,
         "provisioning_id": mps_result["provisioning_id"],
-        "application_name": "dograh-111111111111411181111111",
+        "application_name": "easytech-111111111111411181111111",
         "application_id": 73,
     }
     created = SimpleNamespace(
@@ -66,7 +66,7 @@ async def test_managed_configuration_is_created_from_mps_provisioning(monkeypatc
     provisioning._preprocess_credentials_on_save.assert_awaited_once_with(
         {
             "bearer_token": "domain-bearer",
-            "domain_id": "oss-dograh-11111111.cloudonix.net",
+            "domain_id": "oss-easytech-11111111.cloudonix.net",
             "domain_uuid": mps_result["domain_uuid"],
             "managed_by": provisioning.MANAGED_BY,
             "provisioning_id": mps_result["provisioning_id"],
@@ -77,7 +77,7 @@ async def test_managed_configuration_is_created_from_mps_provisioning(monkeypatc
         name=provisioning.MANAGED_CONFIGURATION_NAME,
         provider="cloudonix",
         credentials=processed,
-        # Never the org default: Dograh provisions this row, and it cannot
+        # Never the org default: EasyTech provisions this row, and it cannot
         # carry a call until the customer connects their own carrier.
         is_default_outbound=False,
     )

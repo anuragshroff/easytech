@@ -247,7 +247,7 @@ async def test_pre_call_overrides_outside_the_visit_are_rejected_not_fatal(
 
 
 @pytest.mark.asyncio
-async def test_pre_call_overrides_cannot_switch_the_dograh_key(
+async def test_pre_call_overrides_cannot_switch_the_easytech_key(
     catalog, run_state, failures
 ):
     catalog(connection(keys="root-key"), default=True)
@@ -338,7 +338,7 @@ async def test_pre_call_cannot_add_managed_services_to_an_authorized_byok_run(
     catalog, run_state, failures
 ):
     catalog(connection("openai"), default=True)
-    dograh = catalog(connection())
+    easytech = catalog(connection())
     pinned = await service.resolve_run_model_configuration(
         organization_id=1, workflow_run=run_state
     )
@@ -348,7 +348,7 @@ async def test_pre_call_cannot_add_managed_services_to_an_authorized_byok_run(
         workflow_run=run_state,
         run_model_configuration=pinned,
         fetched=PreCallFetchResult(
-            model_overrides={"tts": {"provider_connection_uuid": dograh.uuid}},
+            model_overrides={"tts": {"provider_connection_uuid": easytech.uuid}},
             outcome="completed",
         ),
     )

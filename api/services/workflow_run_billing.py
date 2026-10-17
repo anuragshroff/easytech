@@ -1,9 +1,9 @@
 """Workflow-run billing hooks.
 
-Dograh does not rate or deduct credits locally. MPS owns credit accounting.
-For hosted deployments, Dograh reports completed platform usage to MPS.
+EasyTech does not rate or deduct credits locally. MPS owns credit accounting.
+For hosted deployments, EasyTech reports completed platform usage to MPS.
 When a server-minted MPS correlation id exists, MPS uses model-service usage
-as the canonical duration. Otherwise Dograh reports the completed run duration.
+as the canonical duration. Otherwise EasyTech reports the completed run duration.
 """
 
 from typing import Any
@@ -89,7 +89,7 @@ async def report_workflow_run_platform_usage(workflow_run) -> None:
                 "source": "workflow_run_completion",
                 "workflow_id": getattr(workflow_run, "workflow_id", None),
                 "duration_source": (
-                    "mps_correlation" if correlation_id else "dograh_usage_info"
+                    "mps_correlation" if correlation_id else "easytech_usage_info"
                 ),
             },
         )

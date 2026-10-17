@@ -373,7 +373,7 @@ async def _initialize_embed_session(
             raise ValueError("Workflow not found")
         run_inputs = await prepare_workflow_run_inputs(db_client, workflow)
         # Visitor context comes from the host page (script URL params or the
-        # data-dograh-context attribute) and is addressable from prompts as
+        # data-easytech-context attribute) and is addressable from prompts as
         # {{initial_context.<name>}}.
         context_variables = sanitize_embed_context_variables(
             init_request.context_variables

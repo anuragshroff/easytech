@@ -173,7 +173,7 @@ async def test_new_org_mints_key_and_independently_provisions_sip(
     catalog.assert_awaited_once()
     assert catalog.await_args.args == (ORG_ID,)
     kwargs = catalog.await_args.kwargs
-    assert kwargs["provider"] == "dograh"
+    assert kwargs["provider"] == "easytech"
     assert kwargs["credentials"] == {"api_key": MINTED_KEY}
     connection_uuid = str(uuid4())
     spec = ModelConfigurationSpec.model_validate(

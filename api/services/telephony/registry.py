@@ -92,7 +92,7 @@ class ProviderUIMetadata:
 #   "api" — the provider is the carrier. Create an account there, paste
 #           credentials, and rent numbers from them.
 #   "sip" — the customer brings their own carrier or PBX and connects it to a
-#           SIP endpoint Dograh exposes. Credentials alone carry no calls.
+#           SIP endpoint EasyTech exposes. Credentials alone carry no calls.
 ProviderConnectivity = Literal["api", "sip"]
 
 
@@ -365,7 +365,7 @@ def _instrument_validation_error_response(spec: ProviderSpec) -> None:
     original = getattr(spec.provider_cls, "generate_validation_error_response", None)
     if not callable(original):
         return
-    if getattr(original, "_dograh_failure_reporting_instrumented", False):
+    if getattr(original, "_easytech_failure_reporting_instrumented", False):
         return
 
     @wraps(original)
@@ -373,7 +373,7 @@ def _instrument_validation_error_response(spec: ProviderSpec) -> None:
         log_telephony_error(error_type, provider=spec.name)
         return original(error_type, *args, **kwargs)
 
-    generate_validation_error_response._dograh_failure_reporting_instrumented = True
+    generate_validation_error_response._easytech_failure_reporting_instrumented = True
     spec.provider_cls.generate_validation_error_response = staticmethod(
         generate_validation_error_response
     )

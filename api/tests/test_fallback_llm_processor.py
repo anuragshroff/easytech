@@ -1,4 +1,4 @@
-"""Exercise Dograh's race through unchanged Gemini services and frame queues."""
+"""Exercise EasyTech's race through unchanged Gemini services and frame queues."""
 
 import ast
 import asyncio
@@ -861,7 +861,7 @@ async def test_summary_uses_primary_even_after_backup_won(harness, monkeypatch):
 
 
 @pytest.mark.asyncio
-async def test_only_winner_is_accepted_by_dograh_tool_owner(
+async def test_only_winner_is_accepted_by_easytech_tool_owner(
     harness, monkeypatch, simple_workflow
 ):
     from api.services.workflow.pipecat_engine import PipecatEngine

@@ -2,11 +2,11 @@
 
 import Link from 'next/link';
 
-import { GitHubStarBadge } from '@/components/layout/GitHubStarBadge';
 import { PageLayout } from '@/components/layout/PageLayout';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { useAuth } from '@/lib/auth';
+import { APP_NAME } from '@/lib/branding';
 
 export default function OverviewPage() {
     const { user, provider } = useAuth();
@@ -14,9 +14,8 @@ export default function OverviewPage() {
 
     return (
         <PageLayout
-            title={isOSSMode ? "Welcome to Dograh" : `Welcome${user?.displayName ? `, ${user.displayName.split(' ')[0]}` : ''}!`}
-            description={isOSSMode ? "Open source alternative to Vapi. Help us support the project by giving us a star on GitHub." : "Get started with building voice AI workflows"}
-            actions={isOSSMode && <GitHubStarBadge label="Star us on GitHub" showCount source="overview_page" />}>
+            title={isOSSMode ? `Welcome to ${APP_NAME}` : `Welcome${user?.displayName ? `, ${user.displayName.split(' ')[0]}` : ''}!`}
+            description="Get started with building voice AI workflows">
             {/* Quick Actions */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <Card>
@@ -51,38 +50,6 @@ export default function OverviewPage() {
                     </CardContent>
                 </Card>
             </div>
-
-            {/* Resources Section */}
-            <Card>
-                <CardHeader>
-                    <CardTitle>Resources</CardTitle>
-                    <CardDescription>
-                        Get help and learn more about Dograh
-                    </CardDescription>
-                </CardHeader>
-                <CardContent>
-                    <div className="flex flex-wrap gap-4">
-                        <Button asChild variant="outline">
-                            <a
-                                href="https://docs.dograh.com"
-                                target="_blank"
-                                rel="noopener noreferrer"
-                            >
-                                Documentation
-                            </a>
-                        </Button>
-                        <Button asChild variant="outline">
-                            <a
-                                href="https://github.com/dograh-hq/dograh/issues"
-                                target="_blank"
-                                rel="noopener noreferrer"
-                            >
-                                Report an Issue
-                            </a>
-                        </Button>
-                    </div>
-                </CardContent>
-            </Card>
         </PageLayout>
     );
 }

@@ -18,8 +18,8 @@ from websockets.frames import Close
 from api.schemas.ai_model_configuration import EffectiveAIModelConfiguration
 from api.services.configuration.registry import UltravoxRealtimeLLMConfiguration
 from api.services.pipecat.realtime.ultravox_realtime import (
-    DograhUltravoxOneShotInputParams,
-    DograhUltravoxRealtimeLLMService,
+    EasyTechUltravoxOneShotInputParams,
+    EasyTechUltravoxRealtimeLLMService,
 )
 from api.services.pipecat.service_factory import create_realtime_llm_service
 
@@ -49,14 +49,14 @@ class _MessageSocket:
             raise StopAsyncIteration
 
 
-def _make_service() -> DograhUltravoxRealtimeLLMService:
-    service = DograhUltravoxRealtimeLLMService(
-        params=DograhUltravoxOneShotInputParams(
+def _make_service() -> EasyTechUltravoxRealtimeLLMService:
+    service = EasyTechUltravoxRealtimeLLMService(
+        params=EasyTechUltravoxOneShotInputParams(
             api_key="test-key",
             model="ultravox-v0.7",
             output_medium="voice",
         ),
-        settings=DograhUltravoxRealtimeLLMService.Settings(
+        settings=EasyTechUltravoxRealtimeLLMService.Settings(
             model="ultravox-v0.7",
             output_medium="voice",
         ),
@@ -114,7 +114,7 @@ async def test_system_instruction_update_marks_stage_update_required():
     service._socket = object()
 
     changed = await service._update_settings(
-        DograhUltravoxRealtimeLLMService.Settings(system_instruction="new instruction")
+        EasyTechUltravoxRealtimeLLMService.Settings(system_instruction="new instruction")
     )
 
     assert "system_instruction" in changed
@@ -334,12 +334,12 @@ def test_build_one_shot_params_uses_explicit_greeting_text():
     service = _make_service()
 
     params = service._build_one_shot_params(
-        greeting_text="Welcome to Dograh",
+        greeting_text="Welcome to EasyTech",
         agent_speaks_first=True,
     )
 
     assert params.extra["firstSpeakerSettings"] == {
-        "agent": {"text": "Welcome to Dograh"}
+        "agent": {"text": "Welcome to EasyTech"}
     }
 
 
@@ -420,7 +420,7 @@ async def test_receive_messages_broadcasts_interruption_on_playback_clear_buffer
     service.broadcast_interruption.assert_awaited_once()
 
 
-def test_factory_creates_dograh_ultravox_realtime_service():
+def test_factory_creates_easytech_ultravox_realtime_service():
     effective_config = EffectiveAIModelConfiguration(
         is_realtime=True,
         realtime=UltravoxRealtimeLLMConfiguration(
@@ -436,7 +436,7 @@ def test_factory_creates_dograh_ultravox_realtime_service():
         audio_config=SimpleNamespace(),
     )
 
-    assert isinstance(service, DograhUltravoxRealtimeLLMService)
+    assert isinstance(service, EasyTechUltravoxRealtimeLLMService)
     assert service._params.voice == "Mark"
 
 

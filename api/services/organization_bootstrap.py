@@ -1,4 +1,4 @@
-"""Once-per-organization provisioning of Dograh-managed services.
+"""Once-per-organization provisioning of EasyTech-managed services.
 
 Bootstrapping mints an MPS service key, stores it as the organization's
 default model configuration, and provisions owner-scoped managed SIP
@@ -23,13 +23,13 @@ from api.db.organization_configuration_client import LEASE_COMPLETED
 from api.enums import OrganizationConfigurationKey
 from api.errors.mps import MPSUnavailableError
 from api.services.configuration.model_connections import (
-    dograh_model_configuration_spec,
+    easytech_model_configuration_spec,
 )
 from api.services.mps_billing import ensure_hosted_mps_billing_account_v2
 from api.services.mps_service_key_client import mps_service_key_client
 
-MANAGED_SERVICE_KEY_NAME = "Default Dograh Model Service Key"
-MANAGED_CONNECTION_NAME = "Dograh"
+MANAGED_SERVICE_KEY_NAME = "Default EasyTech Model Service Key"
+MANAGED_CONNECTION_NAME = "EasyTech"
 DEFAULT_CONFIGURATION_NAME = "Organization default"
 
 # A holder that dies mid-provisioning leaves its lease pending. This bounds how
@@ -47,7 +47,7 @@ async def ensure_organization_bootstrapped(
     *,
     created_by: str,
 ) -> bool:
-    """Ensure an organization has its Dograh-managed model services and SIP.
+    """Ensure an organization has its EasyTech-managed model services and SIP.
 
     Cheap enough to call on every authenticated request: an organization that
     has completed bootstrap costs a single indexed read. Returns True when the
@@ -172,10 +172,10 @@ async def _bootstrap_organization(
         await db_client.bootstrap_default_model_configuration(
             organization_id,
             connection_name=MANAGED_CONNECTION_NAME,
-            provider="dograh",
+            provider="easytech",
             credentials={"api_key": service_key},
             configuration_name=DEFAULT_CONFIGURATION_NAME,
-            configuration_for=dograh_model_configuration_spec,
+            configuration_for=easytech_model_configuration_spec,
         )
 
     if sip_provisioned:
@@ -216,7 +216,7 @@ async def provision_managed_sip_connectivity(
     *,
     created_by: str,
 ) -> bool:
-    """Provision the organization's Dograh-managed SIP connectivity.
+    """Provision the organization's EasyTech-managed SIP connectivity.
 
     MPS owns the Cloudonix domain. OSS allocations are owned by ``created_by``;
     hosted allocations are owned by ``organization_id``. Model configuration

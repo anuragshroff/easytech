@@ -209,9 +209,9 @@ async def test_enqueue_webhook_delivery_keeps_all_custom_headers():
         payload_template={},
         custom_headers=[
             {"key": "Authorization", "value": "Bearer secret-token"},
-            {"key": "x-dograh-secret", "value": "abc"},
+            {"key": "x-easytech-secret", "value": "abc"},
             {"key": "X-Idempotency-Key", "value": "idem-1"},
-            {"key": "X-Source", "value": "dograh"},
+            {"key": "X-Source", "value": "easytech"},
             {"key": "X-Blank", "value": ""},  # incomplete pair -> skipped
         ],
     )
@@ -231,9 +231,9 @@ async def test_enqueue_webhook_delivery_keeps_all_custom_headers():
     persisted = db.create_webhook_delivery.call_args.kwargs["custom_headers"]
     assert persisted == [
         {"key": "Authorization", "value": "Bearer secret-token"},
-        {"key": "x-dograh-secret", "value": "abc"},
+        {"key": "x-easytech-secret", "value": "abc"},
         {"key": "X-Idempotency-Key", "value": "idem-1"},
-        {"key": "X-Source", "value": "dograh"},
+        {"key": "X-Source", "value": "easytech"},
     ]
 
 
@@ -516,7 +516,7 @@ def test_log_webhook_request_redacts_headers_and_payload():
             headers={
                 "Content-Type": "application/json",
                 "Authorization": "Bearer header-secret",
-                "X-Dograh-Delivery-Id": "uuid-1",
+                "X-EasyTech-Delivery-Id": "uuid-1",
                 "X-Customer": "customer-secret",
             },
         )
@@ -658,7 +658,7 @@ async def test_deliver_webhook_no_op_when_claim_fails():
 async def test_deliver_webhook_delivered_but_record_failure_does_not_dead_letter():
     # If the HTTP POST is accepted (2xx) but recording success fails (DB blip),
     # the row must NOT be dead-lettered -- it stays pending for the sweeper to
-    # reconcile (the receiver dedups the re-send via X-Dograh-Delivery-Id).
+    # reconcile (the receiver dedups the re-send via X-EasyTech-Delivery-Id).
     delivery = _fake_delivery()
     db = _delivery_db(delivery)
     db.mark_webhook_delivery_succeeded = AsyncMock(

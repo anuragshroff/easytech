@@ -8,7 +8,7 @@ import { Label } from "@/components/ui/label";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { cn } from "@/lib/utils";
 
-import { compatibleConnections, configurationForMode, configurationMode, dograhConfiguration, selectionForConnection } from "./configuration";
+import { compatibleConnections, configurationForMode, configurationMode, easytechConfiguration, selectionForConnection } from "./configuration";
 import { AddProviderDialog, type ProviderOption, ProviderSelect } from "./ProviderSelect";
 import { SchemaFields } from "./SchemaFields";
 import type { ConfigurationEditorMode, ConfigurationSpec, FieldSchema, ModelConnectionCatalog, ProviderConnection, ServiceRole, ServiceSelection } from "./types";
@@ -16,12 +16,12 @@ import { MODE_LABELS, ROLE_LABELS } from "./types";
 
 export type ConfigurationFieldsDensity = "full" | "compact";
 
-// Dograh manages its services; only these settings are the user's to change,
+// EasyTech manages its services; only these settings are the user's to change,
 // listed in the order they are shown.
-const DOGRAH_FIELDS: [ServiceRole, string[]][] = [["tts", ["voice", "speed"]], ["stt", ["language", "language_hints"]], ["llm", ["model", "temperature"]]];
+const EASYTECH_FIELDS: [ServiceRole, string[]][] = [["tts", ["voice", "speed"]], ["stt", ["language", "language_hints"]], ["llm", ["model", "temperature"]]];
 const MODES: { value: ConfigurationEditorMode; description: string }[] = [
     { value: "realtime", description: "One speech-to-speech model listens and replies." },
-    { value: "dograh", description: "Dograh runs the transcriber, LLM and voice for you." },
+    { value: "easytech", description: "EasyTech runs the transcriber, LLM and voice for you." },
     { value: "cascade", description: "Pick your own LLM, STT and TTS providers." },
 ];
 const SERVICE_TAB = "-mb-px h-auto min-w-0 flex-1 flex-col items-start gap-0.5 rounded-none border-0 border-b-2 border-transparent px-3 py-2.5 text-left sm:px-4 text-muted-foreground data-[state=active]:border-primary data-[state=active]:bg-transparent data-[state=active]:text-foreground data-[state=active]:shadow-none dark:data-[state=active]:border-primary dark:data-[state=active]:bg-transparent";
@@ -29,7 +29,7 @@ const SERVICE_TAB = "-mb-px h-auto min-w-0 flex-1 flex-col items-start gap-0.5 r
 // Read aloud, "LLM", "STT" and "Embedding" take "an".
 const ROLE_ARTICLES: Record<ServiceRole, string> = { llm: "an", stt: "an", tts: "a", realtime: "a", embeddings: "an" };
 
-type AddTarget = ServiceRole | "dograh";
+type AddTarget = ServiceRole | "easytech";
 
 function restrictSchema(schema: FieldSchema | undefined, allowed?: string[]): FieldSchema | undefined {
     if (!schema || !allowed) return schema;
@@ -64,8 +64,8 @@ function ModeChoice({ value, onChange }: { value: ConfigurationEditorMode; onCha
 /**
  * The one editor for a model configuration spec.
  *
- * The mode comes first: Realtime, Dograh or BYOK. Dograh shows the few
- * settings Dograh leaves to the user. Realtime and BYOK show one tab per
+ * The mode comes first: Realtime, EasyTech or BYOK. EasyTech shows the few
+ * settings EasyTech leaves to the user. Realtime and BYOK show one tab per
  * service, each naming its provider so the whole setup reads at a glance,
  * with the provider and its settings inside. Every provider list ends with
  * a way to add a provider in place.
@@ -96,7 +96,7 @@ export function ConfigurationFields({ configuration, catalog, connections, onCha
     const id = useId();
     const mode = configuration.mode === "realtime" || configuration.llm.provider_connection_uuid
         ? configurationMode(configuration, connections) : unconfiguredMode;
-    const dograhConnections = connections.filter(connection => connection.is_active && connection.provider === "dograh");
+    const easytechConnections = connections.filter(connection => connection.is_active && connection.provider === "easytech");
     const roles = (mode === "realtime" ? ["realtime", "llm", "embeddings"] as ServiceRole[] : ["llm", "stt", "tts", "embeddings"] as ServiceRole[])
         .filter(role => !compact || role !== "embeddings");
     const currentRole = activeRole && roles.includes(activeRole) ? activeRole : roles[0];
@@ -144,15 +144,15 @@ export function ConfigurationFields({ configuration, catalog, connections, onCha
         setActiveRole(null);
         onChange(configurationForMode(nextMode, configuration, catalog, connections));
     };
-    const changeDograhConnection = (value: string) => {
-        const connection = dograhConnections.find(item => item.uuid === value);
-        if (connection) onChange(dograhConfiguration(catalog, connection, configuration, connections));
+    const changeEasyTechConnection = (value: string) => {
+        const connection = easytechConnections.find(item => item.uuid === value);
+        if (connection) onChange(easytechConfiguration(catalog, connection, configuration, connections));
     };
     const connected = new Set(connections.filter(item => item.is_active).map(item => item.provider));
     // Providers a service could add, in catalog order (the most used first),
     // the ones without a connection ahead of the rest.
-    const addProviderKeys = (target: AddTarget) => target === "dograh" ? ["dograh"]
-        : Object.keys(catalog.services[target] || {}).filter(provider => provider !== "dograh")
+    const addProviderKeys = (target: AddTarget) => target === "easytech" ? ["easytech"]
+        : Object.keys(catalog.services[target] || {}).filter(provider => provider !== "easytech")
             .sort((a, b) => Number(connected.has(a)) - Number(connected.has(b)));
     // Named under the add entry, so the list shows what else is available.
     const addHint = (role: ServiceRole) => listNames(addProviderKeys(role).filter(provider => !connected.has(provider)).map(provider => providerTitle(role, provider)));
@@ -163,7 +163,7 @@ export function ConfigurationFields({ configuration, catalog, connections, onCha
         onConnectionAdded?.(connection);
         setAdding(null);
         toast.success("Provider connection saved");
-        if (target === "dograh") onChange(dograhConfiguration(catalog, connection, configuration, connections));
+        if (target === "easytech") onChange(easytechConfiguration(catalog, connection, configuration, connections));
         else if (target) changeSelection(target, selectionForConnection(catalog, target, connection, configuration[target], connections));
     };
     // The connections a service's picker offers, which its tab summary also reads.
@@ -171,24 +171,24 @@ export function ConfigurationFields({ configuration, catalog, connections, onCha
         const options = compatibleConnections(catalog, connections, role);
         // Existing mixed configurations may include a managed service.
         // Keep that selection visible without replacing it during edits.
-        const managed = connections.find(item => item.is_active && item.uuid === configuration[role]?.provider_connection_uuid && item.provider === "dograh");
+        const managed = connections.find(item => item.is_active && item.uuid === configuration[role]?.provider_connection_uuid && item.provider === "easytech");
         if (managed) options.push(managed);
         return options;
     };
 
-    const dograhValue = dograhConnections.some(item => item.uuid === configuration.llm.provider_connection_uuid) ? configuration.llm.provider_connection_uuid : "";
-    const dograhPanel = <div className={cn("grid grid-cols-1 gap-4 rounded-lg border bg-card sm:grid-cols-2", compact ? "p-4" : "p-5")}>
-        {DOGRAH_FIELDS.map(([role, names]) => {
-            const schema = restrictSchema(catalog.services[role]?.dograh?.settings_schema, names.filter(name => !fields || fields.includes(name)));
+    const easytechValue = easytechConnections.some(item => item.uuid === configuration.llm.provider_connection_uuid) ? configuration.llm.provider_connection_uuid : "";
+    const easytechPanel = <div className={cn("grid grid-cols-1 gap-4 rounded-lg border bg-card sm:grid-cols-2", compact ? "p-4" : "p-5")}>
+        {EASYTECH_FIELDS.map(([role, names]) => {
+            const schema = restrictSchema(catalog.services[role]?.easytech?.settings_schema, names.filter(name => !fields || fields.includes(name)));
             if (!hasFields(schema)) return null;
-            return <SchemaFields key={role} className="contents" provider="dograh" role={role} schema={schema}
+            return <SchemaFields key={role} className="contents" provider="easytech" role={role} schema={schema}
                 values={configuration[role]?.settings || {}} onChange={(name, value) => changeSetting(role, name, value)} />;
         })}
         <div className="space-y-1.5">
-            <Label htmlFor="dograh-provider-connection">Dograh account</Label>
-            <ProviderSelect id="dograh-provider-connection" required value={dograhValue} onValueChange={changeDograhConnection}
-                placeholder="Choose an account" addLabel="Add a Dograh account" onAdd={() => setAdding("dograh")}
-                options={dograhConnections.map(connection => ({ value: connection.uuid, label: connection.name }))} />
+            <Label htmlFor="easytech-provider-connection">EasyTech account</Label>
+            <ProviderSelect id="easytech-provider-connection" required value={easytechValue} onValueChange={changeEasyTechConnection}
+                placeholder="Choose an account" addLabel="Add a EasyTech account" onAdd={() => setAdding("easytech")}
+                options={easytechConnections.map(connection => ({ value: connection.uuid, label: connection.name }))} />
         </div>
     </div>;
 
@@ -219,7 +219,7 @@ export function ConfigurationFields({ configuration, catalog, connections, onCha
                     values={selection.settings} context={connection?.connection_settings} onChange={(name, value) => changeSetting(role, name, value)} />}
             </div>}
             {isEmbedding && <p className="text-xs text-muted-foreground">Use the embedding model that indexed this workflow’s knowledge base. Changing it does not reindex documents.</p>}
-            {role === "llm" && llmActions && connection?.provider !== "dograh" && <div className="flex justify-end border-t pt-4">{llmActions}</div>}
+            {role === "llm" && llmActions && connection?.provider !== "easytech" && <div className="flex justify-end border-t pt-4">{llmActions}</div>}
         </div>;
     };
 
@@ -233,7 +233,7 @@ export function ConfigurationFields({ configuration, catalog, connections, onCha
 
     return <div ref={root} className={compact ? "space-y-3" : "space-y-4"}>
         <ModeChoice value={mode} onChange={changeMode} />
-        {mode === "dograh" ? dograhPanel : <Tabs value={currentRole} onValueChange={value => setActiveRole(value as ServiceRole)} className="gap-0 overflow-hidden rounded-lg border bg-card">
+        {mode === "easytech" ? easytechPanel : <Tabs value={currentRole} onValueChange={value => setActiveRole(value as ServiceRole)} className="gap-0 overflow-hidden rounded-lg border bg-card">
             <TabsList aria-label="Services" className="flex h-auto w-full justify-start rounded-none border-b bg-transparent p-0">
                 {roles.map(role => {
                     const summary = tabSummary(role);
@@ -248,7 +248,7 @@ export function ConfigurationFields({ configuration, catalog, connections, onCha
             </TabsContent>)}
         </Tabs>}
         {adding && <AddProviderDialog open onOpenChange={open => { if (!open) setAdding(null); }} catalog={catalog}
-            title={adding === "dograh" ? "Add a Dograh account" : `Add ${ROLE_ARTICLES[adding]} ${ROLE_LABELS[adding]} provider`}
-            providerKeys={addProviderKeys(adding)} role={adding === "dograh" ? undefined : adding} onSaved={connectionAdded} />}
+            title={adding === "easytech" ? "Add a EasyTech account" : `Add ${ROLE_ARTICLES[adding]} ${ROLE_LABELS[adding]} provider`}
+            providerKeys={addProviderKeys(adding)} role={adding === "easytech" ? undefined : adding} onSaved={connectionAdded} />}
     </div>;
 }

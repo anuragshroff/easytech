@@ -126,7 +126,7 @@ def text_chat_trace_id(workflow_run_id: int) -> str:
     per-turn spans land in one shared trace — without persisting extra state
     across the otherwise stateless turn requests.
     """
-    digest = hashlib.sha256(f"dograh-text-chat:{workflow_run_id}".encode()).hexdigest()
+    digest = hashlib.sha256(f"easytech-text-chat:{workflow_run_id}".encode()).hexdigest()
     return digest[:32]
 
 

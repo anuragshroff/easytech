@@ -9,7 +9,7 @@ from types import SimpleNamespace
 
 import pytest
 
-from api.errors.failure import DograhFailure, ErrorSource, ErrorType
+from api.errors.failure import EasyTechFailure, ErrorSource, ErrorType
 from api.services.telephony import ari_manager
 
 
@@ -64,14 +64,14 @@ def _connection() -> ari_manager.ARIConnection:
         organization_id=42,
         telephony_configuration_id=7,
         ari_endpoint="http://pbx.example.com:8088",
-        app_name="dograh",
+        app_name="easytech",
         app_password="secret",
-        ws_client_name="dograh_ws",
+        ws_client_name="easytech_ws",
     )
 
 
-def _permanent_failure() -> DograhFailure:
-    return DograhFailure(
+def _permanent_failure() -> EasyTechFailure:
+    return EasyTechFailure(
         source=ErrorSource.TELEPHONY,
         type=ErrorType.CONFIG_ERROR,
         code="ari-401",
@@ -83,8 +83,8 @@ def _permanent_failure() -> DograhFailure:
     )
 
 
-def _transient_failure() -> DograhFailure:
-    return DograhFailure(
+def _transient_failure() -> EasyTechFailure:
+    return EasyTechFailure(
         source=ErrorSource.TELEPHONY,
         type=ErrorType.PROVIDER_ERROR,
         code="ari-connection",
@@ -232,13 +232,13 @@ async def test_immediate_clean_close_is_accounted_as_a_failure(
     assert conn._reconnect_delay > 1
 
 
-def _row(config_id: int, ws_client_name: str = "dograh_ws") -> SimpleNamespace:
+def _row(config_id: int, ws_client_name: str = "easytech_ws") -> SimpleNamespace:
     return SimpleNamespace(
         id=config_id,
         organization_id=100 + config_id,
         credentials={
             "ari_endpoint": "http://pbx.example.com:8088",
-            "app_name": "dograh",
+            "app_name": "easytech",
             "app_password": "secret",
             "ws_client_name": ws_client_name,
         },

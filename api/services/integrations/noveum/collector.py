@@ -26,7 +26,7 @@ def make_storage_audio_sink(
     manifest: list[dict[str, Any]],
 ) -> Callable[..., Awaitable[bool]]:
     """
-    Build the observer ``audio_sink``: writes each WAV segment to Dograh's
+    Build the observer ``audio_sink``: writes each WAV segment to EasyTech's
     object store (no Noveum network I/O during the live call) and records a
     manifest entry so the completion phase can upload the bytes to Noveum
     later under the same ``audio_uuid`` the observer stamped on the span.
@@ -99,8 +99,8 @@ def build_deferred_observer(
         deferred=True,
         record_audio=record_audio,
         audio_sink=audio_sink,
-        # Dograh's on_call_finished calls _finish_conversation itself, AFTER
-        # dograh's own on_pipeline_finished handler has run stop_recording()
+        # EasyTech's on_call_finished calls _finish_conversation itself, AFTER
+        # easytech's own on_pipeline_finished handler has run stop_recording()
         # (which flushes the AudioBufferProcessor). The SDK's safety net would
         # fire BEFORE that flush on cancelled calls, finishing the trace with
         # incomplete conversation audio — so it is disabled here.
@@ -119,9 +119,9 @@ def build_payload_envelope(
     merged into the trace's attributes so they ship with the trace as-is.
 
     The envelope is sanitized to pure-JSON types before being returned: it is
-    persisted inside ``workflow_run.logs`` alongside Dograh's own keys, and one
+    persisted inside ``workflow_run.logs`` alongside EasyTech's own keys, and one
     non-JSON-serializable span attribute would otherwise make the whole logs
-    commit raise — silently discarding Dograh's data too. The recursive
+    commit raise — silently discarding EasyTech's data too. The recursive
     sanitizer (not a ``json.dumps(default=str)`` round-trip, which misses two
     cases) also stringifies non-string dict KEYS and non-finite floats
     (NaN/Infinity pass ``dumps`` but still break the Postgres JSON commit).

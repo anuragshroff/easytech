@@ -90,7 +90,7 @@ class OrganizationUsageClient(BaseDBClient):
             period_start=period_start,
             period_end=period_end,
             # Deprecated non-null column retained for historical schema compatibility.
-            quota_dograh_tokens=0,
+            quota_easytech_tokens=0,
         )
         # Handle concurrent inserts gracefully
         stmt = stmt.on_conflict_do_nothing(
@@ -130,7 +130,7 @@ class OrganizationUsageClient(BaseDBClient):
             result = {
                 "period_start": cycle.period_start.isoformat(),
                 "period_end": cycle.period_end.isoformat(),
-                "used_dograh_tokens": cycle.used_dograh_tokens,
+                "used_easytech_tokens": cycle.used_easytech_tokens,
                 "total_duration_seconds": cycle.total_duration_seconds,
             }
 
@@ -213,9 +213,9 @@ class OrganizationUsageClient(BaseDBClient):
             total_tokens = 0
             total_duration_seconds = 0
             for run in runs:
-                dograh_tokens = 0
+                easytech_tokens = 0
                 call_duration = (run.usage_info or {}).get("call_duration_seconds", 0)
-                total_tokens += dograh_tokens
+                total_tokens += easytech_tokens
                 total_duration_seconds += int(round(call_duration))
 
                 ic = run.initial_context or {}
@@ -241,7 +241,7 @@ class OrganizationUsageClient(BaseDBClient):
                     "workflow_name": run.workflow.name if run.workflow else None,
                     "name": run.name,
                     "created_at": run.created_at.isoformat(),
-                    "dograh_token_usage": dograh_tokens,
+                    "easytech_token_usage": easytech_tokens,
                     "call_duration_seconds": int(round(call_duration)),
                     "recording_url": run.recording_url,
                     "transcript_url": run.transcript_url,
@@ -386,24 +386,24 @@ class OrganizationUsageClient(BaseDBClient):
             breakdown = []
             total_minutes = 0
             total_cost_usd = 0
-            total_dograh_tokens = 0
+            total_easytech_tokens = 0
 
             for row in daily_usage:
                 seconds = row.total_seconds or 0
                 minutes = seconds / 60
                 cost_usd = seconds * price_per_second_usd
-                dograh_tokens = cost_usd * 100  # 1 cent = 1 token
+                easytech_tokens = cost_usd * 100  # 1 cent = 1 token
 
                 total_minutes += minutes
                 total_cost_usd += cost_usd
-                total_dograh_tokens += dograh_tokens
+                total_easytech_tokens += easytech_tokens
 
                 breakdown.append(
                     {
                         "date": row.date.isoformat(),
                         "minutes": round(minutes, 1),
                         "cost_usd": round(cost_usd, 2),
-                        "dograh_tokens": round(dograh_tokens, 0),
+                        "easytech_tokens": round(easytech_tokens, 0),
                         "call_count": row.call_count,
                     }
                 )
@@ -412,7 +412,7 @@ class OrganizationUsageClient(BaseDBClient):
                 "breakdown": breakdown,
                 "total_minutes": round(total_minutes, 1),
                 "total_cost_usd": round(total_cost_usd, 2),
-                "total_dograh_tokens": round(total_dograh_tokens, 0),
+                "total_easytech_tokens": round(total_easytech_tokens, 0),
                 "currency": "USD",
             }
 

@@ -2,7 +2,7 @@
   "packages": {
     ".": {
       "release-type": "simple",
-      "package-name": "dograh",
+      "package-name": "easytech",
       "changelog-type": "github",
       "changelog-sections": [
         {

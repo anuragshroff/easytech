@@ -462,7 +462,7 @@ async def test_text_chat_pre_call_fetch_hydrates_initial_context_once(
                     "initial_context": {
                         "workflow_run_id": "external-run-id",
                         "customer_name": "Explicit",
-                        "page_url": "https://dograh.com/pricing",
+                        "page_url": "https://easytech.com/pricing",
                     }
                 },
             )
@@ -498,7 +498,7 @@ async def test_text_chat_pre_call_fetch_hydrates_initial_context_once(
         == created["workflow_run_id"]
     )
     assert fetch_kwargs["call_context_vars"]["customer_name"] == "Explicit"
-    assert fetch_kwargs["call_context_vars"]["page_url"] == "https://dograh.com/pricing"
+    assert fetch_kwargs["call_context_vars"]["page_url"] == "https://easytech.com/pricing"
     # The models are only final after the fetch, so they are not in the request.
     assert "runtime_configuration" not in fetch_kwargs["call_context_vars"]
     assert (
@@ -511,7 +511,7 @@ async def test_text_chat_pre_call_fetch_hydrates_initial_context_once(
         "workflow_run_id": workflow_run.id,
         "customer_name": "Fetched",
         "account_tier": "gold",
-        "page_url": "https://dograh.com/pricing",
+        "page_url": "https://easytech.com/pricing",
         "runtime_configuration": {
             "llm_provider": "openai",
             "llm_model": "gpt-4.1",

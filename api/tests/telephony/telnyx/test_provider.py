@@ -493,7 +493,7 @@ def _patch_ensure_connection_id(
 async def test_ensure_connection_id_attaches_outbound_voice_profile_id_when_one_exists():
     session = _fake_aiohttp_session(
         list_payload={"data": [{"id": "1234567890", "name": "Default Profile"}]},
-        create_payload={"data": {"id": 111111, "application_name": "dograh-abc"}},
+        create_payload={"data": {"id": 111111, "application_name": "easytech-abc"}},
     )
 
     backend_patch, session_patch = _patch_ensure_connection_id(session)
@@ -512,7 +512,7 @@ async def test_ensure_connection_id_attaches_outbound_voice_profile_id_when_one_
 async def test_ensure_connection_id_omits_outbound_when_no_voice_profiles_exist():
     session = _fake_aiohttp_session(
         list_payload={"data": []},
-        create_payload={"data": {"id": 111111, "application_name": "dograh-abc"}},
+        create_payload={"data": {"id": 111111, "application_name": "easytech-abc"}},
     )
 
     backend_patch, session_patch = _patch_ensure_connection_id(session)
@@ -528,7 +528,7 @@ async def test_ensure_connection_id_omits_outbound_when_no_voice_profiles_exist(
 async def test_ensure_connection_id_omits_outbound_when_profile_list_call_raises():
     session = _fake_aiohttp_session(
         list_error=aiohttp.ClientError("connection reset"),
-        create_payload={"data": {"id": 111111, "application_name": "dograh-abc"}},
+        create_payload={"data": {"id": 111111, "application_name": "easytech-abc"}},
     )
 
     backend_patch, session_patch = _patch_ensure_connection_id(session)
@@ -574,7 +574,7 @@ async def test_ensure_connection_id_omits_outbound_when_profile_list_times_out()
     an aiohttp.ClientError subclass, so it is caught explicitly."""
     session = _fake_aiohttp_session(
         list_error=asyncio.TimeoutError("profile GET timed out"),
-        create_payload={"data": {"id": 111111, "application_name": "dograh-abc"}},
+        create_payload={"data": {"id": 111111, "application_name": "easytech-abc"}},
     )
 
     backend_patch, session_patch = _patch_ensure_connection_id(session)
@@ -593,7 +593,7 @@ async def test_ensure_connection_id_tolerates_unexpected_profile_payload_shapes(
     for bad_payload in ([], {"data": [None]}, {"data": "not-a-list"}, {"other": 1}):
         session = _fake_aiohttp_session(
             list_payload=bad_payload,
-            create_payload={"data": {"id": 111111, "application_name": "dograh-abc"}},
+            create_payload={"data": {"id": 111111, "application_name": "easytech-abc"}},
         )
 
         backend_patch, session_patch = _patch_ensure_connection_id(session)
@@ -612,7 +612,7 @@ async def test_ensure_connection_id_omits_outbound_when_profile_list_body_is_mal
     not escape and 500 the config save (contract: the save always succeeds)."""
     session = _fake_aiohttp_session(
         list_json_error=json.JSONDecodeError("Expecting value", "", 0),
-        create_payload={"data": {"id": 111111, "application_name": "dograh-abc"}},
+        create_payload={"data": {"id": 111111, "application_name": "easytech-abc"}},
     )
 
     backend_patch, session_patch = _patch_ensure_connection_id(session)
@@ -635,7 +635,7 @@ async def test_ensure_connection_id_skips_disabled_outbound_voice_profiles():
                 {"id": "enabled-2", "name": "Live", "enabled": True},
             ]
         },
-        create_payload={"data": {"id": 111111, "application_name": "dograh-abc"}},
+        create_payload={"data": {"id": 111111, "application_name": "easytech-abc"}},
     )
 
     backend_patch, session_patch = _patch_ensure_connection_id(session)
@@ -650,7 +650,7 @@ async def test_ensure_connection_id_skips_disabled_outbound_voice_profiles():
 async def test_ensure_connection_id_omits_outbound_when_every_profile_is_disabled():
     session = _fake_aiohttp_session(
         list_payload={"data": [{"id": "disabled-1", "enabled": False}]},
-        create_payload={"data": {"id": 111111, "application_name": "dograh-abc"}},
+        create_payload={"data": {"id": 111111, "application_name": "easytech-abc"}},
     )
 
     backend_patch, session_patch = _patch_ensure_connection_id(session)
@@ -668,7 +668,7 @@ async def test_ensure_connection_id_profile_lookup_is_bounded_by_a_timeout():
     lookup must not be able to stall a config save for that long."""
     session = _fake_aiohttp_session(
         list_payload={"data": [{"id": "1234567890"}]},
-        create_payload={"data": {"id": 111111, "application_name": "dograh-abc"}},
+        create_payload={"data": {"id": 111111, "application_name": "easytech-abc"}},
     )
 
     backend_patch, session_patch = _patch_ensure_connection_id(session)

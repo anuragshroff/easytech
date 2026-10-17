@@ -1,5 +1,5 @@
 {
-  "name": "Dograh",
+  "name": "EasyTech",
   "dockerComposeFile": [
     "../docker-compose-local.yaml",
     "docker-compose.yml"
@@ -11,7 +11,7 @@
     "redis",
     "minio"
   ],
-  "workspaceFolder": "/workspaces/dograh",
+  "workspaceFolder": "/workspaces/easytech",
   "shutdownAction": "stopCompose",
   "overrideCommand": false,
   "remoteUser": "vscode",
@@ -31,11 +31,11 @@
   ],
   "portsAttributes": {
     "3000": {
-      "label": "Dograh UI",
+      "label": "EasyTech UI",
       "onAutoForward": "ignore"
     },
     "8000": {
-      "label": "Dograh API",
+      "label": "EasyTech API",
       "onAutoForward": "ignore"
     },
     "5432": {
@@ -54,7 +54,7 @@
   "customizations": {
     "vscode": {
       "settings": {
-        "python.defaultInterpreterPath": "/workspaces/dograh/venv/bin/python",
+        "python.defaultInterpreterPath": "/workspaces/easytech/venv/bin/python",
         "terminal.integrated.defaultProfile.linux": "bash"
       },
       "extensions": [

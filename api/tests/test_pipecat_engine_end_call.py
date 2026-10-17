@@ -1378,7 +1378,7 @@ class TestOrganizationDispositionMapping:
         final = await engine.get_gathered_context()
         assert final["mapped_call_disposition"] == "HUNGUP"
         # The untranslated outcome stays beside it: `call_disposition` is the
-        # record of what Dograh observed, and the call tags are Dograh's own
+        # record of what EasyTech observed, and the call tags are EasyTech's own
         # vocabulary, which reporting reads when a mapping is not wanted.
         assert final["call_disposition"] == EndTaskReason.USER_HANGUP.value
         assert EndTaskReason.USER_HANGUP.value in final["call_tags"]

@@ -123,7 +123,7 @@ export function isComplete(spec: ConfigurationSpec): boolean {
  * mode tells the resolver to take the named services as given, and the
  * explicit empty fallback policy stops the organization default's fallbacks
  * from being inherited (they could target the account chosen as primary, or
- * be rejected in Dograh mode).
+ * be rejected in EasyTech mode).
  */
 export function customOverride(spec: ConfigurationSpec): ModelConfigurationOverride {
     const override: Record<string, unknown> = { mode: spec.mode };
@@ -156,6 +156,6 @@ export function summarizeConfiguration(spec: ConfigurationSpec | null, connectio
     const model = (role: "llm" | "realtime") => String(spec[role]?.settings?.model || name(spec[role]?.provider_connection_uuid) || "provider default");
     const voice = (role: "tts" | "realtime") => String(spec[role]?.settings?.voice || "default voice");
     if (spec.mode === "realtime") return `${model("realtime")} / ${voice("realtime")}`;
-    if (configurationMode(spec, connections) === "dograh") return `Dograh / ${voice("tts")}`;
+    if (configurationMode(spec, connections) === "easytech") return `EasyTech / ${voice("tts")}`;
     return `${model("llm")} / ${voice("tts")}`;
 }

@@ -18,7 +18,7 @@ from api.services.configuration.registry import (
     ServiceType,
 )
 from api.services.pipecat.service_factory import (
-    DograhGoogleVertexLLMService,
+    EasyTechGoogleVertexLLMService,
     create_llm_service,
     create_llm_service_from_provider,
     create_llm_service_with_model_override,
@@ -44,7 +44,7 @@ def _config(provider, **overrides):
 @pytest.fixture(autouse=True)
 def anonymous_vertex_credentials(monkeypatch):
     monkeypatch.setattr(
-        DograhGoogleVertexLLMService,
+        EasyTechGoogleVertexLLMService,
         "_get_credentials",
         staticmethod(lambda *_: AnonymousCredentials()),
     )
@@ -83,7 +83,7 @@ def test_omitted_temperature_preserves_existing_factory_defaults(provider):
         aws_secret_key="test-secret-key",
     )
     expected = {
-        "dograh": None,
+        "easytech": None,
         "speaches": None,
         "aws_bedrock": None,
         "minimax": 1.0,
@@ -257,7 +257,7 @@ def test_realtime_temperature_schema_coverage():
 
 def test_legacy_ultravox_config_preserves_existing_sdk_temperature():
     from api.services.pipecat.realtime.ultravox_realtime import (
-        DograhUltravoxOneShotInputParams,
+        EasyTechUltravoxOneShotInputParams,
     )
 
     config = REGISTRY[ServiceType.REALTIME]["ultravox_realtime"](api_key="test-key")
@@ -272,7 +272,7 @@ def test_legacy_ultravox_config_preserves_existing_sdk_temperature():
     )
     # Before this PR the factory omitted temperature from the SDK constructor,
     # whose default was already serialized into every one-shot call request.
-    old_params = DograhUltravoxOneShotInputParams(api_key="test-key")
+    old_params = EasyTechUltravoxOneShotInputParams(api_key="test-key")
     assert params.temperature == old_params.temperature == 0
 
 

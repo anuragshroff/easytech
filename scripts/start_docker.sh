@@ -2,7 +2,7 @@
 set -e
 
 ENV_FILE=".env"
-REGISTRY="${REGISTRY:-ghcr.io/dograh-hq}"
+REGISTRY="${REGISTRY:-ghcr.io/anuragshroff}"
 ENABLE_TELEMETRY="${ENABLE_TELEMETRY:-true}"
 
 fail() {
@@ -27,7 +27,7 @@ generate_secret() {
 }
 
 generate_minio_root_user() {
-    printf 'dograh%s\n' "$(generate_secret | cut -c1-12)"
+    printf 'easytech%s\n' "$(generate_secret | cut -c1-12)"
 }
 
 dotenv_value() {
@@ -126,12 +126,12 @@ sync_postgres_password() {
         fail "Postgres did not become ready while syncing POSTGRES_PASSWORD."
     fi
 
-    printf '%s\n' "ALTER USER postgres WITH PASSWORD :'dograh_password';" \
+    printf '%s\n' "ALTER USER postgres WITH PASSWORD :'easytech_password';" \
         | docker compose exec -T postgres psql \
         -U postgres \
         -d postgres \
         -v ON_ERROR_STOP=1 \
-        -v "dograh_password=$postgres_password" >/dev/null
+        -v "easytech_password=$postgres_password" >/dev/null
     echo "Postgres password synced."
 }
 
@@ -211,14 +211,14 @@ echo "this script ('docker compose restart' does not apply .env changes)."
 echo ""
 
 if [[ ! -t 0 ]]; then
-    echo "Run the command above from an interactive shell to start Dograh."
+    echo "Run the command above from an interactive shell to start EasyTech."
     exit 0
 fi
 
-read -r -p "Start Dograh now? [Y/n]: " answer
+read -r -p "Start EasyTech now? [Y/n]: " answer
 case "$answer" in
     [Nn]*)
-        echo "Dograh was not started."
+        echo "EasyTech was not started."
         exit 0
         ;;
 esac

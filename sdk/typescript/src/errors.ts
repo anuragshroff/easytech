@@ -1,10 +1,10 @@
-// SDK-level exceptions. All subclass `DograhSdkError` so callers can
+// SDK-level exceptions. All subclass `EasyTechSdkError` so callers can
 // catch them as one category.
 
-export class DograhSdkError extends Error {
+export class EasyTechSdkError extends Error {
     constructor(message: string) {
         super(message);
-        this.name = "DograhSdkError";
+        this.name = "EasyTechSdkError";
     }
 }
 
@@ -16,15 +16,15 @@ export class DograhSdkError extends Error {
  * errors via `ApiError` — this class covers the fast-fail cases caught
  * at the `Workflow.add()` call site.
  */
-export class ValidationError extends DograhSdkError {
+export class ValidationError extends EasyTechSdkError {
     constructor(message: string) {
         super(message);
         this.name = "ValidationError";
     }
 }
 
-/** Raised when the Dograh backend returns a non-2xx response. */
-export class ApiError extends DograhSdkError {
+/** Raised when the EasyTech backend returns a non-2xx response. */
+export class ApiError extends EasyTechSdkError {
     readonly statusCode: number;
     readonly body: unknown;
 
@@ -37,7 +37,7 @@ export class ApiError extends DograhSdkError {
 }
 
 /** Raised when a referenced node type isn't registered on the server. */
-export class SpecMismatchError extends DograhSdkError {
+export class SpecMismatchError extends EasyTechSdkError {
     constructor(message: string) {
         super(message);
         this.name = "SpecMismatchError";

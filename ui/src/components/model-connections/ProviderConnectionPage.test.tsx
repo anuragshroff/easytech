@@ -15,8 +15,8 @@ vi.mock("./useModelConnections", () => ({ useModelConnections: vi.fn() }));
 vi.mock("@/context/OrgConfigContext", () => ({ useOrgConfig: vi.fn() }));
 vi.mock("sonner", () => ({ toast: { success: vi.fn() } }));
 
-const catalog: ModelConnectionCatalog = { services: { llm: { dograh: { title: "Dograh", credential_fields: { api_key: { title: "API key", anyOf: [{ type: "string" }, { type: "array", items: { type: "string" } }] } }, credential_required: ["api_key"], connection_fields: {}, settings_schema: { properties: {} } } } } };
-const connection: ProviderConnection = { uuid: "existing", name: "Dograh", provider: "dograh", is_active: true, revision: 3, connection_settings: {}, configured_credentials: ["api_key"] };
+const catalog: ModelConnectionCatalog = { services: { llm: { easytech: { title: "EasyTech", credential_fields: { api_key: { title: "API key", anyOf: [{ type: "string" }, { type: "array", items: { type: "string" } }] } }, credential_required: ["api_key"], connection_fields: {}, settings_schema: { properties: {} } } } } };
+const connection: ProviderConnection = { uuid: "existing", name: "EasyTech", provider: "easytech", is_active: true, revision: 3, connection_settings: {}, configured_credentials: ["api_key"] };
 const reload = vi.fn();
 const refreshConfig = vi.fn();
 
@@ -51,7 +51,7 @@ describe("provider connection pages", () => {
         fireEvent.change(screen.getByLabelText("API key 2"), { target: { value: "second" } });
         fireEvent.click(screen.getByRole("button", { name: "Save Connection" }));
         await waitFor(() => expect(replace).toHaveBeenCalledWith("/provider-connections/created"));
-        expect(createProviderConnection).toHaveBeenCalledWith({ body: { provider: "dograh", name: "Second account", credentials: { api_key: ["first", "second"] }, connection_settings: {} } });
+        expect(createProviderConnection).toHaveBeenCalledWith({ body: { provider: "easytech", name: "Second account", credentials: { api_key: ["first", "second"] }, connection_settings: {} } });
     });
 
     it("shows unavailable connections without offering an empty editor", () => {

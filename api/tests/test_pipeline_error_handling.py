@@ -390,7 +390,7 @@ async def test_pipeline_failure_outside_campaign_does_not_count(
     call.breaker.assert_not_awaited()
 
 
-def test_dograh_workers_cancel_when_a_processor_becomes_permanently_unusable(
+def test_easytech_workers_cancel_when_a_processor_becomes_permanently_unusable(
     monkeypatch,
 ):
     captured = {}

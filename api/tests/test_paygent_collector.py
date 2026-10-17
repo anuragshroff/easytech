@@ -11,7 +11,7 @@ from pipecat.processors.frame_processor import FrameDirection
 from api.services.integrations.paygent import client as paygent_client
 from api.services.integrations.paygent.collector import PaygentCollector
 from api.services.integrations.paygent.completion import _build_snapshot
-from api.services.pipecat.realtime.aws_nova_sonic import DograhAWSNovaSonicLLMService
+from api.services.pipecat.realtime.aws_nova_sonic import EasyTechAWSNovaSonicLLMService
 
 NOVA_MODEL = "amazon.nova-2-sonic-v1:0"
 
@@ -26,7 +26,7 @@ def nova_collector():
     )
 
 
-async def _report(collector, usage, *, processor="DograhAWSNovaSonicLLMService#0"):
+async def _report(collector, usage, *, processor="EasyTechAWSNovaSonicLLMService#0"):
     frame = MetricsFrame(
         data=[LLMUsageMetricsData(processor=processor, model=NOVA_MODEL, value=usage)]
     )
@@ -46,7 +46,7 @@ async def _report(collector, usage, *, processor="DograhAWSNovaSonicLLMService#0
 async def test_nova_usage_reaches_paygent_with_text_and_audio_split(
     nova_collector, monkeypatch
 ):
-    service = DograhAWSNovaSonicLLMService(
+    service = EasyTechAWSNovaSonicLLMService(
         secret_access_key="test-secret", access_key_id="test-key", region="us-east-1"
     )
 

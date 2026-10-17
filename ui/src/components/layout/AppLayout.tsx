@@ -8,7 +8,6 @@ import React, { ReactNode } from "react";
 import { Button } from "@/components/ui/button";
 import { SidebarInset, SidebarProvider, useSidebar } from "@/components/ui/sidebar";
 import { useAppConfig } from "@/context/AppConfigContext";
-import { LeadFormsProvider } from "@/context/LeadFormsContext";
 
 import { AppSidebar } from "./AppSidebar";
 
@@ -86,20 +85,18 @@ const AppLayout: React.FC<AppLayoutProps> = ({ children }) => {
   return (
     <SidebarProvider defaultOpen>
       {shouldShowSidebar ? (
-        <LeadFormsProvider>
-          <div className="flex min-h-screen w-full">
-            <AppSidebar />
-            <SidebarInset className="flex-1">
-              <BackendStatusBanner />
-              {!isWorkflowEditor && <AppHeader />}
+        <div className="flex min-h-screen w-full">
+          <AppSidebar />
+          <SidebarInset className="flex-1">
+            <BackendStatusBanner />
+            {!isWorkflowEditor && <AppHeader />}
 
-              {/* Main content area */}
-              <main className="app-surface flex-1">
-                {children}
-              </main>
-            </SidebarInset>
-          </div>
-        </LeadFormsProvider>
+            {/* Main content area */}
+            <main className="app-surface flex-1">
+              {children}
+            </main>
+          </SidebarInset>
+        </div>
       ) : (
         <div className="app-surface w-full flex-1">
           <BackendStatusBanner />

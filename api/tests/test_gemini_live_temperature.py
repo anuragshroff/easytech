@@ -8,9 +8,9 @@ from api.services.configuration.registry import (
     GoogleVertexRealtimeLLMConfiguration,
     OpenAIRealtimeLLMConfiguration,
 )
-from api.services.pipecat.realtime.gemini_live import DograhGeminiLiveLLMService
+from api.services.pipecat.realtime.gemini_live import EasyTechGeminiLiveLLMService
 from api.services.pipecat.realtime.gemini_live_vertex import (
-    DograhGeminiLiveVertexLLMService,
+    EasyTechGeminiLiveVertexLLMService,
 )
 from api.services.pipecat.service_factory import create_realtime_llm_service
 
@@ -63,7 +63,7 @@ def test_create_realtime_llm_service_gemini_live_uses_provider_temperature(model
     user_config = DummyUserConfig(realtime_config)
 
     service = create_realtime_llm_service(user_config, _audio_config())
-    assert isinstance(service, DograhGeminiLiveLLMService)
+    assert isinstance(service, EasyTechGeminiLiveLLMService)
     assert service._settings.temperature is None
 
 
@@ -73,7 +73,7 @@ def test_create_realtime_llm_service_gemini_vertex_uses_provider_temperature(
     # Keep this factory test hermetic: the Vertex service normally refreshes
     # Application Default Credentials during construction.
     monkeypatch.setattr(
-        DograhGeminiLiveVertexLLMService,
+        EasyTechGeminiLiveVertexLLMService,
         "_get_credentials",
         staticmethod(lambda _credentials, _credentials_path: AnonymousCredentials()),
     )
@@ -88,5 +88,5 @@ def test_create_realtime_llm_service_gemini_vertex_uses_provider_temperature(
     user_config = DummyUserConfig(realtime_config)
 
     service = create_realtime_llm_service(user_config, _audio_config())
-    assert isinstance(service, DograhGeminiLiveVertexLLMService)
+    assert isinstance(service, EasyTechGeminiLiveVertexLLMService)
     assert service._settings.temperature is None

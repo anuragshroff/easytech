@@ -861,7 +861,7 @@ export const reactivateApiKeyApiV1UserApiKeysApiKeyIdReactivatePut = <ThrowOnErr
 /**
  * Get Voices
  *
- * Get voices from Dograh's managed catalog or a saved provider connection.
+ * Get voices from EasyTech's managed catalog or a saved provider connection.
  *
  * External providers require provider_connection_uuid for an active connection
  * in the selected organization. Model and language filtering depends on the
@@ -1182,7 +1182,7 @@ export const unarchiveToolApiV1ToolsToolUuidUnarchivePost = <ThrowOnError extend
 /**
  * Get Current Organization Context
  *
- * Return organization-scoped configuration signals owned by Dograh.
+ * Return organization-scoped configuration signals owned by EasyTech.
  */
 export const getCurrentOrganizationContextApiV1OrganizationsContextGet = <ThrowOnError extends boolean = false>(options?: Options<GetCurrentOrganizationContextApiV1OrganizationsContextGetData, ThrowOnError>): RequestResult<GetCurrentOrganizationContextApiV1OrganizationsContextGetResponses, GetCurrentOrganizationContextApiV1OrganizationsContextGetErrors, ThrowOnError> => (options?.client ?? client).get<GetCurrentOrganizationContextApiV1OrganizationsContextGetResponses, GetCurrentOrganizationContextApiV1OrganizationsContextGetErrors, ThrowOnError>({ url: '/api/v1/organizations/context', ...options });
 
